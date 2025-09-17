@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
@@ -8,12 +9,20 @@ import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
 import { ArrowLeft, Calendar, FileText, ImageIcon, MapPin, User, Wrench, Ticket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useEffect, useState } from 'react';
 
 export default function IssueDetailPage() {
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
   const issue = mockIssues.find((i) => i.id === id);
+  const [localizedDate, setLocalizedDate] = useState('');
+
+  useEffect(() => {
+    if (issue) {
+      setLocalizedDate(new Date(issue.reportedAt).toLocaleString());
+    }
+  }, [issue]);
 
   if (!issue) {
     return <div className="text-center">Issue not found.</div>;
@@ -55,7 +64,7 @@ export default function IssueDetailPage() {
               </div>
               <div className="flex items-center gap-3">
                 <Calendar className="h-5 w-5 text-muted-foreground" />
-                <span>Reported on: <strong>{new Date(issue.reportedAt).toLocaleString()}</strong></span>
+                <span>Reported on: <strong>{localizedDate || 'Loading date...'}</strong></span>
               </div>
                {reportedBy && <div className="flex items-center gap-3">
                 <User className="h-5 w-5 text-muted-foreground" />
