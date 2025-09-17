@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import dynamic from 'next/dynamic';
+import { useCallback, useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -21,11 +22,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { IssueType } from '@/lib/types';
-import { Send, MapPin } from 'lucide-react';
+import { Send, MapPin, LocateFixed, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useMemo } from 'react';
 
 const issueTypes: IssueType[] = ['Pothole', 'Streetlight', 'Garbage', 'Water Leakage'];
+
+// Default to a central location in India
+const defaultPosition: [number, number] = [20.5937, 78.9629];
 
 const formSchema = z.object({
   title: z.string().min(10, {
@@ -34,8 +37,12 @@ const formSchema = z.object({
   type: z.enum(issueTypes, {
     required_error: 'You need to select an issue type.',
   }),
-  location: z.string().min(5, {
-    message: 'Location description must be at least 5 characters.',
+  location: z.object({
+    lat: z.number(),
+    lng: z.number(),
+    address: z.string().min(5, {
+        message: 'Please select a location on the map or provide a valid address.',
+    }),
   }),
   description: z.string().min(20, {
     message: 'Description must be at least 20 characters.',
@@ -46,21 +53,81 @@ const formSchema = z.object({
 export default function ReportIssuePage() {
   const { toast } = useToast();
   const router = useRouter();
+  const [isLocating, setIsLocating] = useState(false);
+  const [isGeocoding, setIsGeocoding] = useState(false);
+  
+  const LeafletMap = useMemo(() => dynamic(() => import('@/components/shared/LeafletMap'), { 
+    ssr: false,
+    loading: () => <div className="h-[400px] w-full bg-muted rounded-md flex items-center justify-center"><p>Loading map...</p></div>
+  }), []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: '',
-      location: '',
       description: '',
       photo: undefined,
+      location: {
+        lat: defaultPosition[0],
+        lng: defaultPosition[1],
+        address: '',
+      },
     },
   });
-  
-  const LocationPicker = useMemo(() => dynamic(() => import('@/components/shared/LocationPicker'), { 
-    ssr: false,
-    loading: () => <p>Loading map...</p>
-  }), []);
+
+  const getAddressFromLatLng = useCallback(async (lat: number, lng: number) => {
+    setIsGeocoding(true);
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch address');
+      }
+      const data = await response.json();
+      if (data && data.display_name) {
+        form.setValue('location.address', data.display_name, { shouldValidate: true });
+      } else {
+        form.setValue('location.address', 'Address not found', { shouldValidate: true });
+      }
+    } catch (error) {
+      console.error("Reverse geocoding error:", error);
+      toast({
+        variant: 'destructive',
+        title: 'Could not fetch address',
+        description: 'Please check your connection or enter the address manually.',
+      });
+    } finally {
+      setIsGeocoding(false);
+    }
+  }, [form, toast]);
+
+
+  const handleMapClick = useCallback((latlng: { lat: number; lng: number }) => {
+    form.setValue('location.lat', latlng.lat);
+    form.setValue('location.lng', latlng.lng);
+    getAddressFromLatLng(latlng.lat, latlng.lng);
+  }, [form, getAddressFromLatLng]);
+
+  const handleLocateMe = () => {
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        form.setValue('location.lat', latitude);
+        form.setValue('location.lng', longitude);
+        getAddressFromLatLng(latitude, longitude);
+        setIsLocating(false);
+      },
+      (error) => {
+        setIsLocating(false);
+        toast({
+          variant: 'destructive',
+          title: 'Location access denied',
+          description: 'Please enable location services in your browser.',
+        });
+        console.error('Geolocation error:', error);
+      }
+    );
+  };
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log('Simulating issue submission:', values);
@@ -70,6 +137,8 @@ export default function ReportIssuePage() {
     });
     router.push('/citizen/dashboard');
   }
+
+  const { lat, lng } = form.watch('location');
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -123,25 +192,42 @@ export default function ReportIssuePage() {
                         )}
                     />
 
-                    <FormField
-                        control={form.control}
-                        name="location"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel className="flex items-center gap-2"><MapPin/> Location</FormLabel>
-                                <FormControl>
-                                    <LocationPicker 
-                                        value={field.value} 
-                                        onChange={field.onChange} 
-                                    />
-                                </FormControl>
-                                <FormDescription>
-                                    Click the button to fetch your current location, or drag the marker to the exact spot.
-                                </FormDescription>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                     <div className="space-y-4">
+                        <FormLabel className="flex items-center gap-2"><MapPin/> Location</FormLabel>
+                        <div className="rounded-md overflow-hidden border">
+                            <LeafletMap 
+                                center={[lat, lng]}
+                                markerPosition={[lat, lng]}
+                                onMapClick={handleMapClick}
+                                flyTo={[lat, lng]}
+                                isInteractive={true}
+                                scrollWheelZoom={true}
+                            />
+                        </div>
+                        <Button type="button" variant="outline" onClick={handleLocateMe} disabled={isLocating}>
+                            {isLocating ? <Loader2 className="animate-spin" /> : <LocateFixed />}
+                            Use My Current Location
+                        </Button>
+                        <FormField
+                            control={form.control}
+                            name="location.address"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Address</FormLabel>
+                                    <FormControl>
+                                        <div className="relative">
+                                            <Input placeholder="Address will appear here..." {...field} />
+                                            {isGeocoding && <Loader2 className="animate-spin absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground" />}
+                                        </div>
+                                    </FormControl>
+                                     <FormDescription>
+                                        Click on the map or use your location. You can edit the address here if needed.
+                                    </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
 
                     <FormField
                     control={form.control}
