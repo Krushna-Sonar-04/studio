@@ -2,37 +2,39 @@
 
 import { Issue } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { CheckCircle, Circle, CircleDashed, CircleDot, FileCheck, Search, ShieldCheck } from 'lucide-react';
+import { CheckCircle, Circle, CircleDashed, CircleDot } from 'lucide-react';
 
 interface IssueTimelineProps {
   statusHistory: Issue['statusHistory'];
   currentStatus: Issue['status'];
 }
 
-// Corresponds to the detailed 10-step workflow
-const statusMilestones: { status: Issue['status'], label: string }[] = [
+const statusMilestones: { status: Issue['status'] | string, label: string }[] = [
   { status: 'Submitted', label: 'Submitted' },
   { status: 'PendingVerificationAndEstimation', label: 'Assigned' },
-  { status: 'Verified', label: 'Verified & Estimated' },
+  { status: 'Verified', label: 'Verified' },
+  { status: 'Estimated', label: 'Fund Approved' },
   { status: 'Approved', label: 'Approved' },
   { status: 'InProgress', label: 'Work In Progress' },
-  { status: 'Resolved', label: 'Work Completed' },
-  { status: 'Closed', label: 'Resolved' },
+  { status: 'Resolved', label: 'Resolved' }
 ];
 
 export function IssueTimeline({ statusHistory, currentStatus }: IssueTimelineProps) {
   const getStatusIndex = (status: Issue['status']) => {
-    // This finds the first milestone that includes the current status.
-    const milestoneIndex = statusMilestones.findIndex(m => m.status === status);
-    if (milestoneIndex > -1) return milestoneIndex;
-    
-    // Handle intermediate statuses to map them to the correct visual step
-    if (status === 'Estimated' || status === 'PendingApproval') return 2; // Part of "Verified & Estimated" step
-    if (status === 'AssignedToContractor') return 3; // Happens after "Approved"
-    if (status === 'PendingFinalVerification') return 5; // Happens after "Work Completed"
-    if (status === 'Rejected') return statusMilestones.length; // A final state outside the main flow
-    
-    return 0; // Default to the first step
+    switch (status) {
+      case 'Submitted': return 0;
+      case 'PendingVerificationAndEstimation': return 1;
+      case 'Verified': return 2;
+      case 'Estimated': return 3;
+      case 'PendingApproval': return 3; // After estimation, before approval
+      case 'Approved': return 4;
+      case 'AssignedToContractor': return 4;
+      case 'InProgress': return 5;
+      case 'Resolved': return 6;
+      case 'PendingFinalVerification': return 6;
+      case 'Closed': return 6;
+      default: return 0;
+    }
   };
 
   const currentStatusIndex = getStatusIndex(currentStatus);
@@ -45,46 +47,23 @@ export function IssueTimeline({ statusHistory, currentStatus }: IssueTimelinePro
           const isCurrent = index === currentStatusIndex;
           const isCompleted = index < currentStatusIndex;
           
-          let statusUpdate = statusHistory.findLast(s => {
-            // Special handling for the combined "Verified & Estimated" step
-            if (milestone.status === 'Verified') {
-              return s.status === 'Verified' || s.status === 'Estimated' || s.status === 'PendingApproval';
-            }
-             // "Work Completed" is when the contractor marks it "Resolved"
-            if(milestone.status === 'Resolved' && s.status === 'Resolved') {
-              return true;
-            }
-            // "Resolved" is the final "Closed" state from admin
-             if(milestone.status === 'Closed' && s.status === 'Closed') {
-              return true;
-            }
-            return s.status === milestone.status
+          const statusUpdate = statusHistory.findLast(s => {
+            const milestoneIndexForUpdate = getStatusIndex(s.status);
+            return milestoneIndexForUpdate === index;
           });
-          
-          // Get the latest update for the combined step
-          if (milestone.status === 'Verified') {
-              const verifiedUpdate = statusHistory.findLast(s => s.status === 'Verified');
-              const estimatedUpdate = statusHistory.findLast(s => s.status === 'Estimated');
-              if (verifiedUpdate && estimatedUpdate) {
-                statusUpdate = new Date(verifiedUpdate.date) > new Date(estimatedUpdate.date) ? verifiedUpdate : estimatedUpdate;
-              } else {
-                statusUpdate = verifiedUpdate || estimatedUpdate;
-              }
-          }
-
 
           let Icon = Circle;
-          if (isCurrent) Icon = CircleDot;
-          if (isCompleted) Icon = CheckCircle;
+          if (isCurrent && currentStatus !== 'Closed') Icon = CircleDot;
+          if (isCompleted || currentStatus === 'Closed') Icon = CheckCircle;
           if (!isActive) Icon = CircleDashed;
 
           return (
-            <li key={milestone.status} className="relative flex flex-col items-center">
+            <li key={milestone.label} className="relative flex flex-col items-center">
               {index > 0 && (
                  <div
                  className={cn(
                    'absolute top-1/2 left-[-50%] w-full h-0.5 -translate-y-1/2',
-                   index <= currentStatusIndex ? 'bg-primary' : 'bg-border'
+                   isActive ? 'bg-primary' : 'bg-border'
                  )}
                />
               )}

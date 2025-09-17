@@ -36,12 +36,12 @@ export const mockIssues: Issue[] = [
     reportedBy: 'user-1',
     reportedAt: '2024-07-18T21:30:00Z',
     status: 'PendingVerificationAndEstimation',
-    currentRoles: ['Engineer', 'Fund Manager'],
+    currentRoles: ['Engineer'],
     assignedEngineerId: 'user-3',
     assignedFundManagerId: 'user-4',
     statusHistory: [
       { status: 'Submitted', date: '2024-07-18T21:30:00Z', updatedBy: 'Alia Reddy', notes: 'Citizen submission.' },
-      { status: 'PendingVerificationAndEstimation', date: '2024-07-19T09:00:00Z', updatedBy: 'Bhavin Shah', notes: 'Assigned to Chirag Kumar for verification and Deepa Iyer for estimation.' },
+      { status: 'PendingVerificationAndEstimation', date: '2024-07-19T09:00:00Z', updatedBy: 'Bhavin Shah', notes: 'Assigned to Chirag Kumar for verification.' },
     ],
   },
   {
@@ -99,7 +99,7 @@ export const mockIssues: Issue[] = [
       { status: 'AssignedToContractor', date: '2024-07-10T11:30:00Z', updatedBy: 'Bhavin Shah' },
       { status: 'InProgress', date: '2024-07-10T14:00:00Z', updatedBy: 'Farhan Ali' },
       { status: 'Resolved', date: '2024-07-11T17:00:00Z', updatedBy: 'Farhan Ali', notes: 'Pipe replaced and road surface temporarily patched.' },
-      { status: 'PendingFinalVerification', date: '2024-07-12T09:00:00Z', updatedBy: 'Farhan Ali' },
+      { status: 'PendingFinalVerification', date: '2024-07-12T09:00:00Z', updatedBy: 'System' },
       { status: 'Closed', date: '2024-07-12T13:00:00Z', updatedBy: 'Bhavin Shah', notes: 'Work verified by department head. Issue closed.' },
     ],
     verificationReport: { comments: 'Confirmed major water main break. Urgent action required.', submittedAt: '2024-07-10T09:30:00Z' },
