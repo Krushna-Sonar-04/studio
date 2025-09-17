@@ -1,9 +1,13 @@
+import AppHeader from '@/components/shared/Header';
 import React from 'react';
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <main className="flex items-center justify-center min-h-screen">
-      {children}
-    </main>
+     <div className="min-h-screen flex flex-col">
+      <AppHeader />
+      <main className="flex-1 flex items-center justify-center">
+        {children}
+      </main>
+    </div>
   );
 }

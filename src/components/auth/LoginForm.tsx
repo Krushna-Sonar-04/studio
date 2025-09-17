@@ -31,14 +31,15 @@ export function LoginForm() {
       <CardContent>
         <form onSubmit={handleLogin} className="grid gap-4">
           <div className="grid gap-2">
+             <label htmlFor="role-select" className="sr-only">{t('select_role_placeholder')}</label>
             <Select onValueChange={(value) => setSelectedRole(value as UserRole)} value={selectedRole}>
-              <SelectTrigger>
+              <SelectTrigger id="role-select">
                 <SelectValue placeholder={t('select_role_placeholder')} />
               </SelectTrigger>
               <SelectContent>
                 {ROLES.map((role) => (
                   <SelectItem key={role} value={role}>
-                    {t(role.replace(/\s/g, '_'))}
+                    {t(role.replace(/\s/g, '_').replace(/-/g, '_'))}
                   </SelectItem>
                 ))}
               </SelectContent>
