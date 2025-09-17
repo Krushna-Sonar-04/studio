@@ -62,7 +62,7 @@ export default function AppHeader() {
         <div className="flex flex-1 items-center justify-end space-x-4">
           <div className="hidden md:flex items-center gap-4">
             <LanguageSwitcher />
-            {isClient && <UserNav />}
+            {isClient ? <UserNav /> : null}
           </div>
 
            {/* Mobile Nav */}
@@ -74,12 +74,13 @@ export default function AppHeader() {
                 </Button>
               </SheetTrigger>
               <SheetContent side="left">
+                {isClient && (
                 <div className="flex flex-col gap-6 pt-6">
                     <Link href="/" className="mr-8 flex items-center gap-2" onClick={() => setMobileMenuOpen(false)}>
                         <TricolorFlag />
                         <span className="font-bold font-headline text-lg text-primary">{APP_NAME}</span>
                     </Link>
-                   {isClient && (
+                   
                      <>
                       <nav className="grid gap-4">
                           {user && navLinks.map(link => (
@@ -98,8 +99,9 @@ export default function AppHeader() {
                           <UserNav />
                       </div>
                      </>
-                   )}
+                   
                 </div>
+                )}
               </SheetContent>
             </Sheet>
         </div>
