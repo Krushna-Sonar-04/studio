@@ -65,49 +65,45 @@ export default function LandingPage() {
     <div className="flex flex-col min-h-screen bg-background">
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative w-full pt-24 pb-12 md:pt-32 md:pb-24 lg:pt-48 lg:pb-32">
-          <div className="absolute inset-0 z-0">
-             <Image
-                src="https://picsum.photos/seed/civic/1200/700"
-                layout="fill"
-                objectFit="cover"
-                alt="Vibrant city"
-                className="opacity-20"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent"></div>
-          </div>
-          <div className="container px-4 md:px-6 relative z-10">
-            <div className="flex flex-col items-center space-y-4 text-center">
-              <div className="space-y-4">
-                <h1 className="text-4xl font-bold font-headline tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl/none text-foreground">
-                  A New Lens on Civic Engagement
-                </h1>
-                <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
-                  Empower your voice. Report, track, and improve your city — all in one place.
-                </p>
-              </div>
-              <div className="space-x-4">
-                 <Link href="/login">
-                  <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                    Get Started
-                  </Button>
-                </Link>
-                <a href="#features">
-                    <Button size="lg" variant="link">
-                        How it Works
+        <section className="w-full py-24 md:py-32 lg:py-48">
+          <div className="container px-4 md:px-6">
+            <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 xl:gap-16">
+              <div className="flex flex-col justify-center space-y-4">
+                <div className="space-y-4">
+                  <h1 className="text-4xl font-bold font-headline tracking-tighter sm:text-5xl md:text-6xl text-foreground">
+                    A New Lens on Your Community
+                  </h1>
+                  <p className="max-w-[600px] text-muted-foreground md:text-xl">
+                    {APP_NAME} empowers you to report, track, and resolve local civic issues. Be an active part of improving your neighborhood.
+                  </p>
+                </div>
+                <div className="flex flex-col gap-2 min-[400px]:flex-row">
+                  <Link href="/login">
+                    <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                      Get Started
                     </Button>
-                </a>
+                  </Link>
+                </div>
               </div>
+              <Image
+                src="https://picsum.photos/seed/ocean-rocks/800/600"
+                width="800"
+                height="600"
+                alt="Hero"
+                className="mx-auto aspect-video overflow-hidden rounded-xl object-cover sm:w-full lg:order-last"
+                data-ai-hint="ocean rocks"
+              />
             </div>
           </div>
         </section>
 
+
         {/* Features Section */}
-        <section id="features" className="w-full py-12 md:py-24 lg:py-32">
+        <section id="features" className="w-full py-12 md:py-24 lg:py-32 bg-muted">
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
-                <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm">
+                <div className="inline-block rounded-lg bg-background px-3 py-1 text-sm">
                   Latest Features
                 </div>
                 <h2 className="text-3xl font-bold font-headline tracking-tighter sm:text-5xl">
@@ -120,7 +116,7 @@ export default function LandingPage() {
             </div>
             <div className="mx-auto grid max-w-5xl gap-6 py-12 sm:grid-cols-2 md:gap-8 lg:grid-cols-4 lg:max-w-none">
               {features.map((feature) => (
-                <Card key={feature.title} className="flex flex-col items-center justify-start text-center p-4 transition-transform transform hover:-translate-y-2">
+                <Card key={feature.title} className="flex flex-col items-center justify-start text-center p-4 transition-transform transform hover:-translate-y-2 bg-background">
                     <CardHeader className="p-2">
                         {feature.icon}
                     </CardHeader>
