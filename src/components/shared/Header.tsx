@@ -1,13 +1,15 @@
 'use client';
 
 import { APP_NAME } from '@/lib/constants';
-import { Menu } from 'lucide-react';
+import { Menu, Flag } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { UserNav } from './UserNav';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { Button } from '../ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet';
+import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const TricolorFlag = () => (
   <svg
@@ -36,11 +38,13 @@ const TricolorFlag = () => (
 
 export default function AppHeader() {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user } = useAuth();
+  const { t } = useLanguage();
 
   const navLinks = [
       { href: '/citizen/dashboard', label: 'Citizen Dashboard'},
       { href: '/contractor/dashboard', label: 'Contractor Dashboard'},
-      { href: '/login', label: 'Admin Login'},
+      { href: '/login', label: t('login_button')},
   ];
 
   return (
@@ -51,19 +55,14 @@ export default function AppHeader() {
           <span className="font-bold font-headline text-lg text-primary">{APP_NAME}</span>
         </Link>
         
-        {/* Desktop Nav */}
-        <nav className="hidden md:flex flex-1 items-center gap-6 text-sm">
-           {/* Add any desktop nav links here if needed */}
-        </nav>
+        <div className="flex flex-1 items-center justify-end space-x-4">
+          <div className="hidden md:flex items-center gap-4">
+            <LanguageSwitcher />
+            <UserNav />
+          </div>
 
-        <div className="flex flex-1 items-center justify-end gap-4">
-            <div className="hidden md:flex items-center gap-4">
-                <LanguageSwitcher />
-                <UserNav />
-            </div>
-
-            {/* Mobile Nav */}
-            <Sheet open={isMobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+           {/* Mobile Nav */}
+           <Sheet open={isMobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild className="md:hidden">
                 <Button variant="outline" size="icon">
                   <Menu className="h-5 w-5" />
@@ -78,9 +77,16 @@ export default function AppHeader() {
                     </Link>
                     <nav className="grid gap-4">
                         {navLinks.map(link => (
+                          user ? (
                             <Link key={link.href} href={link.href} className="text-muted-foreground hover:text-foreground" onClick={() => setMobileMenuOpen(false)}>
                                 {link.label}
                             </Link>
+                           ) : (
+                             link.href === '/login' && 
+                              <Link key={link.href} href={link.href} className="text-muted-foreground hover:text-foreground" onClick={() => setMobileMenuOpen(false)}>
+                                {link.label}
+                              </Link>
+                           )
                         ))}
                     </nav>
                      <div className="border-t pt-6 flex flex-col gap-4">
