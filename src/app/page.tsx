@@ -86,7 +86,7 @@ export default function LandingPage() {
                 </div>
               </div>
               <Image
-                src="https://picsum.photos/seed/indian-people/800/600"
+                src="https://zolve.com/blog/content/images/2025/01/a13.png"
                 width="800"
                 height="600"
                 alt="Hero"
