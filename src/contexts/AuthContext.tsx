@@ -22,17 +22,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const storedUser = localStorage.getItem('civic-lens-user');
     if (storedUser) {
-      const parsedUser = JSON.parse(storedUser);
-      setUser(parsedUser);
-      // If user is stored, ensure they are on an app page, not a public one
-      const dashboardPath = ROLE_DASHBOARD_PATHS[parsedUser.role] || '/';
-      if (!pathname.startsWith('/app')) {
-        // router.push(dashboardPath); // This might be too aggressive
-      }
-    } else if (!['/login'].includes(pathname)) {
-       // If no user and not on login page, redirect to login
-       // This handles the case of trying to access protected routes directly
-       router.push('/login');
+      setUser(JSON.parse(storedUser));
     }
   }, []);
 
@@ -54,10 +44,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   
   // This effect handles protecting routes
   useEffect(() => {
-    const storedUser = localStorage.getItem('civic-lens-user');
-    const isPublicPath = ['/login'].includes(pathname);
+    const storedUserJson = localStorage.getItem('civic-lens-user');
+    const isPublicPath = ['/login', '/'].includes(pathname);
+    const isAppPath = pathname.startsWith('/app'); // Future-proofing for /app routes
 
-    if (!storedUser && !isPublicPath) {
+    if (storedUserJson) {
+      const storedUser = JSON.parse(storedUserJson);
+      const userDashboard = ROLE_DASHBOARD_PATHS[storedUser.role];
+      // If user is logged in and on a public page, redirect to their dashboard
+      if (isPublicPath) {
+        router.push(userDashboard);
+      }
+      // If user is trying to access a page that doesn't match their role, redirect
+      else if (!pathname.startsWith(userDashboard.split('/').slice(0,2).join('/'))) {
+         // router.push(userDashboard); // This can be too aggressive, let's just log for now.
+         console.warn(`User with role ${storedUser.role} attempting to access ${pathname}`);
+      }
+    } else if (!isPublicPath) {
+      // If no user and not on a public path, redirect to login
       router.push('/login');
     }
 
