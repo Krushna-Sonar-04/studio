@@ -2,12 +2,12 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { mockIssues } from '@/lib/mock-data';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Play, Check, Send, ArrowLeft, Upload } from 'lucide-react';
+import { Play, Check, ArrowLeft, Upload, Ticket } from 'lucide-react';
 
 export default function ContractorJobPage() {
   const params = useParams();
@@ -45,7 +45,10 @@ export default function ContractorJobPage() {
           <Card>
             <CardHeader>
               <CardTitle className="font-headline">{issue.title}</CardTitle>
-              <CardDescription>ID: {issue.id} | Location: {issue.location}</CardDescription>
+              <CardDescription className="flex items-center gap-2">
+                <Ticket className="h-4 w-4" />
+                Token ID: {issue.id} | Location: {issue.location}
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <h3 className="font-semibold mb-2">Work Description:</h3>

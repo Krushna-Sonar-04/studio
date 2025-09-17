@@ -1,7 +1,7 @@
 import { mockIssues, mockUsers } from '@/lib/mock-data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Image from 'next/image';
-import { Calendar, FileText, MapPin, User, Wrench } from 'lucide-react';
+import { Calendar, FileText, MapPin, User, Wrench, Ticket } from 'lucide-react';
 import { VerificationReportGenerator } from '@/components/engineer/VerificationReportGenerator';
 import { Separator } from '@/components/ui/separator';
 
@@ -19,7 +19,10 @@ export default function EngineerJobPage({ params }: { params: { id: string } }) 
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-headline font-bold">Verify Issue: {issue.title}</h1>
-        <p className="text-muted-foreground">Issue ID: {issue.id}</p>
+        <p className="text-muted-foreground flex items-center gap-2">
+            <Ticket className="h-4 w-4" />
+            Token ID: {issue.id}
+        </p>
       </div>
       
       <div className="grid lg:grid-cols-3 gap-8">

@@ -114,7 +114,7 @@ export default function CitizenDashboard() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Issue ID</TableHead>
+                <TableHead>Token ID</TableHead>
                 <TableHead>Title</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Status</TableHead>

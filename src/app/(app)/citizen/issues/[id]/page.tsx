@@ -6,7 +6,7 @@ import { IssueTimeline } from '@/components/shared/IssueTimeline';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
-import { ArrowLeft, Calendar, FileText, ImageIcon, MapPin, User, Wrench } from 'lucide-react';
+import { ArrowLeft, Calendar, FileText, ImageIcon, MapPin, User, Wrench, Ticket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export default function IssueDetailPage() {
@@ -32,7 +32,10 @@ export default function IssueDetailPage() {
           <div className="flex justify-between items-start">
             <div>
               <CardTitle className="text-3xl font-headline">{issue.title}</CardTitle>
-              <CardDescription className="text-base">Issue ID: {issue.id}</CardDescription>
+              <CardDescription className="flex items-center gap-2 text-base">
+                <Ticket className="h-4 w-4" />
+                Token ID: {issue.id}
+              </CardDescription>
             </div>
             <Badge className="text-base" variant={issue.status === 'Resolved' || issue.status === 'Closed' ? 'outline' : 'default'}>
               {issue.status}
@@ -93,6 +96,7 @@ export default function IssueDetailPage() {
       <Card>
         <CardHeader>
           <CardTitle className="font-headline">Issue Progress</CardTitle>
+          <CardDescription>Track the status of your reported issue from submission to resolution.</CardDescription>
         </CardHeader>
         <CardContent>
           <IssueTimeline statusHistory={issue.statusHistory} currentStatus={issue.status} />

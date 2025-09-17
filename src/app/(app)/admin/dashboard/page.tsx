@@ -98,7 +98,7 @@ export default function AdminDashboard() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>ID</TableHead>
+                <TableHead>Token ID</TableHead>
                 <TableHead>Title</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Reported On</TableHead>
@@ -108,10 +108,10 @@ export default function AdminDashboard() {
             <TableBody>
               {issues.map(issue => (
                 <TableRow key={issue.id}>
-                  <TableCell className="font-medium" onClick={() => router.push(`/citizen/issues/${issue.id}`)}>{issue.id}</TableCell>
-                  <TableCell onClick={() => router.push(`/citizen/issues/${issue.id}`)}>{issue.title}</TableCell>
-                  <TableCell onClick={() => router.push(`/citizen/issues/${issue.id}`)}><Badge variant="secondary">{issue.status}</Badge></TableCell>
-                  <TableCell onClick={() => router.push(`/citizen/issues/${issue.id}`)}>{new Date(issue.reportedAt).toLocaleDateString()}</TableCell>
+                  <TableCell className="font-medium cursor-pointer" onClick={() => router.push(`/citizen/issues/${issue.id}`)}>{issue.id}</TableCell>
+                  <TableCell className="cursor-pointer" onClick={() => router.push(`/citizen/issues/${issue.id}`)}>{issue.title}</TableCell>
+                  <TableCell className="cursor-pointer" onClick={() => router.push(`/citizen/issues/${issue.id}`)}><Badge variant="secondary">{issue.status}</Badge></TableCell>
+                  <TableCell className="cursor-pointer" onClick={() => router.push(`/citizen/issues/${issue.id}`)}>{new Date(issue.reportedAt).toLocaleDateString()}</TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -148,7 +148,7 @@ export default function AdminDashboard() {
             </Select>
             <Select onValueChange={setSelectedFundManager}>
               <SelectTrigger><SelectValue placeholder="Select Fund Manager" /></SelectTrigger>
-              <SelectContent>{fundManagers.map(fm => <SelectItem key={fm.id} value={fm.id}>{fm.name}</SelectItem>)}</SelectContent>
+              <SelectContent>{fundManagers.map(fm => <SelectItem key={fm.id} value={fm.name}>{fm.name}</SelectItem>)}</SelectContent>
             </Select>
           </div>
           <DialogFooter>
