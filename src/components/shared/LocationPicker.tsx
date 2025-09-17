@@ -1,7 +1,8 @@
+
 'use client';
 
-import { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet';
+import { useState, useEffect, useRef } from 'react';
+import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
 import { LatLng, Icon } from 'leaflet';
 import { Button } from '@/components/ui/button';
 import { LocateFixed } from 'lucide-react';
@@ -12,6 +13,7 @@ interface LocationPickerProps {
   onChange: (value: string) => void;
 }
 
+// Default to a central location if geolocation fails or is denied
 const defaultPosition: [number, number] = [20.5937, 78.9629]; // India
 
 const customIcon = new Icon({
@@ -23,88 +25,49 @@ const customIcon = new Icon({
   shadowSize: [41, 41]
 });
 
-function LocationHandler({ onPositionChange, position }: { onPositionChange: (latlng: LatLng) => void; position: [number, number] }) {
+
+function MapEvents({ onPositionChange }: { onPositionChange: (latlng: LatLng) => void }) {
     const map = useMap();
 
-    useMapEvents({
-        click(e) {
+    useEffect(() => {
+        const clickHandler = (e: any) => {
             onPositionChange(e.latlng);
-        },
-    });
+        };
+        map.on('click', clickHandler);
 
+        return () => {
+            map.off('click', clickHandler);
+        };
+    }, [map, onPositionChange]);
+
+    return null;
+}
+
+function LocationUpdater({ position }: { position: [number, number] }) {
+    const map = useMap();
     useEffect(() => {
         map.flyTo(position, map.getZoom());
-    }, [position, map]);
-
-    return (
-        <Marker 
-            position={position} 
-            icon={customIcon} 
-            draggable={true}
-            eventHandlers={{
-                dragend: (e) => {
-                    onPositionChange(e.target.getLatLng());
-                }
-            }}
-        />
-    );
+    }, [map, position]);
+    return null;
 }
+
 
 export default function LocationPicker({ value, onChange }: LocationPickerProps) {
   const [position, setPosition] = useState<[number, number] | null>(null);
   const [isLocating, setIsLocating] = useState(true);
-
+  
   const parseValue = (val: string): [number, number] | null => {
-    if (!val) return null;
-    const parts = val.split(',');
-    if (parts.length === 2) {
-        const lat = parseFloat(parts[0].trim());
-        const lng = parseFloat(parts[1].trim());
+    try {
+        const [lat, lng] = val.split(',').map(s => parseFloat(s.trim()));
         if (!isNaN(lat) && !isNaN(lng)) {
             return [lat, lng];
         }
+    } catch(err) {
+        // ignore
     }
     return null;
-  };
-  
-  useEffect(() => {
-    const initialPos = parseValue(value);
-    if (initialPos) {
-      setPosition(initialPos);
-      setIsLocating(false);
-    } else {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const newPos: [number, number] = [pos.coords.latitude, pos.coords.longitude];
-          setPosition(newPos);
-          onChange(`${newPos[0]}, ${newPos[1]}`);
-          setIsLocating(false);
-        },
-        () => {
-          setPosition(defaultPosition);
-          onChange(`${defaultPosition[0]}, ${defaultPosition[1]}`);
-          setIsLocating(false);
-        }
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Run only on mount
+  }
 
-  const handlePositionChange = (latlng: LatLng) => {
-    const newPos: [number, number] = [latlng.lat, latlng.lng];
-    setPosition(newPos);
-    onChange(`${newPos[0].toFixed(6)}, ${newPos[1].toFixed(6)}`);
-  };
-
-  const handleManualInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
-    onChange(newValue);
-    const newPos = parseValue(newValue);
-    if (newPos) {
-        setPosition(newPos);
-    }
-  };
-  
   const handleLocateMe = () => {
     setIsLocating(true);
     navigator.geolocation.getCurrentPosition(
@@ -117,28 +80,72 @@ export default function LocationPicker({ value, onChange }: LocationPickerProps)
       },
       (error) => {
         console.error(error);
+        // If user denies location, use the default position
+        setPosition(defaultPosition);
+        onChange(`${defaultPosition[0].toFixed(6)}, ${defaultPosition[1].toFixed(6)}`);
         setIsLocating(false);
-      }
+      },
+      { enableHighAccuracy: true }
     );
   };
 
-  if (!position) {
-    return (
-      <div className="flex items-center justify-center h-[400px] w-full rounded-md border border-dashed">
-        <p>Getting your location...</p>
-      </div>
-    );
+  useEffect(() => {
+    const initialPos = parseValue(value);
+    if(initialPos) {
+        setPosition(initialPos);
+        setIsLocating(false);
+    } else {
+        handleLocateMe();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handlePositionChange = (latlng: LatLng) => {
+      const newPos: [number, number] = [latlng.lat, latlng.lng];
+      setPosition(newPos);
+      onChange(`${latlng.lat.toFixed(6)}, ${latlng.lng.toFixed(6)}`);
+  }
+
+  const handleManualInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    onChange(newValue);
+    const newPos = parseValue(newValue);
+    if (newPos) {
+        setPosition(newPos);
+    }
   }
 
   return (
     <div className="space-y-2">
-       <MapContainer center={position} zoom={13} className="h-[300px] w-full z-0">
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        <LocationHandler onPositionChange={handlePositionChange} position={position} />
+       {isLocating || !position ? (
+         <div className="flex items-center justify-center h-[300px] w-full rounded-md border border-dashed">
+            <p>Getting your location...</p>
+        </div>
+       ) : (
+        <MapContainer
+            center={position}
+            zoom={13}
+            className="h-[300px] w-full z-0"
+            key={position.join('-')} // Add a key to force re-render when position is set
+        >
+            <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            <Marker 
+                position={position} 
+                icon={customIcon} 
+                draggable={true}
+                eventHandlers={{
+                    dragend: (e) => {
+                        handlePositionChange(e.target.getLatLng());
+                    }
+                }}
+            />
+            <MapEvents onPositionChange={handlePositionChange} />
+            <LocationUpdater position={position} />
       </MapContainer>
+       )}
       
       <div className="flex gap-2">
          <Input
