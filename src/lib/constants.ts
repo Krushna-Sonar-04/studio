@@ -1,6 +1,6 @@
 import { UserRole } from './types';
 
-export const APP_NAME = "CivitasConnect";
+export const APP_NAME = "CIVIC LENS";
 
 export const ROLES: UserRole[] = [
   "Citizen",

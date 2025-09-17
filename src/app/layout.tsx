@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "CivitasConnect",
+  title: "CIVIC LENS",
   description: "Connecting citizens and government for a better community.",
 };
 
