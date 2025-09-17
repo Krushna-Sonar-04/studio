@@ -86,12 +86,12 @@ export default function LandingPage() {
                 </div>
               </div>
               <Image
-                src="https://picsum.photos/seed/ocean-rocks/800/600"
+                src="https://picsum.photos/seed/indian-people/800/600"
                 width="800"
                 height="600"
                 alt="Hero"
                 className="mx-auto aspect-video overflow-hidden rounded-xl object-cover sm:w-full lg:order-last animate-fade-in"
-                data-ai-hint="ocean rocks"
+                data-ai-hint="indian people"
               />
             </div>
           </div>
