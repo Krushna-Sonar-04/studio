@@ -15,9 +15,9 @@ export default function FundManagerDashboard() {
 
   useEffect(() => {
     if (user) {
-      // A Fund Manager sees issues that are 'Verified' and assigned to them.
+      // A Fund Manager sees issues assigned to them that are now their responsibility.
       setAssignedJobs(mockIssues.filter(issue => 
-        issue.assignedFundManagerId === user.id && issue.status === 'Verified'
+        issue.currentRole === user.role && issue.assignedFundManagerId === user.id
       ));
     }
   }, [user]);

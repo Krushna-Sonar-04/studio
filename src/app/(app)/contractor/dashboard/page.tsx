@@ -17,14 +17,15 @@ export default function ContractorDashboard() {
 
   useEffect(() => {
     if (user) {
-      setJobs(mockIssues.filter(issue => issue.assignedContractorId === user.id));
+      setJobs(mockIssues.filter(issue => issue.assignedContractorId === user.id && issue.currentRole === user.role));
     }
   }, [user]);
 
+  const allUserJobs = mockIssues.filter(issue => issue.assignedContractorId === user?.id);
   const stats = {
-    assigned: jobs.filter(j => j.status === 'AssignedToContractor').length,
-    inProgress: jobs.filter(j => j.status === 'InProgress').length,
-    completed: jobs.filter(j => ['Resolved', 'Closed'].includes(j.status)).length,
+    assigned: allUserJobs.filter(j => j.status === 'AssignedToContractor').length,
+    inProgress: allUserJobs.filter(j => j.status === 'InProgress').length,
+    completed: allUserJobs.filter(j => ['Resolved', 'Closed'].includes(j.status)).length,
   };
 
   if (!user) {
@@ -64,7 +65,7 @@ export default function ContractorDashboard() {
 
 
       <Card>
-        <CardHeader><CardTitle>All Assigned Jobs</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Your Active Jobs</CardTitle></CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
@@ -87,7 +88,7 @@ export default function ContractorDashboard() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center">You have no assigned jobs.</TableCell>
+                  <TableCell colSpan={4} className="text-center">You have no active jobs requiring your attention.</TableCell>
                 </TableRow>
               )}
             </TableBody>

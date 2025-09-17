@@ -17,12 +17,14 @@ export type IssueStatus =
   | "Submitted"
   | "AssignedForVerification"
   | "Verified"
+  | "PendingEstimation"
   | "PendingApproval"
   | "Approved"
   | "Rejected"
   | "AssignedToContractor"
   | "InProgress"
   | "Resolved"
+  | "PendingFinalVerification"
   | "Closed";
 
 export type IssueType = "Pothole" | "Streetlight" | "Garbage" | "Water Leakage";
@@ -58,12 +60,13 @@ export type Issue = {
   title: string;
   type: IssueType;
   location: string;
-  description: string;
+  description:string;
   imageUrl?: string;
   reportedBy: string; // User ID
   reportedAt: string;
   status: IssueStatus;
   statusHistory: StatusUpdate[];
+  currentRole: UserRole | 'None'; // Who needs to act on it now
   assignedEngineerId?: string;
   assignedFundManagerId?: string;
   assignedContractorId?: string;
