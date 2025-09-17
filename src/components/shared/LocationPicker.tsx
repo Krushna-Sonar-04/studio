@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef, useMemo } from 'react';
-import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
+import { useState, useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet';
 import { LatLng, Icon } from 'leaflet';
 import { Button } from '@/components/ui/button';
 import { LocateFixed } from 'lucide-react';
@@ -12,7 +12,6 @@ interface LocationPickerProps {
   onChange: (value: string) => void;
 }
 
-// Default to a central location if geolocation fails or is denied
 const defaultPosition: [number, number] = [20.5937, 78.9629]; // India
 
 const customIcon = new Icon({
@@ -24,41 +23,88 @@ const customIcon = new Icon({
   shadowSize: [41, 41]
 });
 
-
-function MapEvents({ onPositionChange }: { onPositionChange: (latlng: LatLng) => void }) {
+function LocationHandler({ onPositionChange, position }: { onPositionChange: (latlng: LatLng) => void; position: [number, number] }) {
     const map = useMap();
 
-    useEffect(() => {
-        map.on('click', (e) => {
+    useMapEvents({
+        click(e) {
             onPositionChange(e.latlng);
-        });
+        },
+    });
 
-        return () => {
-            map.off('click');
-        };
-    }, [map, onPositionChange]);
+    useEffect(() => {
+        map.flyTo(position, map.getZoom());
+    }, [position, map]);
 
-    return null;
+    return (
+        <Marker 
+            position={position} 
+            icon={customIcon} 
+            draggable={true}
+            eventHandlers={{
+                dragend: (e) => {
+                    onPositionChange(e.target.getLatLng());
+                }
+            }}
+        />
+    );
 }
 
 export default function LocationPicker({ value, onChange }: LocationPickerProps) {
   const [position, setPosition] = useState<[number, number] | null>(null);
-  const [isLocating, setIsLocating] = useState(false);
-  const mapRef = useRef<any>(null);
+  const [isLocating, setIsLocating] = useState(true);
 
-  const markerPosition: [number, number] | null = useMemo(() => {
-    if (value) {
-      try {
-        const [lat, lng] = value.split(',').map(Number);
-        if(!isNaN(lat) && !isNaN(lng)) return [lat, lng];
-      } catch (error) {
-         console.error("Invalid value for position", error);
-      }
+  const parseValue = (val: string): [number, number] | null => {
+    if (!val) return null;
+    const parts = val.split(',');
+    if (parts.length === 2) {
+        const lat = parseFloat(parts[0].trim());
+        const lng = parseFloat(parts[1].trim());
+        if (!isNaN(lat) && !isNaN(lng)) {
+            return [lat, lng];
+        }
     }
-    return position || defaultPosition;
-  }, [value, position]);
+    return null;
+  };
   
+  useEffect(() => {
+    const initialPos = parseValue(value);
+    if (initialPos) {
+      setPosition(initialPos);
+      setIsLocating(false);
+    } else {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const newPos: [number, number] = [pos.coords.latitude, pos.coords.longitude];
+          setPosition(newPos);
+          onChange(`${newPos[0]}, ${newPos[1]}`);
+          setIsLocating(false);
+        },
+        () => {
+          setPosition(defaultPosition);
+          onChange(`${defaultPosition[0]}, ${defaultPosition[1]}`);
+          setIsLocating(false);
+        }
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run only on mount
 
+  const handlePositionChange = (latlng: LatLng) => {
+    const newPos: [number, number] = [latlng.lat, latlng.lng];
+    setPosition(newPos);
+    onChange(`${newPos[0].toFixed(6)}, ${newPos[1].toFixed(6)}`);
+  };
+
+  const handleManualInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    onChange(newValue);
+    const newPos = parseValue(newValue);
+    if (newPos) {
+        setPosition(newPos);
+    }
+  };
+  
   const handleLocateMe = () => {
     setIsLocating(true);
     navigator.geolocation.getCurrentPosition(
@@ -66,92 +112,32 @@ export default function LocationPicker({ value, onChange }: LocationPickerProps)
         const { latitude, longitude } = pos.coords;
         const newPos: [number, number] = [latitude, longitude];
         setPosition(newPos);
-        onChange(`${latitude}, ${longitude}`);
-        if(mapRef.current) {
-          mapRef.current.flyTo(newPos, 15);
-        }
+        onChange(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
         setIsLocating(false);
       },
       (error) => {
         console.error(error);
-        alert('Could not get your location. Please allow location access.');
         setIsLocating(false);
-      },
-      { enableHighAccuracy: true }
+      }
     );
   };
 
-  const handlePositionChange = (latlng: LatLng) => {
-      const newPos: [number, number] = [latlng.lat, latlng.lng];
-      setPosition(newPos);
-      onChange(`${latlng.lat.toFixed(6)}, ${latlng.lng.toFixed(6)}`);
-  }
-
-  const handleManualInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(e.target.value);
-    try {
-        const [lat, lng] = e.target.value.split(',').map(s => parseFloat(s.trim()));
-        if (!isNaN(lat) && !isNaN(lng)) {
-            const newPos: [number, number] = [lat, lng];
-            setPosition(newPos);
-             if(mapRef.current) {
-                mapRef.current.flyTo(newPos, mapRef.current.getZoom());
-            }
-        }
-    } catch(err) {
-        console.log("Waiting for valid coordinates");
-    }
-  }
-
-  useEffect(() => {
-    // Try to set position from value on initial load
-    if (value) {
-      try {
-        const [lat, lng] = value.split(',').map(Number);
-        if(!isNaN(lat) && !isNaN(lng)) setPosition([lat, lng]);
-        else handleLocateMe(); // If invalid value, fetch current location
-      } catch (e) {
-        handleLocateMe(); // If parsing fails, fetch current location
-      }
-    } else {
-        handleLocateMe();
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Run only once
-
   if (!position) {
     return (
-        <div className="flex items-center justify-center h-[400px] w-full rounded-md border border-dashed">
-            <p>Getting your location...</p>
-        </div>
-    )
+      <div className="flex items-center justify-center h-[400px] w-full rounded-md border border-dashed">
+        <p>Getting your location...</p>
+      </div>
+    );
   }
 
   return (
     <div className="space-y-2">
-      <MapContainer
-        whenCreated={(mapInstance) => { mapRef.current = mapInstance }}
-        center={position}
-        zoom={13}
-        className="h-[300px] w-full z-0"
-      >
+       <MapContainer center={position} zoom={13} className="h-[300px] w-full z-0">
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        {markerPosition && (
-            <Marker 
-                position={markerPosition} 
-                icon={customIcon} 
-                draggable={true}
-                eventHandlers={{
-                    dragend: (e) => {
-                        handlePositionChange(e.target.getLatLng());
-                    }
-                }}
-            />
-        )}
-        <MapEvents onPositionChange={handlePositionChange} />
+        <LocationHandler onPositionChange={handlePositionChange} position={position} />
       </MapContainer>
       
       <div className="flex gap-2">
