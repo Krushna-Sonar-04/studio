@@ -68,7 +68,7 @@ export default function LandingPage() {
         <section className="w-full py-24 md:py-32 lg:py-48">
           <div className="container px-4 md:px-6">
             <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 xl:gap-16">
-              <div className="flex flex-col justify-center space-y-4">
+              <div className="flex flex-col justify-center space-y-4 animate-fade-in-up">
                 <div className="space-y-4">
                   <h1 className="text-4xl font-bold font-headline tracking-tighter sm:text-5xl md:text-6xl text-foreground">
                     A New Lens on Your Community
@@ -90,7 +90,7 @@ export default function LandingPage() {
                 width="800"
                 height="600"
                 alt="Hero"
-                className="mx-auto aspect-video overflow-hidden rounded-xl object-cover sm:w-full lg:order-last"
+                className="mx-auto aspect-video overflow-hidden rounded-xl object-cover sm:w-full lg:order-last animate-fade-in"
                 data-ai-hint="ocean rocks"
               />
             </div>
@@ -115,8 +115,8 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="mx-auto grid max-w-5xl gap-6 py-12 sm:grid-cols-2 md:gap-8 lg:grid-cols-4 lg:max-w-none">
-              {features.map((feature) => (
-                <Card key={feature.title} className="flex flex-col items-center justify-start text-center p-4 transition-transform transform hover:-translate-y-2 bg-background">
+              {features.map((feature, i) => (
+                <Card key={feature.title} className="flex flex-col items-center justify-start text-center p-4 transition-transform transform hover:-translate-y-2 bg-background animate-fade-in-up" style={{ animationDelay: `${i * 100}ms` }}>
                     <CardHeader className="p-2">
                         {feature.icon}
                     </CardHeader>
