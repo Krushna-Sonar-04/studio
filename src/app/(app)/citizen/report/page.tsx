@@ -3,6 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import dynamic from 'next/dynamic';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -20,8 +21,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { IssueType } from '@/lib/types';
-import { Send } from 'lucide-react';
+import { Send, MapPin } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useMemo } from 'react';
 
 const issueTypes: IssueType[] = ['Pothole', 'Streetlight', 'Garbage', 'Water Leakage'];
 
@@ -54,6 +56,11 @@ export default function ReportIssuePage() {
       photo: undefined,
     },
   });
+  
+  const LocationPicker = useMemo(() => dynamic(() => import('@/components/shared/LocationPicker'), { 
+    ssr: false,
+    loading: () => <p>Loading map...</p>
+  }), []);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log('Simulating issue submission:', values);
@@ -93,7 +100,6 @@ export default function ReportIssuePage() {
                     )}
                     />
 
-                    <div className="grid md:grid-cols-2 gap-8">
                     <FormField
                         control={form.control}
                         name="type"
@@ -121,19 +127,21 @@ export default function ReportIssuePage() {
                         control={form.control}
                         name="location"
                         render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Location</FormLabel>
-                            <FormControl>
-                            <Input placeholder="e.g., Corner of Main St and 1st Ave" {...field} />
-                            </FormControl>
-                            <FormDescription>
-                                Be as specific as possible.
-                            </FormDescription>
-                            <FormMessage />
-                        </FormItem>
+                            <FormItem>
+                                <FormLabel className="flex items-center gap-2"><MapPin/> Location</FormLabel>
+                                <FormControl>
+                                    <LocationPicker 
+                                        value={field.value} 
+                                        onChange={field.onChange} 
+                                    />
+                                </FormControl>
+                                <FormDescription>
+                                    Click the button to fetch your current location, or drag the marker to the exact spot.
+                                </FormDescription>
+                                <FormMessage />
+                            </FormItem>
                         )}
                     />
-                    </div>
 
                     <FormField
                     control={form.control}
