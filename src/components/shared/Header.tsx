@@ -2,6 +2,7 @@ import { APP_NAME } from '@/lib/constants';
 import { Building2 } from 'lucide-react';
 import Link from 'next/link';
 import { UserNav } from './UserNav';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 export default function AppHeader() {
   return (
@@ -11,7 +12,8 @@ export default function AppHeader() {
           <Building2 className="mr-2 h-6 w-6 text-primary" />
           <span className="font-bold font-headline text-lg text-primary">{APP_NAME}</span>
         </Link>
-        <div className="flex flex-1 items-center justify-end">
+        <div className="flex flex-1 items-center justify-end gap-4">
+          <LanguageSwitcher />
           <UserNav />
         </div>
       </div>

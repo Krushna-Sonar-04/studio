@@ -1,0 +1,12 @@
+{
+  "login_title": "लॉग इन करा",
+  "login_description": "तुमच्या डॅशबोर्डवर प्रवेश करण्यासाठी तुमची भूमिका निवडा.",
+  "select_role_placeholder": "एक भूमिका निवडा...",
+  "login_button": "लॉग इन करा",
+  "Citizen": "नागरिक",
+  "Head_of_Department": "विभाग प्रमुख",
+  "Engineer": "अभियंता",
+  "Fund_Manager": "निधी व्यवस्थापक",
+  "Approving_Manager": "मंजुरी व्यवस्थापक",
+  "Contractor": "कंत्राटदार"
+}

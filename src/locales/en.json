@@ -1,0 +1,12 @@
+{
+  "login_title": "Login",
+  "login_description": "Select your role to access your dashboard.",
+  "select_role_placeholder": "Select a role...",
+  "login_button": "Login",
+  "Citizen": "Citizen",
+  "Head_of_Department": "Head of Department",
+  "Engineer": "Engineer",
+  "Fund_Manager": "Fund Manager",
+  "Approving_Manager": "Approving Manager",
+  "Contractor": "Contractor"
+}
