@@ -1,9 +1,9 @@
 'use client';
 
 import { APP_NAME } from '@/lib/constants';
-import { Menu, Flag } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { UserNav } from './UserNav';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { Button } from '../ui/button';
@@ -40,11 +40,15 @@ export default function AppHeader() {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user } = useAuth();
   const { t } = useLanguage();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const navLinks = [
       { href: '/citizen/dashboard', label: 'Citizen Dashboard'},
       { href: '/contractor/dashboard', label: 'Contractor Dashboard'},
-      { href: '/login', label: t('login_button')},
   ];
 
   return (
@@ -58,7 +62,7 @@ export default function AppHeader() {
         <div className="flex flex-1 items-center justify-end space-x-4">
           <div className="hidden md:flex items-center gap-4">
             <LanguageSwitcher />
-            <UserNav />
+            {isClient && <UserNav />}
           </div>
 
            {/* Mobile Nav */}
@@ -75,24 +79,26 @@ export default function AppHeader() {
                         <TricolorFlag />
                         <span className="font-bold font-headline text-lg text-primary">{APP_NAME}</span>
                     </Link>
-                    <nav className="grid gap-4">
-                        {navLinks.map(link => (
-                          user ? (
-                            <Link key={link.href} href={link.href} className="text-muted-foreground hover:text-foreground" onClick={() => setMobileMenuOpen(false)}>
-                                {link.label}
-                            </Link>
-                           ) : (
-                             link.href === '/login' && 
+                   {isClient && (
+                     <>
+                      <nav className="grid gap-4">
+                          {user && navLinks.map(link => (
                               <Link key={link.href} href={link.href} className="text-muted-foreground hover:text-foreground" onClick={() => setMobileMenuOpen(false)}>
-                                {link.label}
+                                  {link.label}
                               </Link>
-                           )
-                        ))}
-                    </nav>
-                     <div className="border-t pt-6 flex flex-col gap-4">
-                        <LanguageSwitcher />
-                        <UserNav />
-                    </div>
+                          ))}
+                          {!user && (
+                             <Link href="/login" className="text-muted-foreground hover:text-foreground" onClick={() => setMobileMenuOpen(false)}>
+                                {t('login_button')}
+                              </Link>
+                          )}
+                      </nav>
+                       <div className="border-t pt-6 flex flex-col gap-4">
+                          <LanguageSwitcher />
+                          <UserNav />
+                      </div>
+                     </>
+                   )}
                 </div>
               </SheetContent>
             </Sheet>
