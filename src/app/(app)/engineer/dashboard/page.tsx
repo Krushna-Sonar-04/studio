@@ -16,7 +16,7 @@ export default function EngineerDashboard() {
 
   useEffect(() => {
     if (user) {
-      setAssignedJobs(mockIssues.filter(issue => issue.currentRole === user.role && issue.assignedEngineerId === user.id));
+      setAssignedJobs(mockIssues.filter(issue => issue.currentRoles.includes(user.role) && issue.assignedEngineerId === user.id));
     }
   }, [user]);
   

@@ -17,7 +17,7 @@ export default function ContractorDashboard() {
 
   useEffect(() => {
     if (user) {
-      setJobs(mockIssues.filter(issue => issue.assignedContractorId === user.id && issue.currentRole === user.role));
+      setJobs(mockIssues.filter(issue => issue.assignedContractorId === user.id && issue.currentRoles.includes(user.role)));
     }
   }, [user]);
 

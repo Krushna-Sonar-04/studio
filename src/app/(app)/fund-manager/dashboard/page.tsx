@@ -17,7 +17,7 @@ export default function FundManagerDashboard() {
     if (user) {
       // A Fund Manager sees issues assigned to them that are now their responsibility.
       setAssignedJobs(mockIssues.filter(issue => 
-        issue.currentRole === user.role && issue.assignedFundManagerId === user.id
+        issue.currentRoles.includes(user.role) && issue.assignedFundManagerId === user.id
       ));
     }
   }, [user]);
@@ -42,7 +42,7 @@ export default function FundManagerDashboard() {
                 <TableHead>ID</TableHead>
                 <TableHead>Title</TableHead>
                 <TableHead>Type</TableHead>
-                <TableHead>Verified On</TableHead>
+                <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -52,7 +52,9 @@ export default function FundManagerDashboard() {
                     <TableCell className="font-medium">{job.id}</TableCell>
                     <TableCell>{job.title}</TableCell>
                     <TableCell>{job.type}</TableCell>
-                    <TableCell>{new Date(job.verificationReport?.submittedAt || '').toLocaleDateString()}</TableCell>
+                     <TableCell>
+                        {job.verificationReport ? 'Verified' : 'Pending Verification'}
+                    </TableCell>
                   </TableRow>
                 ))
               ) : (

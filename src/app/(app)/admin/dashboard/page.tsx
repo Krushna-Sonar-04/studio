@@ -32,7 +32,30 @@ export default function AdminDashboard() {
   const handleAssignTask = () => {
     if (selectedIssue && selectedEngineer && selectedFundManager) {
       console.log(`Assigning issue ${selectedIssue.id} to Engineer ${selectedEngineer} and Fund Manager ${selectedFundManager}`);
-      toast({ title: 'Task Assigned (Simulated)' });
+      // Simulate state update
+      const updatedIssues = issues.map(issue => {
+        if (issue.id === selectedIssue.id) {
+          return {
+            ...issue,
+            status: 'PendingVerificationAndEstimation' as const,
+            currentRoles: ['Engineer', 'Fund Manager'],
+            assignedEngineerId: selectedEngineer,
+            assignedFundManagerId: selectedFundManager,
+            statusHistory: [
+              ...issue.statusHistory,
+              {
+                status: 'PendingVerificationAndEstimation' as const,
+                date: new Date().toISOString(),
+                updatedBy: 'Admin',
+                notes: `Assigned to Engineer and Fund Manager`,
+              },
+            ],
+          };
+        }
+        return issue;
+      });
+      setIssues(updatedIssues);
+      toast({ title: 'Task Assigned', description: 'Issue has been sent to Engineer and Fund Manager.' });
       setAssignTaskOpen(false);
       setSelectedIssue(null);
     }
@@ -49,7 +72,7 @@ export default function AdminDashboard() {
 
   const stats = {
     new: issues.filter(i => i.status === 'Submitted').length,
-    pendingVerification: issues.filter(i => i.status === 'AssignedForVerification').length,
+    pendingVerification: issues.filter(i => i.status === 'PendingVerificationAndEstimation').length,
     inProgress: issues.filter(i => i.status === 'InProgress' || i.status === 'AssignedToContractor').length,
     resolved: issues.filter(i => i.status === 'Resolved' || i.status === 'Closed').length,
   };
@@ -71,7 +94,7 @@ export default function AdminDashboard() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Verification</CardTitle>
+            <CardTitle className="text-sm font-medium">Pending Verification & Estimation</CardTitle>
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent><div className="text-2xl font-bold">{stats.pendingVerification}</div></CardContent>
@@ -119,7 +142,7 @@ export default function AdminDashboard() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => { setSelectedIssue(issue); setAssignTaskOpen(true); }} disabled={issue.status !== 'Submitted'}>
-                          Assign for Verification
+                          Assign for Verification & Estimation
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => { setSelectedIssue(issue); setAssignContractorOpen(true); }} disabled={issue.status !== 'Approved'}>
                           Assign to Contractor
@@ -138,17 +161,17 @@ export default function AdminDashboard() {
       <Dialog open={isAssignTaskOpen} onOpenChange={setAssignTaskOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Assign for Verification</DialogTitle>
+            <DialogTitle>Assign for Verification & Estimation</DialogTitle>
             <DialogDescription>Assign an Engineer and Fund Manager for issue: {selectedIssue?.id}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <Select onValueChange={setSelectedEngineer}>
+            <Select onValueChange={setSelectedEngineer} required>
               <SelectTrigger><SelectValue placeholder="Select Engineer" /></SelectTrigger>
               <SelectContent>{engineers.map(e => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent>
             </Select>
-            <Select onValueChange={setSelectedFundManager}>
+            <Select onValueChange={setSelectedFundManager} required>
               <SelectTrigger><SelectValue placeholder="Select Fund Manager" /></SelectTrigger>
-              <SelectContent>{fundManagers.map(fm => <SelectItem key={fm.id} value={fm.name}>{fm.name}</SelectItem>)}</SelectContent>
+              <SelectContent>{fundManagers.map(fm => <SelectItem key={fm.id} value={fm.id}>{fm.name}</SelectItem>)}</SelectContent>
             </Select>
           </div>
           <DialogFooter>

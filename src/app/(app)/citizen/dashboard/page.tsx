@@ -16,7 +16,7 @@ const StatusBadge = ({ status }: { status: Issue['status'] }) => {
   const variant: 'default' | 'secondary' | 'destructive' | 'outline' = useMemo(() => {
     switch (status) {
       case 'Submitted':
-      case 'AssignedForVerification':
+      case 'PendingVerificationAndEstimation':
         return 'default';
       case 'InProgress':
       case 'Verified':

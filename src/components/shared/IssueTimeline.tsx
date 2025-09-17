@@ -2,7 +2,7 @@
 
 import { Issue } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { CheckCircle, Circle, CircleDashed, CircleDot, Clock } from 'lucide-react';
+import { CheckCircle, Circle, CircleDashed, CircleDot } from 'lucide-react';
 
 interface IssueTimelineProps {
   statusHistory: Issue['statusHistory'];
@@ -23,7 +23,8 @@ export function IssueTimeline({ statusHistory, currentStatus }: IssueTimelinePro
     if (milestoneIndex > -1) return milestoneIndex;
     
     // Handle intermediate statuses
-    if (['AssignedForVerification'].includes(status)) return 0;
+    if (['PendingVerificationAndEstimation'].includes(status)) return 0;
+    if (['Estimated'].includes(status)) return 1;
     if (['PendingApproval'].includes(status)) return 1;
     if (['AssignedToContractor'].includes(status)) return 2;
     if (['Rejected', 'Closed'].includes(status)) return statusMilestones.length;
@@ -41,7 +42,20 @@ export function IssueTimeline({ statusHistory, currentStatus }: IssueTimelinePro
           const isCurrent = index === currentStatusIndex;
           const isCompleted = index < currentStatusIndex;
           
-          const statusUpdate = statusHistory.findLast(s => s.status === milestone);
+          let statusUpdate = statusHistory.findLast(s => s.status === milestone);
+
+          // For "Verified", we need to check both "Verified" and "Estimated" since they are parallel
+          if (milestone === 'Verified') {
+              const verifiedUpdate = statusHistory.findLast(s => s.status === 'Verified');
+              const estimatedUpdate = statusHistory.findLast(s => s.status === 'Estimated');
+              // Use the latest of the two if both exist
+              if(verifiedUpdate && estimatedUpdate) {
+                statusUpdate = new Date(verifiedUpdate.date) > new Date(estimatedUpdate.date) ? verifiedUpdate : estimatedUpdate;
+              } else {
+                statusUpdate = verifiedUpdate || estimatedUpdate;
+              }
+          }
+
 
           let Icon = Circle;
           if (isCurrent) Icon = CircleDot;
@@ -67,7 +81,9 @@ export function IssueTimeline({ statusHistory, currentStatus }: IssueTimelinePro
                 >
                   <Icon className="h-6 w-6" />
                 </div>
-                <h3 className={cn("font-semibold mt-2", isActive && 'text-foreground')}>{milestone}</h3>
+                <h3 className={cn("font-semibold mt-2", isActive && 'text-foreground')}>
+                  {milestone === 'Verified' ? 'Verified & Estimated' : milestone}
+                </h3>
                 {statusUpdate && (
                     <div className="text-xs text-muted-foreground mt-1">
                         <p>{new Date(statusUpdate.date).toLocaleDateString()}</p>

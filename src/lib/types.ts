@@ -15,9 +15,9 @@ export type User = {
 
 export type IssueStatus =
   | "Submitted"
-  | "AssignedForVerification"
+  | "PendingVerificationAndEstimation"
   | "Verified"
-  | "PendingEstimation"
+  | "Estimated"
   | "PendingApproval"
   | "Approved"
   | "Rejected"
@@ -66,7 +66,7 @@ export type Issue = {
   reportedAt: string;
   status: IssueStatus;
   statusHistory: StatusUpdate[];
-  currentRole: UserRole | 'None'; // Who needs to act on it now
+  currentRoles: UserRole[]; // Who needs to act on it now
   assignedEngineerId?: string;
   assignedFundManagerId?: string;
   assignedContractorId?: string;

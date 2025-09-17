@@ -16,7 +16,7 @@ export default function ApprovingManagerDashboard() {
   useEffect(() => {
     // Approving managers see all issues where their role is the current one to act.
     if (user) {
-      setPendingJobs(mockIssues.filter(issue => issue.currentRole === user.role));
+      setPendingJobs(mockIssues.filter(issue => issue.currentRoles.includes(user.role)));
     }
   }, [user]);
 
