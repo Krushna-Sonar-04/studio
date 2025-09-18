@@ -25,6 +25,8 @@ export const mockIssues: Issue[] = [
     statusHistory: [
       { status: 'Submitted', date: '2024-07-20T10:00:00Z', updatedBy: 'Alia Reddy', notes: 'Issue reported by citizen.' },
     ],
+    upvotes: 12,
+    upvotedBy: [],
   },
   {
     id: 'issue-2',
@@ -38,11 +40,12 @@ export const mockIssues: Issue[] = [
     status: 'PendingVerificationAndEstimation',
     currentRoles: ['Engineer'],
     assignedEngineerId: 'user-3',
-    assignedFundManagerId: 'user-4',
     statusHistory: [
       { status: 'Submitted', date: '2024-07-18T21:30:00Z', updatedBy: 'Alia Reddy', notes: 'Citizen submission.' },
-      { status: 'PendingVerificationAndEstimation', date: '2024-07-19T09:00:00Z', updatedBy: 'Bhavin Shah', notes: 'Assigned to Chirag Kumar for verification.' },
+      { status: 'PendingVerificationAndEstimation', date: '2024-07-19T09:00:00Z', updatedBy: 'Bhavin Shah', notes: 'Assigned to Engineer for verification.' },
     ],
+    upvotes: 5,
+    upvotedBy: [],
   },
   {
     id: 'issue-3',
@@ -74,6 +77,8 @@ export const mockIssues: Issue[] = [
       notes: 'Cost covers a special collection trip and installation of one additional standard-issue park bin.',
       submittedAt: '2024-07-18T15:00:00Z',
     },
+    upvotes: 28,
+    upvotedBy: ['user-1'],
   },
   {
     id: 'issue-4',
@@ -109,7 +114,9 @@ export const mockIssues: Issue[] = [
       beforeImageUrl: 'https://picsum.photos/seed/301/600/400',
       afterImageUrl: 'https://picsum.photos/seed/302/600/400',
       submittedAt: '2024-07-11T17:00:00Z'
-    }
+    },
+    upvotes: 52,
+    upvotedBy: ['user-1'],
   },
   {
     id: 'issue-5',
@@ -139,6 +146,8 @@ export const mockIssues: Issue[] = [
       notes: 'Standard cost for bulb and ballast replacement parts and labor.',
       submittedAt: '2024-07-22T14:00:00Z',
     },
+    upvotes: 3,
+    upvotedBy: [],
   },
   {
     id: 'issue-6',
@@ -162,5 +171,7 @@ export const mockIssues: Issue[] = [
       comments: 'Confirming a large amount of construction debris, likely requires a truck and a team to clear.',
       submittedAt: '2024-07-24T10:00:00Z',
     },
+    upvotes: 18,
+    upvotedBy: [],
   },
 ];

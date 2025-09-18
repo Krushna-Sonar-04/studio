@@ -73,4 +73,6 @@ export type Issue = {
   verificationReport?: VerificationReport;
   estimationReport?: EstimationReport;
   contractorReport?: ContractorReport;
+  upvotes: number;
+  upvotedBy: string[];
 };

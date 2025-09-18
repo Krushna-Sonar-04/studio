@@ -11,6 +11,7 @@ import { PlusCircle, BarChart, ListChecks, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
+import { UpvoteButton } from '@/components/shared/UpvoteButton';
 
 const StatusBadge = ({ status }: { status: Issue['status'] }) => {
   const variant: 'default' | 'secondary' | 'destructive' | 'outline' = useMemo(() => {
@@ -39,12 +40,27 @@ export default function CitizenDashboard() {
   const { user } = useAuth();
   const router = useRouter();
   const [userIssues, setUserIssues] = useState<Issue[]>([]);
+  const [allIssues, setAllIssues] = useState<Issue[]>(mockIssues);
 
   useEffect(() => {
     if (user) {
-      setUserIssues(mockIssues.filter((issue) => issue.reportedBy === user.id));
+      setUserIssues(allIssues.filter((issue) => issue.reportedBy === user.id));
     }
-  }, [user]);
+  }, [user, allIssues]);
+
+  const handleUpvoteChange = (issueId: string, newUpvoteCount: number, userHasUpvoted: boolean) => {
+    setAllIssues(prevIssues => 
+      prevIssues.map(issue => {
+        if (issue.id === issueId) {
+          const newUpvotedBy = userHasUpvoted
+            ? [...issue.upvotedBy, user!.id]
+            : issue.upvotedBy.filter(id => id !== user!.id);
+          return { ...issue, upvotes: newUpvoteCount, upvotedBy: newUpvotedBy };
+        }
+        return issue;
+      })
+    );
+  };
 
   const stats = useMemo(() => {
     const total = userIssues.length;
@@ -116,22 +132,47 @@ export default function CitizenDashboard() {
               <TableRow>
                 <TableHead>Token ID</TableHead>
                 <TableHead>Title</TableHead>
-                <TableHead>Type</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Upvotes</TableHead>
                 <TableHead>Reported On</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {userIssues.length > 0 ? (
                 userIssues.map((issue) => (
-                  <TableRow key={issue.id} onClick={() => router.push(`/citizen/issues/${issue.id}`)} className="cursor-pointer">
-                    <TableCell className="font-medium">{issue.id}</TableCell>
-                    <TableCell>{issue.title}</TableCell>
-                    <TableCell>{issue.type}</TableCell>
-                    <TableCell>
+                  <TableRow key={issue.id} >
+                    <TableCell 
+                      className="font-medium cursor-pointer"
+                      onClick={() => router.push(`/citizen/issues/${issue.id}`)}
+                    >
+                      {issue.id}
+                    </TableCell>
+                    <TableCell
+                      className="cursor-pointer"
+                      onClick={() => router.push(`/citizen/issues/${issue.id}`)}
+                    >
+                      {issue.title}
+                    </TableCell>
+                    <TableCell
+                      className="cursor-pointer"
+                      onClick={() => router.push(`/citizen/issues/${issue.id}`)}
+                    >
                       <StatusBadge status={issue.status} />
                     </TableCell>
-                    <TableCell>{new Date(issue.reportedAt).toLocaleDateString()}</TableCell>
+                     <TableCell>
+                      <UpvoteButton
+                        issueId={issue.id}
+                        initialUpvotes={issue.upvotes}
+                        initialHasUpvoted={issue.upvotedBy.includes(user.id)}
+                        onUpvoteChange={handleUpvoteChange}
+                      />
+                    </TableCell>
+                    <TableCell
+                      className="cursor-pointer"
+                      onClick={() => router.push(`/citizen/issues/${issue.id}`)}
+                    >
+                      {new Date(issue.reportedAt).toLocaleDateString()}
+                    </TableCell>
                   </TableRow>
                 ))
               ) : (
