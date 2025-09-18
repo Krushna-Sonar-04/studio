@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { PlusCircle, BarChart, ListChecks, CheckCircle2 } from 'lucide-react';
+import { PlusCircle, BarChart, ListChecks, CheckCircle2, Map } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
@@ -84,12 +84,20 @@ export default function CitizenDashboard() {
           <h1 className="text-3xl font-headline font-bold">Welcome, {user.name}!</h1>
           <p className="text-muted-foreground">Here's a summary of your reported issues.</p>
         </div>
-        <Link href="/citizen/report">
-          <Button>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Report New Issue
-          </Button>
-        </Link>
+        <div className="flex gap-2">
+           <Link href="/citizen/nearby-issues">
+            <Button variant="outline">
+              <Map className="mr-2 h-4 w-4" />
+              View Nearby Issues
+            </Button>
+          </Link>
+          <Link href="/citizen/report">
+            <Button>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Report New Issue
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
