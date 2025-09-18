@@ -26,19 +26,17 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
   const LRef = useRef<any>(null); // To store the leaflet module
 
   useEffect(() => {
-    // Dynamically import Leaflet
     import('leaflet').then(L => {
       LRef.current = L;
 
-      // Webpack icon fix
-      L.Icon.Default.mergeOptions({
-        iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png').default,
-        iconUrl: require('leaflet/dist/images/marker-icon.png').default,
-        shadowUrl: require('leaflet/dist/images/marker-shadow.png').default,
-      });
-
       if (mapContainerRef.current && !mapRef.current) {
-        // Initialize map only once
+        // Webpack icon fix
+        L.Icon.Default.mergeOptions({
+            iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png').default,
+            iconUrl: require('leaflet/dist/images/marker-icon.png').default,
+            shadowUrl: require('leaflet/dist/images/marker-shadow.png').default,
+        });
+
         const map = L.map(mapContainerRef.current, {
           center: center,
           zoom: 13,
@@ -49,22 +47,6 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
           attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         }).addTo(map);
         
-        if (!isInteractive) {
-            map.dragging.disable();
-            map.touchZoom.disable();
-            map.doubleClickZoom.disable();
-            map.scrollWheelZoom.disable();
-            map.boxZoom.disable();
-            map.keyboard.disable();
-            if (map.tap) map.tap.disable();
-        }
-
-        if (onMapClick) {
-          map.on('click', (e: any) => {
-            onMapClick(e.latlng);
-          });
-        }
-
         mapRef.current = map;
       }
     });
@@ -76,8 +58,38 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
         mapRef.current = null;
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty dependency array ensures this runs only once
+  }, []); // Run only once on mount
+
+  useEffect(() => {
+    if (mapRef.current && LRef.current) {
+      if (!isInteractive) {
+        mapRef.current.dragging.disable();
+        mapRef.current.touchZoom.disable();
+        mapRef.current.doubleClickZoom.disable();
+        mapRef.current.scrollWheelZoom.disable();
+        mapRef.current.boxZoom.disable();
+        mapRef.current.keyboard.disable();
+        if (mapRef.current.tap) mapRef.current.tap.disable();
+      } else {
+        mapRef.current.dragging.enable();
+        mapRef.current.touchZoom.enable();
+        mapRef.current.doubleClickZoom.enable();
+        mapRef.current.scrollWheelZoom.enable();
+        mapRef.current.boxZoom.enable();
+        mapRef.current.keyboard.enable();
+        if (mapRef.current.tap) mapRef.current.tap.enable();
+      }
+
+      const map = mapRef.current;
+      map.off('click'); // Remove previous listeners
+      if (onMapClick) {
+        map.on('click', (e: any) => {
+          onMapClick(e.latlng);
+        });
+      }
+    }
+  }, [isInteractive, onMapClick]);
+
 
   useEffect(() => {
     if (mapRef.current && LRef.current && markerPosition) {
@@ -96,10 +108,12 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
   }, [flyTo]);
   
   useEffect(() => {
-    if (mapRef.current && !scrollWheelZoom) {
-      mapRef.current.scrollWheelZoom.disable();
-    } else if (mapRef.current && scrollWheelZoom){
-       mapRef.current.scrollWheelZoom.enable();
+    if (mapRef.current) {
+        if (!scrollWheelZoom) {
+            mapRef.current.scrollWheelZoom.disable();
+        } else {
+            mapRef.current.scrollWheelZoom.enable();
+        }
     }
   }, [scrollWheelZoom]);
 
