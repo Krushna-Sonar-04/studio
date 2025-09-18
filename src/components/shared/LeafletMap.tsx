@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import L, { LatLngExpression, LatLngTuple } from 'leaflet';
+import L, { LatLngTuple } from 'leaflet';
 import { Button } from '../ui/button';
 import { useRouter } from 'next/navigation';
 
@@ -77,9 +77,6 @@ const LeafletMap: React.FC<MapProps> = ({
         zoom={zoom} 
         scrollWheelZoom={scrollWheelZoom} 
         style={{ height: '100%', width: '100%' }}
-        // A key is used to force a re-render of the map when the center changes significantly,
-        // which helps avoid initialization errors in some Next.js dev environments.
-        key={`${center[0]}-${center[1]}`}
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
