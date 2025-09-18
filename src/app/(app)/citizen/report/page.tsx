@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import dynamic from 'next/dynamic';
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useMemo } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -27,8 +27,7 @@ import { useRouter } from 'next/navigation';
 
 // Leaflet is a client-side only library. Using `next/dynamic` with `ssr: false`
 // is the correct and safest way to ensure this component is never rendered on
-// the server, which prevents "window is not defined" and other hydration errors like
-// "Map container already initialized".
+// the server, which prevents "window is not defined" and other hydration errors.
 const LeafletMap = dynamic(() => import('@/components/shared/LeafletMap'), {
     ssr: false,
     loading: () => <div className="h-full w-full bg-muted flex items-center justify-center"><p>Loading map...</p></div>
@@ -84,7 +83,6 @@ export default function ReportIssuePage() {
     setIsGeocoding(true);
     try {
       // Use a free and open-source geocoding service like Nominatim.
-      // In a production app, you might use a more robust, rate-limited service.
       const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
       if (!response.ok) {
         throw new Error('Failed to fetch address');
@@ -146,6 +144,13 @@ export default function ReportIssuePage() {
   }
 
   const { lat, lng } = form.watch('location');
+  
+  // useMemo is used here to prevent the map props from changing on every render,
+  // which can help with stability, although the LeafletMap component itself is
+  // designed to be robust against this.
+  const mapCenter: [number, number] = useMemo(() => [lat, lng], [lat, lng]);
+  const markerPosition: [number, number] = useMemo(() => [lat, lng], [lat, lng]);
+
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -203,10 +208,10 @@ export default function ReportIssuePage() {
                         <FormLabel className="flex items-center gap-2"><MapPin/> Location</FormLabel>
                         <div className="h-[400px] w-full rounded-md overflow-hidden border">
                            <LeafletMap 
-                                center={[lat, lng]}
-                                markerPosition={[lat, lng]}
+                                center={mapCenter}
+                                markerPosition={markerPosition}
                                 onMapClick={handleMapClick}
-                                flyTo={[lat, lng]}
+                                flyTo={mapCenter}
                                 scrollWheelZoom={true}
                             />
                         </div>
