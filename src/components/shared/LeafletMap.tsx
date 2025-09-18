@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import 'leaflet/dist/leaflet.css';
-// Import react-leaflet components dynamically to ensure they are client-side only
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import L, { LatLngTuple } from 'leaflet';
 import { Button } from '../ui/button';
