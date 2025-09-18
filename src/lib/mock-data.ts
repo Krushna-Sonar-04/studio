@@ -186,7 +186,7 @@ export let mockIssues: Issue[] = [
   {
     id: 'issue-7',
     title: 'Fallen Tree Blocking Road',
-    type: 'Pothole', // This should probably be a new type 'Obstruction'
+    type: 'Obstruction',
     location: 'Oak Lane',
     description: 'A large tree has fallen across Oak Lane during the storm last night, completely blocking traffic.',
     imageUrl: 'https://picsum.photos/seed/207/600/400',

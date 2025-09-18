@@ -1,25 +1,21 @@
 'use client';
 
 import { useState } from 'react';
-import { mockIssues, setMockIssues } from '@/lib/mock-data';
-import { Issue, User } from '@/lib/types';
+import { mockIssues, setMockIssues, mockUsers } from '@/lib/mock-data';
+import { Issue } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { MoreHorizontal, Bell, AlertTriangle, Play, CheckCircle, Megaphone, ShieldAlert } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { mockUsers } from '@/lib/mock-data';
+import { Bell, AlertTriangle, Play, CheckCircle, Megaphone } from 'lucide-react';
 import Link from 'next/link';
+import { IssueDataTable } from '@/components/admin/IssueDataTable';
+import { issueColumns } from '@/components/admin/IssueColumns';
 
 export default function AdminDashboard() {
-  const router = useRouter();
   const { toast } = useToast();
   const [issues, setIssues] = useState<Issue[]>(mockIssues);
   const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
@@ -31,6 +27,16 @@ export default function AdminDashboard() {
 
   const engineers = mockUsers.filter(u => u.role === 'Engineer');
   const contractors = mockUsers.filter(u => u.role === 'Contractor');
+
+  const openAssignDialog = (issue: Issue) => {
+    setSelectedIssue(issue);
+    setAssignTaskOpen(true);
+  };
+  
+  const openContractorDialog = (issue: Issue) => {
+    setSelectedIssue(issue);
+    setAssignContractorOpen(true);
+  };
 
   const handleAssignTask = () => {
     if (selectedIssue && selectedEngineer) {
@@ -134,48 +140,10 @@ export default function AdminDashboard() {
       <Card>
         <CardHeader><CardTitle>All Issues</CardTitle></CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Token ID</TableHead>
-                <TableHead>Title</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Reported On</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {issues.map(issue => (
-                <TableRow key={issue.id}>
-                  <TableCell className="font-medium cursor-pointer" onClick={() => router.push(`/citizen/issues/${issue.id}`)}>{issue.id}</TableCell>
-                  <TableCell className="cursor-pointer" onClick={() => router.push(`/citizen/issues/${issue.id}`)}>{issue.title}</TableCell>
-                  <TableCell className="cursor-pointer" onClick={() => router.push(`/citizen/issues/${issue.id}`)}>
-                    <Badge variant={issue.escalated ? 'destructive' : 'secondary'}>
-                      {issue.escalated && <ShieldAlert className="mr-1 h-3 w-3" />}
-                      {issue.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="cursor-pointer" onClick={() => router.push(`/citizen/issues/${issue.id}`)}>{new Date(issue.reportedAt).toLocaleDateString()}</TableCell>
-
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => { setSelectedIssue(issue); setAssignTaskOpen(true); }} disabled={issue.status !== 'Submitted'}>
-                          Assign for Verification
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => { setSelectedIssue(issue); setAssignContractorOpen(true); }} disabled={issue.status !== 'Approved'}>
-                          Assign to Contractor
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <IssueDataTable 
+            columns={issueColumns({ openAssignDialog, openContractorDialog })} 
+            data={issues}
+          />
         </CardContent>
       </Card>
 
