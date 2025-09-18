@@ -29,7 +29,9 @@ export function NotificationItem({ notification, onMarkAsRead }: NotificationIte
     if (!notification.read) {
         onMarkAsRead(notification.id);
     }
-    router.push(`/citizen/issues/${notification.issueId}`);
+    if (notification.issueId) {
+      router.push(`/citizen/issues/${notification.issueId}`);
+    }
   };
 
   return (
@@ -54,10 +56,12 @@ export function NotificationItem({ notification, onMarkAsRead }: NotificationIte
         <TooltipProvider>
             <Tooltip>
                 <TooltipTrigger asChild>
-                    <Circle 
-                        className="h-2.5 w-2.5 shrink-0 mt-1 fill-primary text-primary"
-                        aria-label="Unread"
-                    />
+                    <button onClick={(e) => { e.stopPropagation(); onMarkAsRead(notification.id); }} className="shrink-0 mt-1">
+                      <Circle 
+                          className="h-2.5 w-2.5 fill-primary text-primary"
+                          aria-label="Unread"
+                      />
+                    </button>
                 </TooltipTrigger>
                 <TooltipContent>
                     <p>Mark as read</p>

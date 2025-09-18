@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Bell, Circle } from 'lucide-react';
+import { Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -63,7 +63,7 @@ export function NotificationBell({ user }: NotificationBellProps) {
                     <span className="sr-only">Open notifications</span>
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-80 p-0" align="end">
+            <PopoverContent className="w-96 p-0" align="end">
                 <div className="p-4">
                     <div className="flex justify-between items-center">
                         <h4 className="font-medium">Notifications</h4>

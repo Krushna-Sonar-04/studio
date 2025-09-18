@@ -64,7 +64,7 @@ export default function AppHeader() {
           <div className="hidden md:flex items-center gap-4">
             <LanguageSwitcher />
             {isClient && user && <NotificationBell user={user} />}
-            {isClient ? <UserNav /> : null}
+            {isClient ? <UserNav /> : <Button variant="ghost" onClick={() => router.push('/login')}>Login</Button>}
           </div>
 
            {/* Mobile Nav */}
