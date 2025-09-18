@@ -1,9 +1,10 @@
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { useCallback, useState, useMemo, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -21,21 +22,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { IssueType } from '@/lib/types';
-import { Send, MapPin, Loader2, LocateFixed } from 'lucide-react';
+import { Send, MapPin, Loader2, LocateFixed, Terminal, Map } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useIssues } from '@/hooks/use-issues';
 import { useAuth } from '@/contexts/AuthContext';
-import dynamic from 'next/dynamic';
-import { LatLngTuple } from 'leaflet';
-import { Skeleton } from '@/components/ui/skeleton';
-
-const LeafletMap = dynamic(() => import('@/components/shared/LeafletMap'), {
-  ssr: false,
-  loading: () => <Skeleton className="h-[400px] w-full" />,
-});
-
-// Default to a central location in Pune, India, if geolocation fails.
-const DEFAULT_CENTER: LatLngTuple = [18.5204, 73.8567];
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 
 const issueTypes: IssueType[] = ['Pothole', 'Streetlight', 'Garbage', 'Water Leakage', 'Obstruction'];
@@ -59,9 +50,6 @@ export default function ReportIssuePage() {
   const router = useRouter();
   const { addIssue } = useIssues();
   const { user } = useAuth();
-
-  const [mapCenter, setMapCenter] = useState<LatLngTuple>(DEFAULT_CENTER);
-  const [markerPosition, setMarkerPosition] = useState<LatLngTuple | undefined>(undefined);
   const [isLocating, setIsLocating] = useState(false);
   
   const form = useForm<z.infer<typeof formSchema>>({
@@ -95,22 +83,14 @@ export default function ReportIssuePage() {
   }, [form, toast]);
 
 
-  const handleMapClick = useCallback((latlng: { lat: number, lng: number }) => {
-    setMarkerPosition([latlng.lat, latlng.lng]);
-    fetchAddress(latlng.lat, latlng.lng);
-  }, [fetchAddress]);
-
   const handleLocateMe = () => {
     setIsLocating(true);
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
-        const newPos: LatLngTuple = [latitude, longitude];
-        setMapCenter(newPos);
-        setMarkerPosition(newPos);
         fetchAddress(latitude, longitude);
         setIsLocating(false);
-        toast({ title: 'Location Found!', description: 'Your current location has been set.' });
+        toast({ title: 'Location Found!', description: 'Your current location has been set as the address.' });
       },
       (error) => {
         setIsLocating(false);
@@ -118,7 +98,7 @@ export default function ReportIssuePage() {
         toast({
           variant: 'destructive',
           title: 'Location Error',
-          description: 'Could not get your location. Please allow location access or select on the map.',
+          description: 'Could not get your location. Please enter the address manually.',
         });
       }
     );
@@ -215,23 +195,25 @@ export default function ReportIssuePage() {
                     />
 
                      <div className="space-y-4">
-                         <div className="flex justify-between items-center">
+                        <div className="flex justify-between items-center">
                             <FormLabel className="flex items-center gap-2"><MapPin/> Location</FormLabel>
                              <Button type="button" variant="outline" size="sm" onClick={handleLocateMe} disabled={isLocating}>
                                 {isLocating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LocateFixed className="mr-2 h-4 w-4" />}
                                 Locate Me
                             </Button>
                          </div>
-                        
-                        <div className="h-[400px] w-full rounded-md border overflow-hidden">
-                            <LeafletMap 
-                                center={mapCenter}
-                                flyTo={mapCenter}
-                                zoom={15}
-                                onMapClick={handleMapClick}
-                                markerPosition={markerPosition}
-                            />
-                        </div>
+
+                        <Alert>
+                            <Terminal className="h-4 w-4" />
+                            <AlertTitle>Map is Temporarily Disabled</AlertTitle>
+                            <AlertDescription>
+                                The interactive map is currently under maintenance. Please use the "Locate Me" button or enter the address manually.
+                            </AlertDescription>
+                        </Alert>
+                        <Card className="h-[200px] w-full border-dashed flex flex-col items-center justify-center gap-4 text-center">
+                             <Map className="h-12 w-12 text-muted-foreground" />
+                             <p className="text-muted-foreground">Map view is disabled</p>
+                        </Card>
 
                         <FormField
                             control={form.control}
@@ -240,7 +222,7 @@ export default function ReportIssuePage() {
                                 <FormItem>
                                     <FormLabel>Address</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Click on the map or enter address manually" {...field} />
+                                        <Input placeholder="Click 'Locate Me' or enter address manually" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

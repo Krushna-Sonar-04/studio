@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -8,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
-// Default to a central location in Pune, India, if geolocation fails.
+// Default to a central location in case geolocation fails.
 const DEFAULT_CENTER: LatLngTuple = [18.5204, 73.8567];
 
 export default function NearbyIssuesMapPage() {
@@ -16,18 +17,25 @@ export default function NearbyIssuesMapPage() {
   const [userLocation, setUserLocation] = useState<LatLngTuple | null>(null);
 
   useEffect(() => {
-    // We can keep the location fetching logic for when the map is re-enabled.
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const newLocation: LatLngTuple = [position.coords.latitude, position.coords.longitude];
-        setUserLocation(newLocation);
-      },
-      (error) => {
-        console.error("Error getting user location:", error);
-        // Silently fail for now as the map is disabled.
-      }
-    );
-  }, []);
+    // Geolocation is not used as the map is disabled, but the logic is kept for future use.
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const newLocation: LatLngTuple = [position.coords.latitude, position.coords.longitude];
+            setUserLocation(newLocation);
+          },
+          (error) => {
+            console.error("Error getting user location:", error);
+            setUserLocation(DEFAULT_CENTER);
+            toast({
+              variant: 'destructive',
+              title: "Could not get your location.",
+              description: "Showing default location.",
+            });
+          }
+        );
+    }
+  }, [toast]);
   
   const handleRecenter = () => {
       toast({ title: "Feature Unavailable", description: "The map is temporarily under maintenance." });
@@ -57,7 +65,7 @@ export default function NearbyIssuesMapPage() {
         </Alert>
 
       <Card className="h-[calc(100vh-300px)] w-full border rounded-lg overflow-hidden">
-        <CardContent className="h-full flex flex-col items-center justify-center gap-4 text-center">
+        <CardContent className="h-full flex flex-col items-center justify-center gap-4 text-center bg-muted/20">
             <Map className="h-16 w-16 text-muted-foreground" />
             <h3 className="text-xl font-semibold">Map Temporarily Unavailable</h3>
             <p className="text-muted-foreground max-w-sm">We are working on fixing an issue with the interactive map. This feature will be restored soon. Thank you for your patience.</p>
