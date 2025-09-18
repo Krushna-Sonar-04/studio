@@ -3,7 +3,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import dynamic from 'next/dynamic';
 import { useCallback, useState, useMemo } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -22,25 +21,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { IssueType } from '@/lib/types';
-import { Send, MapPin, LocateFixed, Loader2 } from 'lucide-react';
+import { Send, MapPin, Loader2, AlertTriangle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useIssues } from '@/hooks/use-issues';
 import { useAuth } from '@/contexts/AuthContext';
-
-
-// Leaflet is a client-side only library. Using `next/dynamic` with `ssr: false`
-// is the correct and safest way to ensure this component is never rendered on
-// the server, which prevents "window is not defined" and other hydration errors.
-const LeafletMap = dynamic(() => import('@/components/shared/LeafletMap'), {
-    ssr: false,
-    loading: () => <div className="h-[400px] w-full bg-muted flex items-center justify-center"><p>Loading map...</p></div>
-});
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 
 const issueTypes: IssueType[] = ['Pothole', 'Streetlight', 'Garbage', 'Water Leakage', 'Obstruction'];
-
-// Default to a central location in India
-const defaultPosition: [number, number] = [20.5937, 78.9629];
 
 const formSchema = z.object({
   title: z.string().min(10, {
@@ -49,13 +37,7 @@ const formSchema = z.object({
   type: z.enum(issueTypes, {
     required_error: 'You need to select an issue type.',
   }),
-  location: z.object({
-    lat: z.number(),
-    lng: z.number(),
-    address: z.string().min(5, {
-        message: 'Please select a location on the map or provide a valid address.',
-    }),
-  }),
+  location: z.string().min(10, { message: 'Address must be at least 10 characters.' }),
   description: z.string().min(20, {
     message: 'Description must be at least 20 characters.',
   }),
@@ -67,8 +49,6 @@ export default function ReportIssuePage() {
   const router = useRouter();
   const { addIssue } = useIssues();
   const { user } = useAuth();
-  const [isLocating, setIsLocating] = useState(false);
-  const [isGeocoding, setIsGeocoding] = useState(false);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -76,68 +56,9 @@ export default function ReportIssuePage() {
       title: '',
       description: '',
       photo: undefined,
-      location: {
-        lat: defaultPosition[0],
-        lng: defaultPosition[1],
-        address: '',
-      },
+      location: '',
     },
   });
-
-  const getAddressFromLatLng = useCallback(async (lat: number, lng: number) => {
-    setIsGeocoding(true);
-    try {
-      // Use a free and open-source geocoding service like Nominatim.
-      const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch address');
-      }
-      const data = await response.json();
-      if (data && data.display_name) {
-        form.setValue('location.address', data.display_name, { shouldValidate: true });
-      } else {
-        form.setValue('location.address', 'Address not found', { shouldValidate: true });
-      }
-    } catch (error) {
-      console.error("Reverse geocoding error:", error);
-      toast({
-        variant: 'destructive',
-        title: 'Could not fetch address',
-        description: 'Please check your connection or enter the address manually.',
-      });
-    } finally {
-      setIsGeocoding(false);
-    }
-  }, [form, toast]);
-
-
-  const handleMapClick = useCallback((latlng: { lat: number; lng: number }) => {
-    form.setValue('location.lat', latlng.lat);
-    form.setValue('location.lng', latlng.lng);
-    getAddressFromLatLng(latlng.lat, latlng.lng);
-  }, [form, getAddressFromLatLng]);
-
-  const handleLocateMe = () => {
-    setIsLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        form.setValue('location.lat', latitude);
-        form.setValue('location.lng', longitude);
-        getAddressFromLatLng(latitude, longitude);
-        setIsLocating(false);
-      },
-      (error) => {
-        setIsLocating(false);
-        toast({
-          variant: 'destructive',
-          title: 'Location access denied',
-          description: 'Please enable location services in your browser.',
-        });
-        console.error('Geolocation error:', error);
-      }
-    );
-  };
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     if (!user) {
@@ -149,7 +70,7 @@ export default function ReportIssuePage() {
       id: `issue-${Date.now()}`,
       title: values.title,
       type: values.type,
-      location: values.location.address,
+      location: values.location,
       description: values.description,
       // In a real app, upload the photo and get a URL
       imageUrl: values.photo?.[0] ? 'https://picsum.photos/seed/210/600/400' : undefined,
@@ -170,15 +91,6 @@ export default function ReportIssuePage() {
     });
     router.push('/citizen/dashboard');
   }
-
-  const { lat, lng } = form.watch('location');
-  
-  // useMemo is used here to prevent the map props from changing on every render,
-  // which can help with stability, although the LeafletMap component itself is
-  // designed to be robust against this.
-  const mapCenter: [number, number] = useMemo(() => [lat, lng], [lat, lng]);
-  const markerPosition: [number, number] = useMemo(() => [lat, lng], [lat, lng]);
-
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -234,34 +146,24 @@ export default function ReportIssuePage() {
 
                      <div className="space-y-4">
                         <FormLabel className="flex items-center gap-2"><MapPin/> Location</FormLabel>
-                        <div className="h-[400px] w-full rounded-md overflow-hidden border">
-                           <LeafletMap 
-                                center={mapCenter}
-                                markerPosition={markerPosition}
-                                onMapClick={handleMapClick}
-                                flyTo={mapCenter}
-                                scrollWheelZoom={true}
-                            />
-                        </div>
-                        <Button type="button" variant="outline" onClick={handleLocateMe} disabled={isLocating}>
-                            {isLocating ? <Loader2 className="animate-spin mr-2" /> : <LocateFixed className="mr-2 h-4 w-4" />}
-                            Use My Current Location
-                        </Button>
+                        
+                        <Alert variant="destructive">
+                            <AlertTriangle className="h-4 w-4" />
+                            <AlertTitle>Map Under Maintenance</AlertTitle>
+                            <AlertDescription>
+                                The interactive map is temporarily unavailable. Please enter the full address manually below.
+                            </AlertDescription>
+                        </Alert>
+
                         <FormField
                             control={form.control}
-                            name="location.address"
+                            name="location"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Address</FormLabel>
                                     <FormControl>
-                                        <div className="relative">
-                                            <Input placeholder="Address will appear here..." {...field} />
-                                            {isGeocoding && <Loader2 className="animate-spin absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground" />}
-                                        </div>
+                                        <Input placeholder="Enter the full address of the issue" {...field} />
                                     </FormControl>
-                                     <FormDescription>
-                                        Click on the map or use your location. You can edit the address here if needed.
-                                    </FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )}
