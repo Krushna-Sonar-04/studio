@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import dynamic from 'next/dynamic';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -24,6 +24,7 @@ import { useToast } from '@/hooks/use-toast';
 import { IssueType } from '@/lib/types';
 import { Send, MapPin, LocateFixed, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import LeafletMap from '@/components/shared/LeafletMap';
 
 const issueTypes: IssueType[] = ['Pothole', 'Streetlight', 'Garbage', 'Water Leakage'];
 
@@ -56,11 +57,6 @@ export default function ReportIssuePage() {
   const [isLocating, setIsLocating] = useState(false);
   const [isGeocoding, setIsGeocoding] = useState(false);
   
-  const LeafletMap = useMemo(() => dynamic(() => import('@/components/shared/LeafletMap'), { 
-    ssr: false,
-    loading: () => <div className="h-[400px] w-full bg-muted rounded-md flex items-center justify-center"><p>Loading map...</p></div>
-  }), []);
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {

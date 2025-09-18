@@ -1,13 +1,13 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import dynamic from 'next/dynamic';
 import { mockIssues } from '@/lib/mock-data';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal } from 'lucide-react';
 import { LatLngTuple } from 'leaflet';
 import { useToast } from '@/hooks/use-toast';
 import { IssueMarker } from '@/components/shared/LeafletMap';
+import LeafletMap from '@/components/shared/LeafletMap';
 
 // Default to a central location in Pune, India
 const DEFAULT_CENTER: LatLngTuple = [18.5204, 73.8567];
@@ -16,12 +16,6 @@ export default function NearbyIssuesMapPage() {
   const { toast } = useToast();
   const [userLocation, setUserLocation] = useState<LatLngTuple | null>(null);
   const [loading, setLoading] = useState(true);
-
-  // Dynamically import the map component to prevent SSR issues with Leaflet
-  const LeafletMap = useMemo(() => dynamic(() => import('@/components/shared/LeafletMap'), { 
-    ssr: false,
-    loading: () => <div className="h-[calc(100vh-200px)] w-full bg-muted rounded-md flex items-center justify-center"><p>Loading map...</p></div>
-  }), []);
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
