@@ -9,7 +9,8 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Users } from 'lucide-react';
+import { Users, ImageIcon } from 'lucide-react';
+import Image from 'next/image';
 
 export default function ApprovingManagerDashboard() {
   const { user } = useAuth();
@@ -50,6 +51,7 @@ export default function ApprovingManagerDashboard() {
             <TableHeader>
               <TableRow>
                 <TableHead>ID</TableHead>
+                <TableHead>Image</TableHead>
                 <TableHead>Title</TableHead>
                 <TableHead>Estimated Cost</TableHead>
                 <TableHead>Submitted On</TableHead>
@@ -60,6 +62,17 @@ export default function ApprovingManagerDashboard() {
                 pendingJobs.map(job => (
                   <TableRow key={job.id} onClick={() => router.push(`/approving-manager/jobs/${job.id}`)} className="cursor-pointer">
                     <TableCell className="font-medium">{job.id}</TableCell>
+                    <TableCell>
+                      {job.imageUrl ? (
+                        <div className="w-16 h-10 rounded-md overflow-hidden border flex items-center justify-center">
+                          <Image src={job.imageUrl} alt={job.title} width={64} height={40} className="object-cover" />
+                        </div>
+                      ) : (
+                        <div className="w-16 h-10 rounded-md bg-muted flex items-center justify-center">
+                            <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                      )}
+                    </TableCell>
                     <TableCell>{job.title}</TableCell>
                     <TableCell>${job.estimationReport?.estimatedCost.toLocaleString()}</TableCell>
                     <TableCell>{new Date(job.estimationReport?.submittedAt || '').toLocaleDateString()}</TableCell>
@@ -67,7 +80,7 @@ export default function ApprovingManagerDashboard() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center">No jobs are pending approval.</TableCell>
+                  <TableCell colSpan={5} className="text-center">No jobs are pending approval.</TableCell>
                 </TableRow>
               )}
             </TableBody>

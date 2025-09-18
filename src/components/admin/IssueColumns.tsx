@@ -3,7 +3,7 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { Issue } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
-import { MoreHorizontal, ShieldAlert, Clock } from 'lucide-react';
+import { MoreHorizontal, ShieldAlert, Clock, ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -16,6 +16,7 @@ import { useRouter } from 'next/navigation';
 import { formatDistanceToNow, isPast } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { issueStatuses } from './data';
+import Image from 'next/image';
 
 type IssueColumnsProps = {
   openAssignDialog: (issue: Issue) => void;
@@ -42,6 +43,22 @@ export const issueColumns = ({ openAssignDialog, openContractorDialog }: IssueCo
     {
       accessorKey: 'title',
       header: ({ column }) => <DataTableColumnHeader column={column} title="Title" />,
+    },
+    {
+        accessorKey: 'imageUrl',
+        header: 'Image',
+        cell: ({ row }) => {
+            const imageUrl = row.original.imageUrl;
+            return imageUrl ? (
+              <div className="w-16 h-10 rounded-md overflow-hidden border flex items-center justify-center">
+                <Image src={imageUrl} alt={row.original.title} width={64} height={40} className="object-cover" />
+              </div>
+            ) : (
+                <div className="w-16 h-10 rounded-md bg-muted flex items-center justify-center">
+                    <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                </div>
+            )
+        },
     },
     {
       accessorKey: 'status',

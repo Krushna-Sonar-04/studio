@@ -7,6 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
+import { ImageIcon } from 'lucide-react';
 
 export default function FundManagerDashboard() {
   const { user } = useAuth();
@@ -41,6 +43,7 @@ export default function FundManagerDashboard() {
             <TableHeader>
               <TableRow>
                 <TableHead>ID</TableHead>
+                <TableHead>Image</TableHead>
                 <TableHead>Title</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Status</TableHead>
@@ -51,6 +54,17 @@ export default function FundManagerDashboard() {
                 assignedJobs.map(job => (
                   <TableRow key={job.id} onClick={() => router.push(`/fund-manager/jobs/${job.id}`)} className="cursor-pointer">
                     <TableCell className="font-medium">{job.id}</TableCell>
+                    <TableCell>
+                      {job.imageUrl ? (
+                        <div className="w-16 h-10 rounded-md overflow-hidden border flex items-center justify-center">
+                          <Image src={job.imageUrl} alt={job.title} width={64} height={40} className="object-cover" />
+                        </div>
+                      ) : (
+                        <div className="w-16 h-10 rounded-md bg-muted flex items-center justify-center">
+                            <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                      )}
+                    </TableCell>
                     <TableCell>{job.title}</TableCell>
                     <TableCell>{job.type}</TableCell>
                      <TableCell>
@@ -60,7 +74,7 @@ export default function FundManagerDashboard() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center">No jobs currently require estimation.</TableCell>
+                  <TableCell colSpan={5} className="text-center">No jobs currently require estimation.</TableCell>
                 </TableRow>
               )}
             </TableBody>

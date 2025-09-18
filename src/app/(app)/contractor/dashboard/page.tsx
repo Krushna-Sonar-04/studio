@@ -8,7 +8,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { ClipboardList, Play, CheckCircle2 } from 'lucide-react';
+import { ClipboardList, Play, CheckCircle2, ImageIcon } from 'lucide-react';
+import Image from 'next/image';
 
 export default function ContractorDashboard() {
   const { user } = useAuth();
@@ -72,6 +73,7 @@ export default function ContractorDashboard() {
             <TableHeader>
               <TableRow>
                 <TableHead>ID</TableHead>
+                <TableHead>Image</TableHead>
                 <TableHead>Title</TableHead>
                 <TableHead>Location</TableHead>
                 <TableHead>Status</TableHead>
@@ -82,6 +84,17 @@ export default function ContractorDashboard() {
                 jobs.map(job => (
                   <TableRow key={job.id} onClick={() => router.push(`/contractor/jobs/${job.id}`)} className="cursor-pointer">
                     <TableCell className="font-medium">{job.id}</TableCell>
+                    <TableCell>
+                      {job.imageUrl ? (
+                        <div className="w-16 h-10 rounded-md overflow-hidden border flex items-center justify-center">
+                          <Image src={job.imageUrl} alt={job.title} width={64} height={40} className="object-cover" />
+                        </div>
+                      ) : (
+                        <div className="w-16 h-10 rounded-md bg-muted flex items-center justify-center">
+                            <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                      )}
+                    </TableCell>
                     <TableCell>{job.title}</TableCell>
                     <TableCell>{job.location}</TableCell>
                     <TableCell><Badge variant="outline">{job.status}</Badge></TableCell>
@@ -89,7 +102,7 @@ export default function ContractorDashboard() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center">You have no active jobs requiring your attention.</TableCell>
+                  <TableCell colSpan={5} className="text-center">You have no active jobs requiring your attention.</TableCell>
                 </TableRow>
               )}
             </TableBody>

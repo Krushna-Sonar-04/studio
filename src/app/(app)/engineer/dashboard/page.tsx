@@ -7,6 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
+import { ImageIcon } from 'lucide-react';
 
 export default function EngineerDashboard() {
   const { user } = useAuth();
@@ -38,6 +40,7 @@ export default function EngineerDashboard() {
             <TableHeader>
               <TableRow>
                 <TableHead>ID</TableHead>
+                <TableHead>Image</TableHead>
                 <TableHead>Title</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Reported On</TableHead>
@@ -48,6 +51,17 @@ export default function EngineerDashboard() {
                 assignedJobs.map(job => (
                   <TableRow key={job.id} onClick={() => router.push(`/engineer/jobs/${job.id}`)} className="cursor-pointer">
                     <TableCell className="font-medium">{job.id}</TableCell>
+                    <TableCell>
+                      {job.imageUrl ? (
+                        <div className="w-16 h-10 rounded-md overflow-hidden border flex items-center justify-center">
+                          <Image src={job.imageUrl} alt={job.title} width={64} height={40} className="object-cover" />
+                        </div>
+                      ) : (
+                        <div className="w-16 h-10 rounded-md bg-muted flex items-center justify-center">
+                            <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                      )}
+                    </TableCell>
                     <TableCell>{job.title}</TableCell>
                     <TableCell>{job.type}</TableCell>
                     <TableCell>{new Date(job.reportedAt).toLocaleDateString()}</TableCell>
@@ -55,7 +69,7 @@ export default function EngineerDashboard() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center">No jobs assigned for verification.</TableCell>
+                  <TableCell colSpan={5} className="text-center">No jobs assigned for verification.</TableCell>
                 </TableRow>
               )}
             </TableBody>
