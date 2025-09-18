@@ -194,13 +194,12 @@ export default function ReportIssuePage() {
 
                      <div className="space-y-4">
                         <FormLabel className="flex items-center gap-2"><MapPin/> Location</FormLabel>
-                        <div className="rounded-md overflow-hidden border">
+                        <div className="h-[400px] w-full rounded-md overflow-hidden border">
                             <LeafletMap 
                                 center={[lat, lng]}
                                 markerPosition={[lat, lng]}
                                 onMapClick={handleMapClick}
                                 flyTo={[lat, lng]}
-                                isInteractive={true}
                                 scrollWheelZoom={true}
                             />
                         </div>

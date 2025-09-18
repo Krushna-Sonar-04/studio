@@ -5,19 +5,20 @@ import dynamic from 'next/dynamic';
 import { mockIssues } from '@/lib/mock-data';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal } from 'lucide-react';
-import { LatLngExpression } from 'leaflet';
+import { LatLngTuple } from 'leaflet';
 import { useToast } from '@/hooks/use-toast';
+import { IssueMarker } from '@/components/shared/LeafletMap';
 
 // Default to a central location in Pune, India
-const DEFAULT_CENTER: LatLngExpression = [18.5204, 73.8567];
+const DEFAULT_CENTER: LatLngTuple = [18.5204, 73.8567];
 
 export default function NearbyIssuesMapPage() {
   const { toast } = useToast();
-  const [userLocation, setUserLocation] = useState<LatLngExpression | null>(null);
+  const [userLocation, setUserLocation] = useState<LatLngTuple | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Dynamically import the map component to prevent SSR issues with Leaflet
-  const IssuesMap = useMemo(() => dynamic(() => import('@/components/shared/IssuesMap'), { 
+  const LeafletMap = useMemo(() => dynamic(() => import('@/components/shared/LeafletMap'), { 
     ssr: false,
     loading: () => <div className="h-[calc(100vh-200px)] w-full bg-muted rounded-md flex items-center justify-center"><p>Loading map...</p></div>
   }), []);
@@ -41,7 +42,7 @@ export default function NearbyIssuesMapPage() {
     );
   }, [toast]);
 
-  const issuesWithCoords = useMemo(() => {
+  const issuesWithCoords: IssueMarker[] = useMemo(() => {
     return mockIssues
       .map(issue => {
         // This is a naive way to parse coordinates from a string address.
@@ -56,7 +57,13 @@ export default function NearbyIssuesMapPage() {
         }
         return null;
       })
-      .filter((issue): issue is NonNullable<typeof issue> => issue !== null);
+      .filter((issue): issue is NonNullable<typeof issue> => issue !== null)
+      .map(issue => ({
+          id: issue.id,
+          title: issue.title,
+          lat: issue.lat,
+          lng: issue.lng
+      }));
   }, []);
   
   return (
@@ -78,7 +85,7 @@ export default function NearbyIssuesMapPage() {
 
       <div className="h-[calc(100vh-250px)] w-full border rounded-lg overflow-hidden">
         {!loading && userLocation ? (
-          <IssuesMap center={userLocation} issues={issuesWithCoords} />
+          <LeafletMap center={userLocation} markers={issuesWithCoords} zoom={14} />
         ) : (
           <div className="h-full w-full bg-muted flex items-center justify-center">
             <p>Fetching your location...</p>

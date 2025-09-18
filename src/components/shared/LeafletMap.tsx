@@ -1,124 +1,113 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import L, { LatLngExpression, LatLngTuple } from 'leaflet';
+import { Button } from '../ui/button';
+import { useRouter } from 'next/navigation';
 
-interface LeafletMapProps {
-  center: [number, number];
-  markerPosition?: [number, number];
+// Fix for default icon path issue with webpack
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png').default,
+  iconUrl: require('leaflet/dist/images/marker-icon.png').default,
+  shadowUrl: require('leaflet/dist/images/marker-shadow.png').default,
+});
+
+
+export interface IssueMarker {
+  id: string;
+  title: string;
+  lat: number;
+  lng: number;
+}
+
+interface MapProps {
+  center: LatLngTuple;
+  markerPosition?: LatLngTuple;
+  markers?: IssueMarker[];
+  zoom?: number;
   onMapClick?: (latlng: { lat: number; lng: number }) => void;
-  flyTo?: [number, number];
-  isInteractive?: boolean;
+  flyTo?: LatLngTuple;
   scrollWheelZoom?: boolean;
 }
 
-const LeafletMap: React.FC<LeafletMapProps> = ({
-  center,
-  markerPosition,
-  onMapClick,
-  flyTo,
-  isInteractive = true,
-  scrollWheelZoom = true,
-}) => {
-  const mapRef = useRef<any>(null); // L.Map
-  const markerRef = useRef<any>(null); // L.Marker
-  const mapContainerRef = useRef<HTMLDivElement>(null);
-  const LRef = useRef<any>(null); // To store the leaflet module
-
-  useEffect(() => {
-    import('leaflet').then(L => {
-      LRef.current = L;
-
-      if (mapContainerRef.current && !mapRef.current) {
-        // Webpack icon fix
-        L.Icon.Default.mergeOptions({
-            iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png').default,
-            iconUrl: require('leaflet/dist/images/marker-icon.png').default,
-            shadowUrl: require('leaflet/dist/images/marker-shadow.png').default,
-        });
-
-        const map = L.map(mapContainerRef.current, {
-          center: center,
-          zoom: 13,
-          scrollWheelZoom: scrollWheelZoom,
-        });
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        }).addTo(map);
-        
-        mapRef.current = map;
-      }
-    });
-
-    // Cleanup function
-    return () => {
-      if (mapRef.current) {
-        mapRef.current.remove();
-        mapRef.current = null;
-      }
-    };
-  }, []); // Run only once on mount
-
-  useEffect(() => {
-    if (mapRef.current && LRef.current) {
-      if (!isInteractive) {
-        mapRef.current.dragging.disable();
-        mapRef.current.touchZoom.disable();
-        mapRef.current.doubleClickZoom.disable();
-        mapRef.current.scrollWheelZoom.disable();
-        mapRef.current.boxZoom.disable();
-        mapRef.current.keyboard.disable();
-        if (mapRef.current.tap) mapRef.current.tap.disable();
-      } else {
-        mapRef.current.dragging.enable();
-        mapRef.current.touchZoom.enable();
-        mapRef.current.doubleClickZoom.enable();
-        mapRef.current.scrollWheelZoom.enable();
-        mapRef.current.boxZoom.enable();
-        mapRef.current.keyboard.enable();
-        if (mapRef.current.tap) mapRef.current.tap.enable();
-      }
-
-      const map = mapRef.current;
-      map.off('click'); // Remove previous listeners
-      if (onMapClick) {
-        map.on('click', (e: any) => {
-          onMapClick(e.latlng);
-        });
-      }
-    }
-  }, [isInteractive, onMapClick]);
-
-
-  useEffect(() => {
-    if (mapRef.current && LRef.current && markerPosition) {
-      if (markerRef.current) {
-        markerRef.current.setLatLng(markerPosition);
-      } else {
-        markerRef.current = LRef.current.marker(markerPosition).addTo(mapRef.current);
-      }
-    }
-  }, [markerPosition]);
-
-  useEffect(() => {
-    if (mapRef.current && flyTo) {
-      mapRef.current.flyTo(flyTo, mapRef.current.getZoom());
-    }
-  }, [flyTo]);
-  
-  useEffect(() => {
-    if (mapRef.current) {
-        if (!scrollWheelZoom) {
-            mapRef.current.scrollWheelZoom.disable();
+// Component to handle map view changes
+const MapFlyTo = ({ center, zoom, flyTo }: { center: LatLngTuple, zoom: number, flyTo?: LatLngTuple}) => {
+    const map = useMap();
+    useEffect(() => {
+        if(flyTo) {
+             map.flyTo(flyTo, zoom);
         } else {
-            mapRef.current.scrollWheelZoom.enable();
+            map.setView(center, zoom);
         }
-    }
-  }, [scrollWheelZoom]);
+    }, [center, zoom, flyTo, map]);
 
+    return null;
+}
 
-  return <div ref={mapContainerRef} className="h-[400px] w-full" />;
+// Component to handle map click events
+const MapClickHandler = ({ onMapClick }: { onMapClick?: (latlng: { lat: number; lng: number }) => void }) => {
+    useMap({
+        click: (e) => {
+            if(onMapClick) {
+                onMapClick(e.latlng);
+            }
+        },
+    });
+    return null;
+}
+
+const LeafletMap: React.FC<MapProps> = ({ 
+    center, 
+    markerPosition, 
+    markers,
+    zoom = 13, 
+    onMapClick,
+    flyTo,
+    scrollWheelZoom = true,
+}) => {
+  const router = useRouter();
+
+  return (
+    <MapContainer 
+        center={center} 
+        zoom={zoom} 
+        scrollWheelZoom={scrollWheelZoom} 
+        style={{ height: '100%', width: '100%' }}
+        // A key is used to force a re-render of the map when the center changes significantly,
+        // which helps avoid initialization errors in some Next.js dev environments.
+        key={`${center[0]}-${center[1]}`}
+    >
+      <TileLayer
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
+      <MapFlyTo center={center} zoom={zoom} flyTo={flyTo} />
+      <MapClickHandler onMapClick={onMapClick} />
+
+      {markerPosition && <Marker position={markerPosition} />}
+      
+      {markers && markers.map(issue => (
+        <Marker key={issue.id} position={[issue.lat, issue.lng]}>
+          <Popup>
+            <div className="p-1 space-y-2">
+                <h4 className="font-bold text-base">{issue.title}</h4>
+                <Button 
+                    size="sm"
+                    className="w-full"
+                    onClick={() => router.push(`/citizen/issues/${issue.id}`)}
+                >
+                    View Details
+                </Button>
+            </div>
+          </Popup>
+        </Marker>
+      ))}
+    </MapContainer>
+  );
 };
 
 export default LeafletMap;
