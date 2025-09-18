@@ -1,4 +1,5 @@
 import { User, Issue } from './types';
+import { add } from 'date-fns';
 
 export const mockUsers: User[] = [
   { id: 'user-1', name: 'Alia Reddy', role: 'Citizen', avatarUrl: 'https://picsum.photos/seed/101/100/100' },
@@ -46,6 +47,8 @@ export let mockIssues: Issue[] = [
     ],
     upvotes: 5,
     upvotedBy: [],
+    slaDays: 7,
+    slaDeadline: add(new Date(), { days: 5 }).toISOString(),
   },
   {
     id: 'issue-3',
@@ -79,6 +82,8 @@ export let mockIssues: Issue[] = [
     },
     upvotes: 28,
     upvotedBy: ['user-1'],
+    slaDays: 5,
+    slaDeadline: add(new Date('2024-07-16T10:00:00Z'), { days: 5 }).toISOString(),
   },
   {
     id: 'issue-4',
@@ -173,6 +178,31 @@ export let mockIssues: Issue[] = [
     },
     upvotes: 18,
     upvotedBy: [],
+    slaDays: 15,
+    slaDeadline: add(new Date('2024-07-23T15:30:00Z'), { days: 15 }).toISOString(),
+  },
+  {
+    id: 'issue-7',
+    title: 'Fallen Tree Blocking Road',
+    type: 'Pothole', // This should probably be a new type 'Obstruction'
+    location: 'Oak Lane',
+    description: 'A large tree has fallen across Oak Lane during the storm last night, completely blocking traffic.',
+    imageUrl: 'https://picsum.photos/seed/207/600/400',
+    reportedBy: 'user-1',
+    reportedAt: '2024-07-20T08:00:00Z',
+    status: 'Escalated',
+    currentRoles: ['Head of Department'],
+    assignedEngineerId: 'user-3',
+    statusHistory: [
+      { status: 'Submitted', date: '2024-07-20T08:00:00Z', updatedBy: 'Alia Reddy' },
+      { status: 'PendingVerificationAndEstimation', date: '2024-07-20T08:30:00Z', updatedBy: 'Bhavin Shah' },
+      { status: 'Escalated', date: '2024-07-23T09:00:00Z', updatedBy: 'System', notes: 'SLA of 2 days breached. Escalated to Head of Department.' },
+    ],
+    upvotes: 45,
+    upvotedBy: [],
+    slaDays: 2,
+    slaDeadline: new Date('2024-07-22T08:30:00Z').toISOString(),
+    escalated: true,
   },
 ];
 

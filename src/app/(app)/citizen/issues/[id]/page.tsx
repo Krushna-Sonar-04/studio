@@ -7,9 +7,11 @@ import { IssueTimeline } from '@/components/shared/IssueTimeline';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
-import { ArrowLeft, Calendar, FileText, ImageIcon, MapPin, User, Wrench, Ticket } from 'lucide-react';
+import { ArrowLeft, Calendar, FileText, ImageIcon, MapPin, User, Wrench, Ticket, ShieldAlert, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
+import { cn } from '@/lib/utils';
+import { format, formatDistanceToNow, isPast } from 'date-fns';
 
 export default function IssueDetailPage() {
   const params = useParams();
@@ -29,6 +31,7 @@ export default function IssueDetailPage() {
   }
   
   const reportedBy = mockUsers.find(u => u.id === issue.reportedBy);
+  const isSlaBreached = issue.slaDeadline && isPast(new Date(issue.slaDeadline));
 
   return (
     <div className="space-y-8">
@@ -46,7 +49,11 @@ export default function IssueDetailPage() {
                 Token ID: {issue.id}
               </CardDescription>
             </div>
-            <Badge className="text-base" variant={issue.status === 'Resolved' || issue.status === 'Closed' ? 'outline' : 'default'}>
+            <Badge 
+              className="text-base" 
+              variant={issue.status === 'Resolved' || issue.status === 'Closed' ? 'outline' : (issue.escalated ? 'destructive' : 'default')}
+            >
+              {issue.escalated && <ShieldAlert className="mr-1 h-4 w-4" />}
               {issue.status}
             </Badge>
           </div>
@@ -70,6 +77,21 @@ export default function IssueDetailPage() {
                 <User className="h-5 w-5 text-muted-foreground" />
                 <span>Reported by: <strong>{reportedBy.name}</strong></span>
               </div>}
+               {issue.slaDeadline && (
+                <div className={cn("flex items-center gap-3 p-3 rounded-md", isSlaBreached ? "bg-destructive/10 text-destructive" : "bg-muted/50")}>
+                    <Clock className="h-5 w-5" />
+                    <div>
+                        <span className="font-semibold">SLA Deadline:</span>
+                        <strong className="ml-2">{format(new Date(issue.slaDeadline), 'PPP')}</strong>
+                        <p className="text-sm">
+                            ({isSlaBreached 
+                                ? `Breached ${formatDistanceToNow(new Date(issue.slaDeadline))} ago` 
+                                : `${formatDistanceToNow(new Date(issue.slaDeadline))} remaining`
+                            })
+                        </p>
+                    </div>
+                </div>
+               )}
             </div>
             <div className="space-y-4">
               <div className="flex items-start gap-3">

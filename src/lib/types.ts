@@ -25,7 +25,8 @@ export type IssueStatus =
   | "InProgress"
   | "Resolved"
   | "PendingFinalVerification"
-  | "Closed";
+  | "Closed"
+  | "Escalated";
 
 export type IssueType = "Pothole" | "Streetlight" | "Garbage" | "Water Leakage";
 
@@ -75,6 +76,9 @@ export type Issue = {
   contractorReport?: ContractorReport;
   upvotes: number;
   upvotedBy: string[];
+  slaDays?: number;
+  slaDeadline?: string;
+  escalated?: boolean;
 };
 
 export type AnnouncementPriority = "Low" | "Medium" | "High";

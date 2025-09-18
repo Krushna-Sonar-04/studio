@@ -10,8 +10,10 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { MoreHorizontal, Bell, AlertTriangle, Play, CheckCircle, Megaphone } from 'lucide-react';
+import { MoreHorizontal, Bell, AlertTriangle, Play, CheckCircle, Megaphone, ShieldAlert } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { mockUsers } from '@/lib/mock-data';
 import Link from 'next/link';
@@ -25,12 +27,16 @@ export default function AdminDashboard() {
   const [isAssignContractorOpen, setAssignContractorOpen] = useState(false);
   const [selectedEngineer, setSelectedEngineer] = useState('');
   const [selectedContractor, setSelectedContractor] = useState('');
+  const [slaDays, setSlaDays] = useState(10);
 
   const engineers = mockUsers.filter(u => u.role === 'Engineer');
   const contractors = mockUsers.filter(u => u.role === 'Contractor');
 
   const handleAssignTask = () => {
     if (selectedIssue && selectedEngineer) {
+       const deadline = new Date();
+       deadline.setDate(deadline.getDate() + slaDays);
+
       const updatedIssues = issues.map(issue => {
         if (issue.id === selectedIssue.id) {
           return {
@@ -38,13 +44,15 @@ export default function AdminDashboard() {
             status: 'PendingVerificationAndEstimation' as const,
             currentRoles: ['Engineer'],
             assignedEngineerId: selectedEngineer,
+            slaDays: slaDays,
+            slaDeadline: deadline.toISOString(),
             statusHistory: [
               ...issue.statusHistory,
               {
                 status: 'PendingVerificationAndEstimation' as const,
                 date: new Date().toISOString(),
                 updatedBy: 'Admin',
-                notes: `Assigned to Engineer for verification.`,
+                notes: `Assigned to Engineer for verification with a ${slaDays}-day SLA.`,
               },
             ],
           };
@@ -53,9 +61,11 @@ export default function AdminDashboard() {
       });
       setMockIssues(updatedIssues);
       setIssues(updatedIssues);
-      toast({ title: 'Task Assigned', description: 'Issue has been sent to the Engineer for verification.' });
+      toast({ title: 'Task Assigned', description: `Issue sent to Engineer with a ${slaDays}-day SLA.` });
       setAssignTaskOpen(false);
       setSelectedIssue(null);
+      setSelectedEngineer('');
+      setSlaDays(10);
     }
   };
 
@@ -139,7 +149,12 @@ export default function AdminDashboard() {
                 <TableRow key={issue.id}>
                   <TableCell className="font-medium cursor-pointer" onClick={() => router.push(`/citizen/issues/${issue.id}`)}>{issue.id}</TableCell>
                   <TableCell className="cursor-pointer" onClick={() => router.push(`/citizen/issues/${issue.id}`)}>{issue.title}</TableCell>
-                  <TableCell className="cursor-pointer" onClick={() => router.push(`/citizen/issues/${issue.id}`)}><Badge variant="secondary">{issue.status}</Badge></TableCell>
+                  <TableCell className="cursor-pointer" onClick={() => router.push(`/citizen/issues/${issue.id}`)}>
+                    <Badge variant={issue.escalated ? 'destructive' : 'secondary'}>
+                      {issue.escalated && <ShieldAlert className="mr-1 h-3 w-3" />}
+                      {issue.status}
+                    </Badge>
+                  </TableCell>
                   <TableCell className="cursor-pointer" onClick={() => router.push(`/citizen/issues/${issue.id}`)}>{new Date(issue.reportedAt).toLocaleDateString()}</TableCell>
 
                   <TableCell>
@@ -169,17 +184,30 @@ export default function AdminDashboard() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Assign for Verification</DialogTitle>
-            <DialogDescription>Assign an Engineer for issue: {selectedIssue?.id}</DialogDescription>
+            <DialogDescription>Assign an Engineer and set an SLA for issue: {selectedIssue?.id}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <Select onValueChange={setSelectedEngineer} required>
-              <SelectTrigger><SelectValue placeholder="Select Engineer" /></SelectTrigger>
-              <SelectContent>{engineers.map(e => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent>
-            </Select>
+            <div className="space-y-2">
+                <Label htmlFor="engineer-select">Engineer</Label>
+                <Select onValueChange={setSelectedEngineer} required>
+                    <SelectTrigger id="engineer-select"><SelectValue placeholder="Select Engineer" /></SelectTrigger>
+                    <SelectContent>{engineers.map(e => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent>
+                </Select>
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="sla-days">SLA (in days)</Label>
+                <Input 
+                    id="sla-days" 
+                    type="number" 
+                    value={slaDays}
+                    onChange={(e) => setSlaDays(parseInt(e.target.value, 10))}
+                    min="1"
+                />
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setAssignTaskOpen(false)}>Cancel</Button>
-            <Button onClick={handleAssignTask}>Assign</Button>
+            <Button onClick={handleAssignTask} disabled={!selectedEngineer}>Assign</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
