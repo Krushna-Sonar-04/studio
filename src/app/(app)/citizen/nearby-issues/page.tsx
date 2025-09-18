@@ -1,36 +1,59 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { LocateFixed, Map, Terminal } from 'lucide-react';
+import { LocateFixed, Terminal } from 'lucide-react';
 import { LatLngTuple } from 'leaflet';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { useIssues } from '@/hooks/use-issues';
+import dynamic from 'next/dynamic';
+import { Skeleton } from '@/components/ui/skeleton';
+import { IssueMarker } from '@/components/shared/LeafletMap';
 
 // Default to a central location in case geolocation fails.
 const DEFAULT_CENTER: LatLngTuple = [18.5204, 73.8567];
 
+const Map = dynamic(() => import('@/components/shared/LeafletMap'), { 
+    ssr: false,
+    loading: () => <Skeleton className="h-full w-full" />
+});
+
 export default function NearbyIssuesMapPage() {
   const { toast } = useToast();
+  const { getIssues } = useIssues();
   const [userLocation, setUserLocation] = useState<LatLngTuple | null>(null);
+  const [mapCenter, setMapCenter] = useState<LatLngTuple>(DEFAULT_CENTER);
+  
+  const issueMarkers = useMemo((): IssueMarker[] => {
+      const issues = getIssues();
+      // This is a mock implementation. A real app would get lat/lng from the issue data.
+      return issues.map((issue, index) => ({
+          id: issue.id,
+          title: issue.title,
+          // Randomize location slightly around a central point for demonstration
+          lat: 18.5204 + (Math.random() - 0.5) * 0.1,
+          lng: 73.8567 + (Math.random() - 0.5) * 0.1,
+      }));
+  }, [getIssues]);
 
   useEffect(() => {
-    // Geolocation is not used as the map is disabled, but the logic is kept for future use.
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           (position) => {
             const newLocation: LatLngTuple = [position.coords.latitude, position.coords.longitude];
             setUserLocation(newLocation);
+            setMapCenter(newLocation);
           },
           (error) => {
             console.error("Error getting user location:", error);
-            setUserLocation(DEFAULT_CENTER);
+            // Don't set user location, map will use default center
             toast({
               variant: 'destructive',
               title: "Could not get your location.",
-              description: "Showing default location.",
+              description: "Showing default location. Use the 'Recenter' button to try again.",
             });
           }
         );
@@ -38,7 +61,12 @@ export default function NearbyIssuesMapPage() {
   }, [toast]);
   
   const handleRecenter = () => {
-      toast({ title: "Feature Unavailable", description: "The map is temporarily under maintenance." });
+      if(userLocation) {
+        setMapCenter(userLocation);
+        toast({ title: "Map Recenterd", description: "Map has been centered on your location." });
+      } else {
+        toast({ variant: 'destructive', title: "Location Unavailable", description: "Could not get your location to recenter." });
+      }
   };
   
   return (
@@ -50,7 +78,7 @@ export default function NearbyIssuesMapPage() {
             Explore civic issues reported in your vicinity.
           </p>
         </div>
-        <Button onClick={handleRecenter} variant="outline" disabled>
+        <Button onClick={handleRecenter} variant="outline">
             <LocateFixed className="mr-2 h-4 w-4" />
             Recenter on Me
         </Button>
@@ -60,15 +88,18 @@ export default function NearbyIssuesMapPage() {
           <Terminal className="h-4 w-4" />
           <AlertTitle>Developer Note</AlertTitle>
           <AlertDescription>
-            The interactive map feature is temporarily disabled to resolve a persistent error. This placeholder is in its place.
+            This map uses mock locations for demonstration purposes. Issue locations are randomized around a central point.
           </AlertDescription>
         </Alert>
 
       <Card className="h-[calc(100vh-300px)] w-full border rounded-lg overflow-hidden">
-        <CardContent className="h-full flex flex-col items-center justify-center gap-4 text-center bg-muted/20">
-            <Map className="h-16 w-16 text-muted-foreground" />
-            <h3 className="text-xl font-semibold">Map Temporarily Unavailable</h3>
-            <p className="text-muted-foreground max-w-sm">We are working on fixing an issue with the interactive map. This feature will be restored soon. Thank you for your patience.</p>
+        <CardContent className="p-0 h-full">
+            <Map 
+                center={mapCenter} 
+                zoom={14} 
+                markers={issueMarkers}
+                flyTo={mapCenter}
+            />
         </CardContent>
       </Card>
     </div>

@@ -22,11 +22,18 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { IssueType } from '@/lib/types';
-import { Send, MapPin, Loader2, LocateFixed, Terminal, Map } from 'lucide-react';
+import { Send, MapPin, Loader2, LocateFixed } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useIssues } from '@/hooks/use-issues';
 import { useAuth } from '@/contexts/AuthContext';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import dynamic from 'next/dynamic';
+import { Skeleton } from '@/components/ui/skeleton';
+import { LatLngTuple } from 'leaflet';
+
+const Map = dynamic(() => import('@/components/shared/LeafletMap'), { 
+    ssr: false,
+    loading: () => <Skeleton className="h-[200px] w-full" />
+});
 
 
 const issueTypes: IssueType[] = ['Pothole', 'Streetlight', 'Garbage', 'Water Leakage', 'Obstruction'];
@@ -51,6 +58,7 @@ export default function ReportIssuePage() {
   const { addIssue } = useIssues();
   const { user } = useAuth();
   const [isLocating, setIsLocating] = useState(false);
+  const [markerPosition, setMarkerPosition] = useState<LatLngTuple | undefined>(undefined);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -82,13 +90,17 @@ export default function ReportIssuePage() {
     }
   }, [form, toast]);
 
+ const handleSetLocation = useCallback((lat: number, lng: number) => {
+    setMarkerPosition([lat, lng]);
+    fetchAddress(lat, lng);
+  }, [fetchAddress]);
 
   const handleLocateMe = () => {
     setIsLocating(true);
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
-        fetchAddress(latitude, longitude);
+        handleSetLocation(latitude, longitude);
         setIsLocating(false);
         toast({ title: 'Location Found!', description: 'Your current location has been set as the address.' });
       },
@@ -102,6 +114,10 @@ export default function ReportIssuePage() {
         });
       }
     );
+  };
+  
+  const handleMapClick = (latlng: { lat: number, lng: number }) => {
+      handleSetLocation(latlng.lat, latlng.lng);
   };
   
   // Set initial location on component mount
@@ -203,17 +219,16 @@ export default function ReportIssuePage() {
                             </Button>
                          </div>
 
-                        <Alert>
-                            <Terminal className="h-4 w-4" />
-                            <AlertTitle>Map is Temporarily Disabled</AlertTitle>
-                            <AlertDescription>
-                                The interactive map is currently under maintenance. Please use the "Locate Me" button or enter the address manually.
-                            </AlertDescription>
-                        </Alert>
-                        <Card className="h-[200px] w-full border-dashed flex flex-col items-center justify-center gap-4 text-center">
-                             <Map className="h-12 w-12 text-muted-foreground" />
-                             <p className="text-muted-foreground">Map view is disabled</p>
-                        </Card>
+                        <div className="h-[200px] w-full border rounded-lg overflow-hidden">
+                            <Map 
+                                center={markerPosition || [18.5204, 73.8567]} 
+                                markerPosition={markerPosition}
+                                onMapClick={handleMapClick}
+                                zoom={15}
+                                flyTo={markerPosition}
+                                scrollWheelZoom={false}
+                            />
+                        </div>
 
                         <FormField
                             control={form.control}
@@ -222,7 +237,7 @@ export default function ReportIssuePage() {
                                 <FormItem>
                                     <FormLabel>Address</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Click 'Locate Me' or enter address manually" {...field} />
+                                        <Input placeholder="Click 'Locate Me' or on map, or enter address" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -271,7 +286,7 @@ export default function ReportIssuePage() {
                     </Button>
                 </form>
                 </Form>
-            </CardContent>
+            </Content>
         </Card>
     </div>
   );

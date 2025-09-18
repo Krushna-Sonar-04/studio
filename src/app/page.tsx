@@ -90,6 +90,7 @@ export default function LandingPage() {
                 width="800"
                 height="600"
                 alt="Hero"
+                priority
                 className="mx-auto aspect-video overflow-hidden rounded-xl object-cover sm:w-full lg:order-last animate-fade-in"
                 data-ai-hint="indian people"
               />
