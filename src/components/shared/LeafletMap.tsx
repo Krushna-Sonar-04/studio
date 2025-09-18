@@ -112,22 +112,6 @@ const LeafletMap: React.FC<MapProps> = ({
         {/* In a real application, you would replace this `markers` prop
             with data fetched from a database like Firestore. */}
         {markers && markers.map(issue => {
-            const popupContent = document.createElement('div');
-            popupContent.className = 'p-1 space-y-2';
-            
-            const title = document.createElement('h4');
-            title.className = 'font-bold text-base';
-            title.innerText = issue.title;
-
-            const button = document.createElement('button');
-            button.innerText = 'View Details';
-            // Use Tailwind classes via a regular class attribute
-            button.className = 'w-full h-9 px-3 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-sm';
-            button.onclick = () => router.push(`/citizen/issues/${issue.id}`);
-            
-            popupContent.appendChild(title);
-            popupContent.appendChild(button);
-
             return (
               <Marker key={issue.id} position={[issue.lat, issue.lng]}>
                  <Popup>
