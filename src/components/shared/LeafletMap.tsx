@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import 'leaflet/dist/leaflet.css';
 import L, { LatLngTuple, Map as LeafletMapInstance } from 'leaflet';
-import { Button } from '../ui/button';
 import { useRouter } from 'next/navigation';
 
 // FIX: This is a common and necessary fix for a known issue with Webpack and Leaflet.
