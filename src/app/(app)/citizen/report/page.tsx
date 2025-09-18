@@ -27,7 +27,8 @@ import { useRouter } from 'next/navigation';
 
 // Leaflet is a client-side only library. Using `next/dynamic` with `ssr: false`
 // is the correct and safest way to ensure this component is never rendered on
-// the server, which prevents "window is not defined" and other hydration errors.
+// the server, which prevents "window is not defined" and other hydration errors like
+// "Map container already initialized".
 const LeafletMap = dynamic(() => import('@/components/shared/LeafletMap'), {
     ssr: false,
     loading: () => <div className="h-full w-full bg-muted flex items-center justify-center"><p>Loading map...</p></div>

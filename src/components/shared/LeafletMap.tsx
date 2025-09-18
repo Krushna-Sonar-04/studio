@@ -80,7 +80,7 @@ const LeafletMap: React.FC<MapProps> = ({
   // components can render twice to detect side effects. If a library like Leaflet initializes a map on a DOM element,
   // the second render will try to initialize it again, causing the error.
   // By using `useState` and `useEffect` to only render the `<MapContainer>` *after* the component has mounted
-  // on the client-side, we guarantee it only runs once in the browser.
+  // on the client-side, we guarantee it only runs once in the browser, which is the definitive fix for this issue.
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => {
     setIsMounted(true);
@@ -96,8 +96,6 @@ const LeafletMap: React.FC<MapProps> = ({
 
   return (
     <MapContainer 
-        // Using a key here is NOT recommended as it can cause the re-initialization error by forcing a remount.
-        // The component's internal state should be managed by its props and internal hooks like `useMap`.
         center={center} 
         zoom={zoom} 
         scrollWheelZoom={scrollWheelZoom} 

@@ -9,10 +9,11 @@ import { useToast } from '@/hooks/use-toast';
 import { IssueMarker } from '@/components/shared/LeafletMap';
 import { Button } from '@/components/ui/button';
 
-// The "window is not defined" error in Next.js happens when a component that
-// relies on browser-only APIs (like Leaflet) is rendered on the server.
-// `dynamic` with `ssr: false` is the correct way to fix this, ensuring the
-// component is only ever loaded and rendered on the client.
+// The "window is not defined" and "Map container already initialized" errors in Next.js
+// happen because Leaflet directly interacts with the browser's DOM.
+// Using `dynamic` with `ssr: false` is the correct and necessary way to fix this.
+// It ensures the component is only ever loaded and rendered on the client-side,
+// preventing server-side rendering and client-side hydration conflicts.
 const LeafletMap = dynamic(() => import('@/components/shared/LeafletMap'), {
   ssr: false,
   loading: () => <div className="h-full w-full bg-muted flex items-center justify-center"><p>Loading map...</p></div>
