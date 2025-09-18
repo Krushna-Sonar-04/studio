@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { mockIssues, mockUsers } from '@/lib/mock-data';
+import { mockIssues, setMockIssues } from '@/lib/mock-data';
 import { Issue, User } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -11,8 +11,10 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { MoreHorizontal, Bell, AlertTriangle, Play, CheckCircle } from 'lucide-react';
+import { MoreHorizontal, Bell, AlertTriangle, Play, CheckCircle, Megaphone } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { mockUsers } from '@/lib/mock-data';
+import Link from 'next/link';
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -29,7 +31,6 @@ export default function AdminDashboard() {
 
   const handleAssignTask = () => {
     if (selectedIssue && selectedEngineer) {
-      console.log(`Assigning issue ${selectedIssue.id} to Engineer ${selectedEngineer}`);
       const updatedIssues = issues.map(issue => {
         if (issue.id === selectedIssue.id) {
           return {
@@ -50,6 +51,7 @@ export default function AdminDashboard() {
         }
         return issue;
       });
+      setMockIssues(updatedIssues);
       setIssues(updatedIssues);
       toast({ title: 'Task Assigned', description: 'Issue has been sent to the Engineer for verification.' });
       setAssignTaskOpen(false);
@@ -75,9 +77,17 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-headline font-bold">Admin Dashboard</h1>
-        <p className="text-muted-foreground">Overview of all civic issues.</p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-headline font-bold">Admin Dashboard</h1>
+          <p className="text-muted-foreground">Overview of all civic issues.</p>
+        </div>
+        <Link href="/admin/broadcast">
+            <Button>
+                <Megaphone className="mr-2 h-4 w-4" />
+                Send Broadcast
+            </Button>
+        </Link>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -131,6 +141,7 @@ export default function AdminDashboard() {
                   <TableCell className="cursor-pointer" onClick={() => router.push(`/citizen/issues/${issue.id}`)}>{issue.title}</TableCell>
                   <TableCell className="cursor-pointer" onClick={() => router.push(`/citizen/issues/${issue.id}`)}><Badge variant="secondary">{issue.status}</Badge></TableCell>
                   <TableCell className="cursor-pointer" onClick={() => router.push(`/citizen/issues/${issue.id}`)}>{new Date(issue.reportedAt).toLocaleDateString()}</TableCell>
+
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>

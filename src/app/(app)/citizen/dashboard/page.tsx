@@ -7,11 +7,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { PlusCircle, BarChart, ListChecks, CheckCircle2, Map } from 'lucide-react';
+import { PlusCircle, BarChart, ListChecks, CheckCircle2, Map, Megaphone } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { UpvoteButton } from '@/components/shared/UpvoteButton';
+import { mockAnnouncements } from '@/lib/mock-data/announcements';
+import { AnnouncementCard } from '@/components/shared/AnnouncementCard';
 
 const StatusBadge = ({ status }: { status: Issue['status'] }) => {
   const variant: 'default' | 'secondary' | 'destructive' | 'outline' = useMemo(() => {
@@ -73,6 +75,10 @@ export default function CitizenDashboard() {
     return { total, inProgress, resolved };
   }, [userIssues]);
   
+  const latestAnnouncement = useMemo(() => {
+    return [...mockAnnouncements].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
+  }, []);
+
   if (!user) {
     return <div className="text-center">Loading user data...</div>;
   }
@@ -99,6 +105,21 @@ export default function CitizenDashboard() {
           </Link>
         </div>
       </div>
+
+       {latestAnnouncement && (
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-headline font-bold flex items-center gap-2">
+              <Megaphone className="text-primary" /> Latest Announcement
+            </h2>
+            <Link href="/citizen/announcements">
+              <Button variant="link">View All</Button>
+            </Link>
+          </div>
+          <AnnouncementCard announcement={latestAnnouncement} />
+        </div>
+      )}
+
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>

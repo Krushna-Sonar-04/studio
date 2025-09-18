@@ -76,3 +76,13 @@ export type Issue = {
   upvotes: number;
   upvotedBy: string[];
 };
+
+export type AnnouncementPriority = "Low" | "Medium" | "High";
+
+export type Announcement = {
+  id: string;
+  title: string;
+  message: string;
+  priority: AnnouncementPriority;
+  createdAt: string;
+};

@@ -10,7 +10,7 @@ export const mockUsers: User[] = [
   { id: 'user-7', name: 'Gita Patel', role: 'Engineer', avatarUrl: 'https://picsum.photos/seed/107/100/100' },
 ];
 
-export const mockIssues: Issue[] = [
+export let mockIssues: Issue[] = [
   {
     id: 'issue-1',
     title: 'Large Pothole on Main Street',
@@ -175,3 +175,7 @@ export const mockIssues: Issue[] = [
     upvotedBy: [],
   },
 ];
+
+export const setMockIssues = (newIssues: Issue[]) => {
+  mockIssues = newIssues;
+};
