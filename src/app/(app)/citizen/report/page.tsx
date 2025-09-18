@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -286,7 +287,7 @@ export default function ReportIssuePage() {
                     </Button>
                 </form>
                 </Form>
-            </Content>
+            </CardContent>
         </Card>
     </div>
   );
