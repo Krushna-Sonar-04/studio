@@ -8,12 +8,13 @@ import { useRouter } from 'next/navigation';
 
 // This is a common fix for a known issue with Webpack and Leaflet.
 // It ensures that the default marker icons can be found and displayed correctly.
+// This code runs once when the module is imported.
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png').default,
-  iconUrl: require('leaflet/dist/images/marker-icon.png').default,
-  shadowUrl: require('leaflet/dist/images/marker-shadow.png').default,
+  iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
+  iconUrl: require('leaflet/dist/images/marker-icon.png'),
+  shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
 });
 
 
@@ -83,7 +84,11 @@ const LeafletMap: React.FC<MapProps> = ({
             mapInstanceRef.current = null;
         }
     };
-  }, []); // Empty dependency array ensures this runs only once on mount and unmount.
+  // NOTE: The dependency array is intentionally empty. This effect should only run
+  // once when the component mounts and the cleanup should only run when it unmounts.
+  // Props changes are handled by separate effects.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Effect for updating markers
   useEffect(() => {
