@@ -96,3 +96,16 @@ export type Announcement = {
   priority: AnnouncementPriority;
   createdAt: string;
 };
+
+export type NotificationType = "new_assignment" | "sla_alert" | "escalation" | "status_update";
+
+export type Notification = {
+  id: string;
+  type: NotificationType;
+  title: string;
+  description: string;
+  issueId: string;
+  timestamp: string;
+  read: boolean;
+  userId: string; // The user this notification is for
+};

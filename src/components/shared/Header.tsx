@@ -10,6 +10,7 @@ import { Button } from '../ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { NotificationBell } from './NotificationBell';
 
 const TricolorFlag = () => (
   <svg
@@ -59,9 +60,10 @@ export default function AppHeader() {
           <span className="font-bold font-headline text-lg text-primary">{APP_NAME}</span>
         </Link>
         
-        <div className="flex flex-1 items-center justify-end space-x-4">
+        <div className="flex flex-1 items-center justify-end space-x-2 md:space-x-4">
           <div className="hidden md:flex items-center gap-4">
             <LanguageSwitcher />
+            {isClient && user && <NotificationBell user={user} />}
             {isClient ? <UserNav /> : null}
           </div>
 
@@ -95,7 +97,10 @@ export default function AppHeader() {
                           )}
                       </nav>
                        <div className="border-t pt-6 flex flex-col gap-4">
-                          <LanguageSwitcher />
+                            <div className="flex items-center justify-between">
+                                <LanguageSwitcher />
+                                {user && <NotificationBell user={user} />}
+                            </div>
                           <UserNav />
                       </div>
                      </>
