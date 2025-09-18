@@ -9,19 +9,25 @@ import { useToast } from '@/hooks/use-toast';
 import { IssueMarker } from '@/components/shared/LeafletMap';
 import { Button } from '@/components/ui/button';
 
+// The "window is not defined" error in Next.js happens when a component that
+// relies on browser-only APIs (like Leaflet) is rendered on the server.
+// `dynamic` with `ssr: false` is the correct way to fix this, ensuring the
+// component is only ever loaded and rendered on the client.
 const LeafletMap = dynamic(() => import('@/components/shared/LeafletMap'), {
   ssr: false,
   loading: () => <div className="h-full w-full bg-muted flex items-center justify-center"><p>Loading map...</p></div>
 });
 
 
-// Default to a central location in Pune, India
+// Default to a central location in Pune, India, if geolocation fails.
 const DEFAULT_CENTER: LatLngTuple = [18.5204, 73.8567];
 
+// In a real application, this data would be fetched from Firestore
+// based on the user's location.
 const dummyIssues: IssueMarker[] = [
-  { id: '1', title: 'Pothole on JM Road', lat: 18.5204, lng: 73.8567 },
-  { id: '2', title: 'Broken Street Light near FC College', lat: 18.5215, lng: 73.8575 },
-  { id: '3', title: 'Garbage Overflow at Deccan Gymkhana', lat: 18.5189, lng: 73.8550 },
+  { id: 'issue-1', title: 'Pothole on JM Road', lat: 18.5204, lng: 73.8567 },
+  { id: 'issue-2', title: 'Broken Street Light near FC College', lat: 18.5215, lng: 73.8575 },
+  { id: 'issue-3', title: 'Garbage Overflow at Deccan Gymkhana', lat: 18.5189, lng: 73.8550 },
 ];
 
 export default function NearbyIssuesMapPage() {
@@ -31,6 +37,8 @@ export default function NearbyIssuesMapPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Use `navigator.geolocation` to get the user's current location.
+    // This is a browser API and must run inside `useEffect`.
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const newLocation: LatLngTuple = [position.coords.latitude, position.coords.longitude];
@@ -55,7 +63,7 @@ export default function NearbyIssuesMapPage() {
   const handleRecenter = () => {
     if (userLocation) {
       setMapCenter(userLocation);
-      toast({ title: "Map Recenter", description: "Map centered on your current location." });
+      toast({ title: "Map Recentered", description: "Map centered on your current location." });
     } else {
       toast({ variant: "destructive", title: "Cannot Recenter", description: "Your location is not available." });
     }

@@ -25,13 +25,16 @@ import { IssueType } from '@/lib/types';
 import { Send, MapPin, LocateFixed, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
+// Leaflet is a client-side only library. Using `next/dynamic` with `ssr: false`
+// is the correct and safest way to ensure this component is never rendered on
+// the server, which prevents "window is not defined" and other hydration errors.
 const LeafletMap = dynamic(() => import('@/components/shared/LeafletMap'), {
     ssr: false,
     loading: () => <div className="h-full w-full bg-muted flex items-center justify-center"><p>Loading map...</p></div>
 });
 
 
-const issueTypes: IssueType[] = ['Pothole', 'Streetlight', 'Garbage', 'Water Leakage'];
+const issueTypes: IssueType[] = ['Pothole', 'Streetlight', 'Garbage', 'Water Leakage', 'Obstruction'];
 
 // Default to a central location in India
 const defaultPosition: [number, number] = [20.5937, 78.9629];
@@ -79,6 +82,8 @@ export default function ReportIssuePage() {
   const getAddressFromLatLng = useCallback(async (lat: number, lng: number) => {
     setIsGeocoding(true);
     try {
+      // Use a free and open-source geocoding service like Nominatim.
+      // In a production app, you might use a more robust, rate-limited service.
       const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
       if (!response.ok) {
         throw new Error('Failed to fetch address');

@@ -7,8 +7,9 @@ import L, { LatLngTuple } from 'leaflet';
 import { Button } from '../ui/button';
 import { useRouter } from 'next/navigation';
 
-// Fix for default icon path issue with webpack which is common in Next.js
-// This ensures Leaflet can find its marker icon images.
+// This is a common fix for a known issue with Webpack and Leaflet.
+// It ensures that the default marker icons can be found and displayed correctly.
+// Without this, you might see broken image icons for markers.
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 
 L.Icon.Default.mergeOptions({
@@ -36,7 +37,10 @@ interface MapProps {
 }
 
 
-// Internal component to handle map view changes like flying to a new location.
+// This internal component uses the `useMap` hook from `react-leaflet`
+// to control the map instance imperatively. This is the correct way to
+// trigger actions like flying to a new location without re-rendering the
+// entire MapContainer, which helps prevent initialization errors.
 const MapController = ({ flyTo, zoom }: { flyTo?: LatLngTuple, zoom: number}) => {
     const map = useMap();
     useEffect(() => {
@@ -48,7 +52,8 @@ const MapController = ({ flyTo, zoom }: { flyTo?: LatLngTuple, zoom: number}) =>
     return null;
 }
 
-// Internal component to handle map click events, used for dropping a pin.
+// This component handles map click events. It's separated to keep concerns
+// clean and avoid adding too many props to the main component.
 const MapClickHandler = ({ onMapClick }: { onMapClick?: (latlng: { lat: number; lng: number }) => void }) => {
     useMap({
         click: (e) => {
@@ -70,13 +75,13 @@ const LeafletMap: React.FC<MapProps> = ({
     scrollWheelZoom = true,
 }) => {
   const router = useRouter();
-  const [isMounted, setIsMounted] = useState(false);
-
+  
   // The "Map container is already initialized" error occurs because in React's StrictMode (used in Next.js development),
   // components can render twice to detect side effects. If a library like Leaflet initializes a map on a DOM element,
-  // the second render will try to initialize it again on the same element, causing the error.
-  // By using useEffect with an empty dependency array, we ensure the MapContainer is only rendered *after*
-  // the component has mounted on the client-side, and only once. The `isMounted` flag prevents server-side rendering.
+  // the second render will try to initialize it again, causing the error.
+  // By using `useState` and `useEffect` to only render the `<MapContainer>` *after* the component has mounted
+  // on the client-side, we guarantee it only runs once in the browser.
+  const [isMounted, setIsMounted] = useState(false);
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -130,6 +135,8 @@ const LeafletMap: React.FC<MapProps> = ({
   );
 };
 
+// It's good practice to provide a display name for components, especially
+// when using React DevTools or for debugging.
 LeafletMap.displayName = 'LeafletMap';
 
 export default LeafletMap;
