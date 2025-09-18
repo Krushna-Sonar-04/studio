@@ -11,6 +11,12 @@ export type User = {
   name: string;
   role: UserRole;
   avatarUrl: string;
+  // Adding more details for user management
+  email?: string;
+  phone?: string;
+  department?: 'Water' | 'Roads' | 'Sanitation' | 'Electrical';
+  zone?: 'North' | 'South' | 'East' | 'West';
+  active?: boolean;
 };
 
 export type IssueStatus =

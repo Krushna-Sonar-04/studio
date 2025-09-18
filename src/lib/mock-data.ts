@@ -1,14 +1,16 @@
 import { User, Issue } from './types';
 import { add } from 'date-fns';
 
-export const mockUsers: User[] = [
-  { id: 'user-1', name: 'Alia Reddy', role: 'Citizen', avatarUrl: 'https://picsum.photos/seed/101/100/100' },
-  { id: 'user-2', name: 'Bhavin Shah', role: 'Head of Department', avatarUrl: 'https://picsum.photos/seed/102/100/100' },
-  { id: 'user-3', name: 'Chirag Kumar', role: 'Engineer', avatarUrl: 'https://picsum.photos/seed/103/100/100' },
-  { id: 'user-4', name: 'Deepa Iyer', role: 'Fund Manager', avatarUrl: 'https://picsum.photos/seed/104/100/100' },
-  { id: 'user-5', name: 'Esha Verma', role: 'Approving Manager', avatarUrl: 'https://picsum.photos/seed/105/100/100' },
-  { id: 'user-6', name: 'Farhan Ali', role: 'Contractor', avatarUrl: 'https://picsum.photos/seed/106/100/100' },
-  { id: 'user-7', name: 'Gita Patel', role: 'Engineer', avatarUrl: 'https://picsum.photos/seed/107/100/100' },
+export let mockUsers: User[] = [
+  { id: 'user-1', name: 'Alia Reddy', role: 'Citizen', avatarUrl: 'https://picsum.photos/seed/101/100/100', email: 'alia.r@email.com', phone: '9876543210', active: true },
+  { id: 'user-2', name: 'Bhavin Shah', role: 'Head of Department', avatarUrl: 'https://picsum.photos/seed/102/100/100', email: 'bhavin.s@gov.in', phone: '9876543211', department: 'Roads', active: true },
+  { id: 'user-3', name: 'Chirag Kumar', role: 'Engineer', avatarUrl: 'https://picsum.photos/seed/103/100/100', email: 'chirag.k@gov.in', phone: '9876543212', department: 'Roads', zone: 'North', active: true },
+  { id: 'user-4', name: 'Deepa Iyer', role: 'Fund Manager', avatarUrl: 'https://picsum.photos/seed/104/100/100', email: 'deepa.i@gov.in', phone: '9876543213', active: true },
+  { id: 'user-5', name: 'Esha Verma', role: 'Approving Manager', avatarUrl: 'https://picsum.photos/seed/105/100/100', email: 'esha.v@gov.in', phone: '9876543214', active: true },
+  { id: 'user-6', name: 'Farhan Ali', role: 'Contractor', avatarUrl: 'https://picsum.photos/seed/106/100/100', email: 'farhan.ali@contractors.com', phone: '9876543215', department: 'Sanitation', zone: 'West', active: true },
+  { id: 'user-7', name: 'Gita Patel', role: 'Engineer', avatarUrl: 'https://picsum.photos/seed/107/100/100', email: 'gita.p@gov.in', phone: '9876543216', department: 'Water', zone: 'South', active: true },
+  { id: 'user-8', name: 'Harish Mehta', role: 'Contractor', avatarUrl: 'https://picsum.photos/seed/108/100/100', email: 'harish.m@contractors.com', phone: '9876543217', department: 'Roads', zone: 'North', active: true },
+  { id: 'user-9', name: 'Ishaan Chopra', role: 'Contractor', avatarUrl: 'https://picsum.photos/seed/109/100/100', email: 'ishaan.c@contractors.com', phone: '9876543218', department: 'Electrical', zone: 'East', active: false },
 ];
 
 export let mockIssues: Issue[] = [
@@ -208,4 +210,14 @@ export let mockIssues: Issue[] = [
 
 export const setMockIssues = (newIssues: Issue[]) => {
   mockIssues = newIssues;
+};
+
+// Function to update mock users (e.g., for contractor management)
+export const setMockUsers = (newUsers: User[]) => {
+    mockUsers = newUsers;
+};
+
+// Function to add a user
+export const addMockUser = (newUser: User) => {
+    mockUsers.push(newUser);
 };

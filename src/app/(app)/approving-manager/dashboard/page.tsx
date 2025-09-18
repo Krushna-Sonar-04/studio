@@ -7,6 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { Users } from 'lucide-react';
 
 export default function ApprovingManagerDashboard() {
   const { user } = useAuth();
@@ -26,9 +29,17 @@ export default function ApprovingManagerDashboard() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-headline font-bold">Approval Dashboard</h1>
-        <p className="text-muted-foreground">Projects awaiting your approval.</p>
+      <div className="flex justify-between items-center">
+        <div>
+            <h1 className="text-3xl font-headline font-bold">Approval Dashboard</h1>
+            <p className="text-muted-foreground">Projects awaiting your approval and contractor management.</p>
+        </div>
+        <Link href="/approving-manager/contractors">
+            <Button>
+                <Users className="mr-2 h-4 w-4" />
+                Manage Contractors
+            </Button>
+        </Link>
       </div>
 
       <Card>
