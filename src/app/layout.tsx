@@ -4,11 +4,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { cn } from "@/lib/utils";
 import "./globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
-import AppHeader from "@/components/shared/Header";
-import Footer from "@/components/shared/Footer";
+import { APP_NAME } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "CIVIC LENS",
+  title: APP_NAME,
   description: "Connecting citizens and government for a better community.",
 };
 
@@ -27,13 +26,7 @@ export default function RootLayout({
       <body className={cn("min-h-screen bg-background font-body antialiased")}>
         <AuthProvider>
           <LanguageProvider>
-            <div className="flex flex-col min-h-screen">
-              <AppHeader />
-              <main className="flex-1">
-                {children}
-              </main>
-              <Footer />
-            </div>
+              {children}
             <Toaster />
           </LanguageProvider>
         </AuthProvider>
