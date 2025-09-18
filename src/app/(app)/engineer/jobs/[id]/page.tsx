@@ -1,13 +1,19 @@
-import { mockIssues, mockUsers } from '@/lib/mock-data';
+'use client';
+
+import { useIssues } from '@/hooks/use-issues';
+import { mockUsers } from '@/lib/mock-data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Image from 'next/image';
 import { Calendar, FileText, MapPin, User, Wrench, Ticket } from 'lucide-react';
 import { VerificationReportGenerator } from '@/components/engineer/VerificationReportGenerator';
 import { Separator } from '@/components/ui/separator';
+import { useParams } from 'next/navigation';
 
-export default function EngineerJobPage({ params }: { params: { id: string } }) {
+export default function EngineerJobPage() {
+  const params = useParams();
   const { id } = params;
-  const issue = mockIssues.find((i) => i.id === id);
+  const { issues } = useIssues();
+  const issue = issues.find((i) => i.id === id);
 
   if (!issue) {
     return <div className="text-center">Job not found.</div>;

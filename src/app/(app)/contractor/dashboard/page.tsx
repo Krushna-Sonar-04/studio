@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
-import { mockIssues } from '@/lib/mock-data';
+import { useIssues } from '@/hooks/use-issues';
 import { Issue } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -12,16 +12,17 @@ import { ClipboardList, Play, CheckCircle2 } from 'lucide-react';
 
 export default function ContractorDashboard() {
   const { user } = useAuth();
+  const { issues } = useIssues();
   const router = useRouter();
   const [jobs, setJobs] = useState<Issue[]>([]);
 
   useEffect(() => {
     if (user) {
-      setJobs(mockIssues.filter(issue => issue.assignedContractorId === user.id && issue.currentRoles.includes(user.role)));
+      setJobs(issues.filter(issue => issue.assignedContractorId === user.id && issue.currentRoles.includes(user.role)));
     }
-  }, [user]);
+  }, [user, issues]);
 
-  const allUserJobs = mockIssues.filter(issue => issue.assignedContractorId === user?.id);
+  const allUserJobs = issues.filter(issue => issue.assignedContractorId === user?.id);
   const stats = {
     assigned: allUserJobs.filter(j => j.status === 'AssignedToContractor').length,
     inProgress: allUserJobs.filter(j => j.status === 'InProgress').length,

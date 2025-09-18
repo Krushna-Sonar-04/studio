@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { generateIssueVerificationReport, IssueVerificationReportOutput } from '@/ai/flows/issue-verification-report-generation';
-import { Issue } from '@/lib/types';
+import { Issue, VerificationReport } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,8 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { Sparkles, Lightbulb, FileText, Upload, Send, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useIssues } from '@/hooks/use-issues';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function VerificationReportGenerator({ issue }: { issue: Issue }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -18,6 +20,9 @@ export function VerificationReportGenerator({ issue }: { issue: Issue }) {
   const [comments, setComments] = useState('');
   const { toast } = useToast();
   const router = useRouter();
+  const { updateIssue } = useIssues();
+  const { user } = useAuth();
+
 
   const handleGenerateReport = async () => {
     setIsLoading(true);
@@ -42,10 +47,32 @@ export function VerificationReportGenerator({ issue }: { issue: Issue }) {
   };
   
   const handleSubmit = () => {
-    console.log('Submitting verification report:', { issueId: issue.id, comments });
+    if (!user) return;
+
+    const verificationReport: VerificationReport = {
+        comments: comments,
+        submittedAt: new Date().toISOString(),
+        // In a real app, upload the photo and add the URL here
+    };
+
+    const updatedIssue: Issue = {
+        ...issue,
+        status: 'Verified',
+        // In a real app, you would have a system to assign this. Here we hardcode.
+        assignedFundManagerId: 'user-4', 
+        currentRoles: ['Fund Manager'],
+        verificationReport: verificationReport,
+        statusHistory: [
+            ...issue.statusHistory,
+            { status: 'Verified', date: new Date().toISOString(), updatedBy: user.name, notes: 'Issue verified by engineer.' }
+        ]
+    };
+    
+    updateIssue(updatedIssue);
+
     toast({
       title: 'Verification Report Submitted!',
-      description: 'The report has been sent for cost estimation. (Simulated)',
+      description: 'The report has been sent for cost estimation.',
     });
     router.push('/engineer/dashboard');
   };

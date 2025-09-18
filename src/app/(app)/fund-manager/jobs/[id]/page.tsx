@@ -1,20 +1,26 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { mockIssues, mockUsers } from '@/lib/mock-data';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useIssues } from '@/hooks/use-issues';
+import { mockUsers } from '@/lib/mock-data';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, User, FileText, Send } from 'lucide-react';
+import { ArrowLeft, Send } from 'lucide-react';
+import type { Issue, EstimationReport } from '@/lib/types';
+import { useAuth } from '@/contexts/AuthContext';
+
 
 export default function FundManagerJobPage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
+  const { issues, updateIssue } = useIssues();
+  const { user } = useAuth();
   const id = params.id as string;
-  const issue = mockIssues.find((i) => i.id === id);
+  const issue = issues.find((i) => i.id === id);
 
   if (!issue) {
     return <div className="text-center">Job not found.</div>;
@@ -22,11 +28,46 @@ export default function FundManagerJobPage() {
   
   const engineer = mockUsers.find(u => u.id === issue.assignedEngineerId);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!user) return;
+
+    const formData = new FormData(e.currentTarget);
+    const cost = parseFloat(formData.get('cost') as string);
+    const notes = formData.get('notes') as string;
+
+    const estimationReport: EstimationReport = {
+      estimatedCost: cost,
+      notes: notes,
+      submittedAt: new Date().toISOString(),
+    };
+
+    const updatedIssue: Issue = {
+      ...issue,
+      status: 'PendingApproval',
+      currentRoles: ['Approving Manager'],
+      estimationReport: estimationReport,
+      statusHistory: [
+        ...issue.statusHistory,
+        {
+          status: 'Estimated',
+          date: new Date().toISOString(),
+          updatedBy: user.name,
+          notes: `Cost estimation submitted: $${cost}.`,
+        },
+        {
+          status: 'PendingApproval',
+          date: new Date().toISOString(),
+          updatedBy: 'System',
+          notes: 'Forwarded for final approval.',
+        }
+      ],
+    };
+
+    updateIssue(updatedIssue);
     toast({
       title: 'Estimation Submitted',
-      description: 'Cost estimation has been sent for final approval. (Simulated)',
+      description: 'Cost estimation has been sent for final approval.',
     });
     router.push('/fund-manager/dashboard');
   };
@@ -71,11 +112,11 @@ export default function FundManagerJobPage() {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <label htmlFor="cost" className="text-sm font-medium">Estimated Cost ($)</label>
-                  <Input id="cost" type="number" placeholder="e.g., 5500" required />
+                  <Input id="cost" name="cost" type="number" placeholder="e.g., 5500" required />
                 </div>
                 <div className="space-y-2">
                   <label htmlFor="notes" className="text-sm font-medium">Notes</label>
-                  <Textarea id="notes" placeholder="Breakdown of costs, required materials, etc." className="min-h-[120px]" required/>
+                  <Textarea id="notes" name="notes" placeholder="Breakdown of costs, required materials, etc." className="min-h-[120px]" required/>
                 </div>
               </CardContent>
               <CardFooter>

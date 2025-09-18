@@ -93,7 +93,7 @@ export const issueColumns = ({ openAssignDialog, openContractorDialog }: IssueCo
                     <span>
                         {isBreached 
                             ? `${formatDistanceToNow(new Date(slaDeadline))} ago` 
-                            : formatDistanceToNow(new Date(slaDeadline))
+                            : formatDistanceToNow(new Date(slaDeadline), { addSuffix: true })
                         }
                     </span>
                  </div>

@@ -1,24 +1,24 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
-import { mockIssues } from '@/lib/mock-data';
+import { useIssues } from '@/hooks/use-issues';
 import { Issue } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export default function EngineerDashboard() {
   const { user } = useAuth();
+  const { issues } = useIssues();
   const router = useRouter();
   const [assignedJobs, setAssignedJobs] = useState<Issue[]>([]);
 
   useEffect(() => {
     if (user) {
-      setAssignedJobs(mockIssues.filter(issue => issue.currentRoles.includes(user.role) && issue.assignedEngineerId === user.id));
+      setAssignedJobs(issues.filter(issue => issue.currentRoles.includes(user.role) && issue.assignedEngineerId === user.id));
     }
-  }, [user]);
+  }, [user, issues]);
   
   if (!user) {
     return <div>Loading...</div>;

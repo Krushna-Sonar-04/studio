@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
-import { mockIssues } from '@/lib/mock-data';
+import { useIssues } from '@/hooks/use-issues';
 import { Issue } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -13,15 +13,16 @@ import { Users } from 'lucide-react';
 
 export default function ApprovingManagerDashboard() {
   const { user } = useAuth();
+  const { issues } = useIssues();
   const router = useRouter();
   const [pendingJobs, setPendingJobs] = useState<Issue[]>([]);
 
   useEffect(() => {
     // Approving managers see all issues where their role is the current one to act.
     if (user) {
-      setPendingJobs(mockIssues.filter(issue => issue.currentRoles.includes(user.role)));
+      setPendingJobs(issues.filter(issue => issue.currentRoles.includes(user.role)));
     }
-  }, [user]);
+  }, [user, issues]);
 
   if (!user) {
     return <div>Loading...</div>;

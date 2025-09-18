@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { APP_NAME } from '@/lib/constants';
 import { Menu } from 'lucide-react';
 import Link from 'next/link';
@@ -50,6 +51,7 @@ export default function AppHeader() {
   const navLinks = [
       { href: '/citizen/dashboard', label: 'Citizen Dashboard'},
       { href: '/contractor/dashboard', label: 'Contractor Dashboard'},
+      { href: '/admin/dashboard', label: 'Admin Dashboard'},
   ];
 
   return (
@@ -64,7 +66,7 @@ export default function AppHeader() {
           <div className="hidden md:flex items-center gap-4">
             <LanguageSwitcher />
             {isClient && user && <NotificationBell user={user} />}
-            {isClient ? <UserNav /> : <Button variant="ghost" onClick={() => router.push('/login')}>Login</Button>}
+            {isClient && <UserNav />}
           </div>
 
            {/* Mobile Nav */}
@@ -83,7 +85,7 @@ export default function AppHeader() {
                         <span className="font-bold font-headline text-lg text-primary">{APP_NAME}</span>
                     </Link>
                    
-                     <>
+                     <React.Fragment key={user ? user.id : 'logged-out'}>
                       <nav className="grid gap-4">
                           {user && navLinks.map(link => (
                               <Link key={link.href} href={link.href} className="text-muted-foreground hover:text-foreground" onClick={() => setMobileMenuOpen(false)}>
@@ -103,7 +105,7 @@ export default function AppHeader() {
                             </div>
                           <UserNav />
                       </div>
-                     </>
+                     </React.Fragment>
                    
                 </div>
                 )}

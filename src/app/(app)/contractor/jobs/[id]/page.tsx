@@ -1,36 +1,77 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { mockIssues } from '@/lib/mock-data';
+import { useIssues } from '@/hooks/use-issues';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Play, Check, ArrowLeft, Upload, Ticket } from 'lucide-react';
+import type { Issue, ContractorReport } from '@/lib/types';
+import { useAuth } from '@/contexts/AuthContext';
+
 
 export default function ContractorJobPage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
+  const { issues, updateIssue } = useIssues();
+  const { user } = useAuth();
   const id = params.id as string;
-  const issue = mockIssues.find((i) => i.id === id);
+  const issue = issues.find((i) => i.id === id);
 
   if (!issue) {
     return <div className="text-center">Job not found.</div>;
   }
 
-  const handleStatusUpdate = (status: 'InProgress' | 'Resolved') => {
+  const handleStatusUpdate = (newStatus: 'InProgress' | 'Resolved') => {
+    if (!user) return;
+    
+    const statusNote = newStatus === 'InProgress' ? 'Work has started.' : 'Work has been completed.';
+    
+    const updatedIssue: Issue = {
+        ...issue,
+        status: newStatus,
+        // When work starts, it's still the contractor's role. When resolved, it moves to admin for final verification.
+        currentRoles: newStatus === 'InProgress' ? ['Contractor'] : ['Head of Department'],
+        statusHistory: [
+            ...issue.statusHistory,
+            { status: newStatus, date: new Date().toISOString(), updatedBy: user.name, notes: statusNote }
+        ]
+    };
+
+    updateIssue(updatedIssue);
     toast({
-      title: `Status Updated to ${status}`,
-      description: 'The job status has been changed. (Simulated)',
+      title: `Status Updated to ${newStatus}`,
+      description: 'The job status has been changed.',
     });
-    // In a real app, you'd update the state here.
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-     handleStatusUpdate('Resolved');
+    if (!user) return;
+    
+    const contractorReport: ContractorReport = {
+        notes: (e.currentTarget.querySelector('#notes') as HTMLTextAreaElement).value,
+        beforeImageUrl: 'https://picsum.photos/seed/310/600/400', // Placeholder
+        afterImageUrl: 'https://picsum.photos/seed/311/600/400', // Placeholder
+        submittedAt: new Date().toISOString(),
+    };
+
+     const updatedIssue: Issue = {
+        ...issue,
+        status: 'Resolved',
+        currentRoles: ['Head of Department'], // Next step: Final verification by Admin/HOD
+        contractorReport: contractorReport,
+        statusHistory: [
+            ...issue.statusHistory,
+            { status: 'Resolved', date: new Date().toISOString(), updatedBy: user.name, notes: 'Completion report submitted.' }
+        ]
+    };
+
+    updateIssue(updatedIssue);
+    toast({ title: 'Completion Report Submitted', description: 'The job has been marked as resolved and is pending final verification.' });
     router.push('/contractor/dashboard');
   };
 
@@ -83,7 +124,7 @@ export default function ContractorJobPage() {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button type="submit" className="w-full">
+                <Button type="submit" className="w-full" disabled={issue.status !== 'InProgress'}>
                     <Check className="mr-2 h-4 w-4" /> Mark as Resolved
                 </Button>
               </CardFooter>

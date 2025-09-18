@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { mockIssues, setMockIssues, mockUsers } from '@/lib/mock-data';
+import { useIssues } from '@/hooks/use-issues';
+import { mockUsers } from '@/lib/mock-data';
 import { Issue } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,7 +18,7 @@ import { issueColumns } from '@/components/admin/IssueColumns';
 
 export default function AdminDashboard() {
   const { toast } = useToast();
-  const [issues, setIssues] = useState<Issue[]>(mockIssues);
+  const { issues, updateIssue, getIssues } = useIssues();
   const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
   const [isAssignTaskOpen, setAssignTaskOpen] = useState(false);
   const [isAssignContractorOpen, setAssignContractorOpen] = useState(false);
@@ -43,30 +44,25 @@ export default function AdminDashboard() {
        const deadline = new Date();
        deadline.setDate(deadline.getDate() + slaDays);
 
-      const updatedIssues = issues.map(issue => {
-        if (issue.id === selectedIssue.id) {
-          return {
-            ...issue,
-            status: 'PendingVerificationAndEstimation' as const,
-            currentRoles: ['Engineer'],
-            assignedEngineerId: selectedEngineer,
-            slaDays: slaDays,
-            slaDeadline: deadline.toISOString(),
-            statusHistory: [
-              ...issue.statusHistory,
-              {
-                status: 'PendingVerificationAndEstimation' as const,
-                date: new Date().toISOString(),
-                updatedBy: 'Admin',
-                notes: `Assigned to Engineer for verification with a ${slaDays}-day SLA.`,
-              },
-            ],
-          };
-        }
-        return issue;
-      });
-      setMockIssues(updatedIssues);
-      setIssues(updatedIssues);
+       const updatedIssue: Issue = {
+         ...selectedIssue,
+         status: 'PendingVerificationAndEstimation',
+         currentRoles: ['Engineer'],
+         assignedEngineerId: selectedEngineer,
+         slaDays: slaDays,
+         slaDeadline: deadline.toISOString(),
+         statusHistory: [
+           ...selectedIssue.statusHistory,
+           {
+             status: 'PendingVerificationAndEstimation',
+             date: new Date().toISOString(),
+             updatedBy: 'Admin',
+             notes: `Assigned to Engineer for verification with a ${slaDays}-day SLA.`,
+           },
+         ],
+       };
+
+      updateIssue(updatedIssue);
       toast({ title: 'Task Assigned', description: `Issue sent to Engineer with a ${slaDays}-day SLA.` });
       setAssignTaskOpen(false);
       setSelectedIssue(null);
@@ -78,17 +74,35 @@ export default function AdminDashboard() {
   const handleAssignContractor = () => {
     if (selectedIssue && selectedContractor) {
       console.log(`Assigning issue ${selectedIssue.id} to Contractor ${selectedContractor}`);
-      toast({ title: 'Contractor Assigned (Simulated)' });
+       const updatedIssue: Issue = {
+        ...selectedIssue,
+        status: 'AssignedToContractor',
+        assignedContractorId: selectedContractor,
+        currentRoles: ['Contractor'],
+        statusHistory: [
+          ...selectedIssue.statusHistory,
+          {
+            status: 'AssignedToContractor',
+            date: new Date().toISOString(),
+            updatedBy: 'Admin',
+            notes: `Work assigned to Contractor.`,
+          },
+        ],
+      };
+      updateIssue(updatedIssue);
+      toast({ title: 'Contractor Assigned', description: `Issue assigned to contractor for execution.` });
       setAssignContractorOpen(false);
       setSelectedIssue(null);
     }
   };
 
+  const currentIssues = getIssues();
+
   const stats = {
-    new: issues.filter(i => i.status === 'Submitted').length,
-    pendingVerification: issues.filter(i => i.status === 'PendingVerificationAndEstimation').length,
-    inProgress: issues.filter(i => i.status === 'InProgress' || i.status === 'AssignedToContractor').length,
-    resolved: issues.filter(i => i.status === 'Resolved' || i.status === 'Closed').length,
+    new: currentIssues.filter(i => i.status === 'Submitted').length,
+    pendingVerification: currentIssues.filter(i => i.status === 'PendingVerificationAndEstimation').length,
+    inProgress: currentIssues.filter(i => i.status === 'InProgress' || i.status === 'AssignedToContractor').length,
+    resolved: currentIssues.filter(i => i.status === 'Resolved' || i.status === 'Closed').length,
   };
 
   return (
@@ -142,7 +156,7 @@ export default function AdminDashboard() {
         <CardContent>
           <IssueDataTable 
             columns={issueColumns({ openAssignDialog, openContractorDialog })} 
-            data={issues}
+            data={currentIssues}
           />
         </CardContent>
       </Card>
@@ -195,7 +209,7 @@ export default function AdminDashboard() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setAssignContractorOpen(false)}>Cancel</Button>
-            <Button onClick={handleAssignContractor}>Assign</Button>
+            <Button onClick={handleAssignContractor} disabled={!selectedContractor}>Assign</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

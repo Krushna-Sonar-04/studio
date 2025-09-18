@@ -24,13 +24,16 @@ import { useToast } from '@/hooks/use-toast';
 import { IssueType } from '@/lib/types';
 import { Send, MapPin, LocateFixed, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useIssues } from '@/hooks/use-issues';
+import { useAuth } from '@/contexts/AuthContext';
+
 
 // Leaflet is a client-side only library. Using `next/dynamic` with `ssr: false`
 // is the correct and safest way to ensure this component is never rendered on
 // the server, which prevents "window is not defined" and other hydration errors.
 const LeafletMap = dynamic(() => import('@/components/shared/LeafletMap'), {
     ssr: false,
-    loading: () => <div className="h-full w-full bg-muted flex items-center justify-center"><p>Loading map...</p></div>
+    loading: () => <div className="h-[400px] w-full bg-muted flex items-center justify-center"><p>Loading map...</p></div>
 });
 
 
@@ -62,6 +65,8 @@ const formSchema = z.object({
 export default function ReportIssuePage() {
   const { toast } = useToast();
   const router = useRouter();
+  const { addIssue } = useIssues();
+  const { user } = useAuth();
   const [isLocating, setIsLocating] = useState(false);
   const [isGeocoding, setIsGeocoding] = useState(false);
   
@@ -135,10 +140,33 @@ export default function ReportIssuePage() {
   };
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log('Simulating issue submission:', values);
+    if (!user) {
+      toast({ variant: 'destructive', title: 'You must be logged in to report an issue.' });
+      return;
+    }
+    
+    addIssue({
+      id: `issue-${Date.now()}`,
+      title: values.title,
+      type: values.type,
+      location: values.location.address,
+      description: values.description,
+      // In a real app, upload the photo and get a URL
+      imageUrl: values.photo?.[0] ? 'https://picsum.photos/seed/210/600/400' : undefined,
+      reportedBy: user.id,
+      reportedAt: new Date().toISOString(),
+      status: 'Submitted',
+      currentRoles: ['Head of Department'],
+      statusHistory: [
+        { status: 'Submitted', date: new Date().toISOString(), updatedBy: user.name, notes: 'Issue reported by citizen.' },
+      ],
+      upvotes: 0,
+      upvotedBy: [],
+    });
+
     toast({
       title: 'Issue Submitted!',
-      description: 'Your civic issue report has been received. (Simulated)',
+      description: 'Your civic issue report has been received.',
     });
     router.push('/citizen/dashboard');
   }
@@ -216,7 +244,7 @@ export default function ReportIssuePage() {
                             />
                         </div>
                         <Button type="button" variant="outline" onClick={handleLocateMe} disabled={isLocating}>
-                            {isLocating ? <Loader2 className="animate-spin" /> : <LocateFixed />}
+                            {isLocating ? <Loader2 className="animate-spin mr-2" /> : <LocateFixed className="mr-2 h-4 w-4" />}
                             Use My Current Location
                         </Button>
                         <FormField

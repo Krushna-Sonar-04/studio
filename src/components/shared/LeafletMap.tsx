@@ -1,14 +1,17 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import 'leaflet/dist/leaflet.css';
-import L, { LatLngTuple, Map as LeafletMapInstance } from 'leaflet';
+// Import react-leaflet components dynamically to ensure they are client-side only
+import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
+import L, { LatLngTuple } from 'leaflet';
 import { Button } from '../ui/button';
 import { useRouter } from 'next/navigation';
 
-// This is a common fix for a known issue with Webpack and Leaflet.
-// It ensures that the default marker icons can be found and displayed correctly.
-// This code runs once when the module is imported.
+// This is a common and necessary fix for a known issue with Webpack and Leaflet.
+// It ensures that the default marker icons can be found and displayed correctly
+// by manually setting the paths to the icon images. This code runs once when
+// the module is imported, before any components are rendered.
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 
 L.Icon.Default.mergeOptions({
@@ -24,6 +27,30 @@ export interface IssueMarker {
   lat: number;
   lng: number;
 }
+
+// A helper component to programmatically control the map (e.g., fly to a new location)
+// without causing the main MapContainer to re-render, which is a common source of errors.
+const MapController = ({ flyTo, zoom }: { flyTo: LatLngTuple; zoom: number }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (flyTo) {
+      map.flyTo(flyTo, zoom);
+    }
+  }, [flyTo, zoom, map]);
+  return null;
+};
+
+// A helper component to handle map click events without adding the event listener
+// directly to the MapContainer, which can also cause re-render issues.
+const MapClickHandler = ({ onMapClick }: { onMapClick: (latlng: { lat: number; lng: number }) => void }) => {
+    useMapEvents({
+        click(e) {
+            onMapClick(e.latlng);
+        },
+    });
+    return null;
+};
+
 
 interface MapProps {
   center: LatLngTuple;
@@ -44,63 +71,48 @@ const LeafletMap: React.FC<MapProps> = ({
     flyTo,
     scrollWheelZoom = true,
 }) => {
-  const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<LeafletMapInstance | null>(null);
-  const markersRef = useRef<L.Marker[]>([]);
   const router = useRouter();
 
+  // The "Map container is already initialized" error occurs because React's StrictMode
+  // (in development) re-mounts components to detect side effects. This causes Leaflet
+  // to try to initialize a new map on the same div.
+  //
+  // THE FIX:
+  // 1. Use `useState` (`isMounted`) to track if the component has mounted on the client.
+  // 2. The `useEffect` with an empty dependency array `[]` runs ONLY ONCE after the
+  //    initial client-side render, where we safely set `isMounted` to true.
+  // 3. We conditionally render `<MapContainer>` only when `isMounted` is true.
+  //
+  // This two-step process ensures that `MapContainer` is only ever rendered a single
+  // time on the client, completely avoiding the double-initialization problem.
+  const [isMounted, setIsMounted] = useState(false);
   useEffect(() => {
-    // This effect hook handles the entire lifecycle of the Leaflet map.
-    // It creates the map instance, adds layers, and importantly, cleans up
-    // by calling `map.remove()` on unmount.
-
-    // The "Map container is already initialized" error happens when React's StrictMode
-    // (in development) causes a component to re-mount, and a new map tries to initialize
-    // on the same div. The cleanup function (`return () => ...`) is the definitive
-    // fix because it properly destroys the old map instance before the new one can be created.
-    if (mapContainerRef.current && !mapInstanceRef.current) {
-        const map = L.map(mapContainerRef.current, {
-            center: center,
-            zoom: zoom,
-            scrollWheelZoom: scrollWheelZoom
-        });
-        mapInstanceRef.current = map;
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
-
-        if (onMapClick) {
-          map.on('click', (e) => {
-            onMapClick(e.latlng);
-          });
-        }
-    }
-
-    return () => {
-        // Cleanup on unmount
-        if (mapInstanceRef.current) {
-            mapInstanceRef.current.remove();
-            mapInstanceRef.current = null;
-        }
-    };
-  // NOTE: The dependency array is intentionally empty. This effect should only run
-  // once when the component mounts and the cleanup should only run when it unmounts.
-  // Props changes are handled by separate effects.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    setIsMounted(true);
   }, []);
 
-  // Effect for updating markers
-  useEffect(() => {
-    if (mapInstanceRef.current) {
-      // Clear existing markers
-      markersRef.current.forEach(marker => marker.remove());
-      markersRef.current = [];
+  if (!isMounted) {
+    // While the component is not yet mounted on the client, render nothing or a placeholder.
+    // This prevents any server-side rendering attempts for the map.
+    return null;
+  }
 
-      // In a real application, you would replace this `markers` prop
-      // with data fetched from a database like Firestore.
-      if (markers) {
-        const newMarkers = markers.map(issue => {
+  return (
+      <MapContainer 
+        // Using a key here is NOT recommended as it can cause the re-initialization error by forcing a remount.
+        // The component's internal state should be managed by its props and internal hooks like `useMap`.
+        center={center} 
+        zoom={zoom} 
+        scrollWheelZoom={scrollWheelZoom} 
+        style={{ height: '100%', width: '100%' }}
+      >
+        <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+
+        {/* In a real application, you would replace this `markers` prop
+            with data fetched from a database like Firestore. */}
+        {markers && markers.map(issue => {
             const popupContent = document.createElement('div');
             popupContent.className = 'p-1 space-y-2';
             
@@ -117,33 +129,27 @@ const LeafletMap: React.FC<MapProps> = ({
             popupContent.appendChild(title);
             popupContent.appendChild(button);
 
-            const marker = L.marker([issue.lat, issue.lng]).bindPopup(popupContent);
-            return marker;
-        });
+            return (
+              <Marker key={issue.id} position={[issue.lat, issue.lng]}>
+                 <Popup>
+                    {issue.title}
+                    <br/>
+                    <Button size="sm" className="w-full mt-2" onClick={() => router.push(`/citizen/issues/${issue.id}`)}>
+                        View Details
+                    </Button>
+                </Popup>
+              </Marker>
+            )
+        })}
         
-        newMarkers.forEach(marker => marker.addTo(mapInstanceRef.current!));
-        markersRef.current = newMarkers;
-      }
-      
-      // Handle the single, draggable-like marker for the report page
-      if (markerPosition) {
-         const newMarkers = [L.marker(markerPosition)];
-         newMarkers.forEach(marker => marker.addTo(mapInstanceRef.current!));
-         markersRef.current = newMarkers;
-      }
-    }
-  }, [markers, markerPosition, router]);
-  
-  // Effect for flying to a new location
-   useEffect(() => {
-        if (mapInstanceRef.current && flyTo) {
-            mapInstanceRef.current.flyTo(flyTo, zoom);
-        }
-    }, [flyTo, zoom]);
+        {/* Handle the single, draggable-like marker for the report page */}
+        {markerPosition && <Marker position={markerPosition} />}
 
-
-  // The component returns a simple div. The map is injected into it by the useEffect hook.
-  return <div ref={mapContainerRef} style={{ height: '100%', width: '100%' }} />;
+        {/* Use helper components to manage map state and events */}
+        {flyTo && <MapController flyTo={flyTo} zoom={zoom} />}
+        {onMapClick && <MapClickHandler onMapClick={onMapClick} />}
+      </MapContainer>
+  );
 };
 
 LeafletMap.displayName = 'LeafletMap';

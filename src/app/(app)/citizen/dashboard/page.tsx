@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
-import { mockIssues } from '@/lib/mock-data';
+import { useIssues } from '@/hooks/use-issues';
 import { Issue } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -40,28 +40,29 @@ const StatusBadge = ({ status }: { status: Issue['status'] }) => {
 
 export default function CitizenDashboard() {
   const { user } = useAuth();
+  const { issues, updateIssue } = useIssues();
   const router = useRouter();
   const [userIssues, setUserIssues] = useState<Issue[]>([]);
-  const [allIssues, setAllIssues] = useState<Issue[]>(mockIssues);
 
   useEffect(() => {
     if (user) {
-      setUserIssues(allIssues.filter((issue) => issue.reportedBy === user.id));
+      setUserIssues(issues.filter((issue) => issue.reportedBy === user.id));
     }
-  }, [user, allIssues]);
+  }, [user, issues]);
 
   const handleUpvoteChange = (issueId: string, newUpvoteCount: number, userHasUpvoted: boolean) => {
-    setAllIssues(prevIssues => 
-      prevIssues.map(issue => {
-        if (issue.id === issueId) {
-          const newUpvotedBy = userHasUpvoted
-            ? [...issue.upvotedBy, user!.id]
-            : issue.upvotedBy.filter(id => id !== user!.id);
-          return { ...issue, upvotes: newUpvoteCount, upvotedBy: newUpvotedBy };
-        }
-        return issue;
-      })
-    );
+    const issueToUpdate = issues.find(issue => issue.id === issueId);
+    if (issueToUpdate && user) {
+        const newUpvotedBy = userHasUpvoted
+            ? [...issueToUpdate.upvotedBy, user.id]
+            : issueToUpdate.upvotedBy.filter(id => id !== user.id);
+        
+        updateIssue({
+            ...issueToUpdate,
+            upvotes: newUpvoteCount,
+            upvotedBy: newUpvotedBy,
+        });
+    }
   };
 
   const stats = useMemo(() => {

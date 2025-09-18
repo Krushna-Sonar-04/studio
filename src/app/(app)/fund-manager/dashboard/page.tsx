@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
-import { mockIssues } from '@/lib/mock-data';
+import { useIssues } from '@/hooks/use-issues';
 import { Issue } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -10,17 +10,18 @@ import { useEffect, useState } from 'react';
 
 export default function FundManagerDashboard() {
   const { user } = useAuth();
+  const { issues } = useIssues();
   const router = useRouter();
   const [assignedJobs, setAssignedJobs] = useState<Issue[]>([]);
 
   useEffect(() => {
     if (user) {
       // A Fund Manager sees issues assigned to them that are now their responsibility.
-      setAssignedJobs(mockIssues.filter(issue => 
+      setAssignedJobs(issues.filter(issue => 
         issue.currentRoles.includes(user.role) && issue.assignedFundManagerId === user.id
       ));
     }
-  }, [user]);
+  }, [user, issues]);
 
   if (!user) {
     return <div>Loading...</div>;

@@ -2,7 +2,8 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { mockIssues, mockUsers } from '@/lib/mock-data';
+import { useIssues } from '@/hooks/use-issues';
+import { mockUsers } from '@/lib/mock-data';
 import { IssueTimeline } from '@/components/shared/IssueTimeline';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -16,8 +17,9 @@ import { format, formatDistanceToNow, isPast } from 'date-fns';
 export default function IssueDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { issues } = useIssues();
   const id = params.id as string;
-  const issue = mockIssues.find((i) => i.id === id);
+  const issue = issues.find((i) => i.id === id);
   const [localizedDate, setLocalizedDate] = useState('');
 
   useEffect(() => {
@@ -86,7 +88,7 @@ export default function IssueDetailPage() {
                         <p className="text-sm">
                             ({isSlaBreached 
                                 ? `Breached ${formatDistanceToNow(new Date(issue.slaDeadline))} ago` 
-                                : `${formatDistanceToNow(new Date(issue.slaDeadline))} remaining`
+                                : `${formatDistanceToNow(new Date(issue.slaDeadline), { addSuffix: true })}`
                             })
                         </p>
                     </div>

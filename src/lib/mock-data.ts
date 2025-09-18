@@ -61,7 +61,7 @@ export let mockIssues: Issue[] = [
     reportedBy: 'user-1',
     reportedAt: '2024-07-15T14:00:00Z',
     status: 'Approved',
-    currentRoles: ['Contractor'],
+    currentRoles: ['Head of Department'],
     assignedEngineerId: 'user-7',
     assignedFundManagerId: 'user-4',
     assignedContractorId: 'user-6',
@@ -71,7 +71,7 @@ export let mockIssues: Issue[] = [
       { status: 'Verified', date: '2024-07-17T11:30:00Z', updatedBy: 'Gita Patel' },
       { status: 'Estimated', date: '2024-07-18T15:00:00Z', updatedBy: 'Deepa Iyer' },
       { status: 'PendingApproval', date: '2024-07-18T15:05:00Z', updatedBy: 'System' },
-      { status: 'Approved', date: '2024-07-19T16:45:00Z', updatedBy: 'Esha Verma', notes: 'Project approved for execution. Assigned to Contractor.' },
+      { status: 'Approved', date: '2024-07-19T16:45:00Z', updatedBy: 'Esha Verma', notes: 'Project approved for execution. Forwarded to Admin for contractor assignment.' },
     ],
     verificationReport: {
       comments: 'Verified the overflowing bin. The issue is as reported. Requires immediate collection and possibly a second bin for this high-traffic area.',
@@ -208,16 +208,13 @@ export let mockIssues: Issue[] = [
   },
 ];
 
+// DEPRECATED: These functions are no longer used. The `useIssues` hook now manages the state.
 export const setMockIssues = (newIssues: Issue[]) => {
-  mockIssues = newIssues;
+  // mockIssues = newIssues;
 };
-
-// Function to update mock users (e.g., for contractor management)
-export const setMockUsers = (newUsers: User[]) => {
-    mockUsers = newUsers;
-};
-
-// Function to add a user
 export const addMockUser = (newUser: User) => {
     mockUsers.push(newUser);
+};
+export const setMockUsers = (newUsers: User[]) => {
+    mockUsers = newUsers;
 };

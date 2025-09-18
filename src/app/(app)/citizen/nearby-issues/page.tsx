@@ -8,6 +8,7 @@ import { LatLngTuple } from 'leaflet';
 import { useToast } from '@/hooks/use-toast';
 import { IssueMarker } from '@/components/shared/LeafletMap';
 import { Button } from '@/components/ui/button';
+import { useIssues } from '@/hooks/use-issues';
 
 // The "window is not defined" error in Next.js happens because Leaflet directly
 // interacts with the browser's DOM. Using `dynamic` with `ssr: false` is the
