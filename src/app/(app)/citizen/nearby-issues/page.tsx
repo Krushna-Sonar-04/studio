@@ -1,13 +1,20 @@
+
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { LocateFixed, Terminal } from 'lucide-react';
 import { LatLngTuple } from 'leaflet';
 import { useToast } from '@/hooks/use-toast';
 import { IssueMarker } from '@/components/shared/LeafletMap';
-import LeafletMap from '@/components/shared/LeafletMap';
 import { Button } from '@/components/ui/button';
+
+const LeafletMap = dynamic(() => import('@/components/shared/LeafletMap'), {
+  ssr: false,
+  loading: () => <div className="h-full w-full bg-muted flex items-center justify-center"><p>Loading map...</p></div>
+});
+
 
 // Default to a central location in Pune, India
 const DEFAULT_CENTER: LatLngTuple = [18.5204, 73.8567];

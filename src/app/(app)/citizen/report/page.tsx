@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -24,7 +25,12 @@ import { useToast } from '@/hooks/use-toast';
 import { IssueType } from '@/lib/types';
 import { Send, MapPin, LocateFixed, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import LeafletMap from '@/components/shared/LeafletMap';
+
+const LeafletMap = dynamic(() => import('@/components/shared/LeafletMap'), {
+    ssr: false,
+    loading: () => <div className="h-full w-full bg-muted flex items-center justify-center"><p>Loading map...</p></div>
+});
+
 
 const issueTypes: IssueType[] = ['Pothole', 'Streetlight', 'Garbage', 'Water Leakage'];
 
