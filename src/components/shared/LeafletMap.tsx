@@ -60,7 +60,7 @@ const MapClickHandler = ({ onMapClick }: { onMapClick?: (latlng: { lat: number; 
     return null;
 }
 
-const LeafletMap: React.FC<MapProps> = React.memo(({ 
+const LeafletMap: React.FC<MapProps> = ({ 
     center, 
     markerPosition, 
     markers,
@@ -72,42 +72,40 @@ const LeafletMap: React.FC<MapProps> = React.memo(({
   const router = useRouter();
 
   return (
-     <div key="map-container" style={{ height: '100%', width: '100%' }}>
-        <MapContainer 
-            center={center} 
-            zoom={zoom} 
-            scrollWheelZoom={scrollWheelZoom} 
-            style={{ height: '100%', width: '100%' }}
-        >
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          <MapFlyTo center={center} zoom={zoom} flyTo={flyTo} />
-          <MapClickHandler onMapClick={onMapClick} />
+    <MapContainer 
+        center={center} 
+        zoom={zoom} 
+        scrollWheelZoom={scrollWheelZoom} 
+        style={{ height: '100%', width: '100%' }}
+    >
+      <TileLayer
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
+      <MapFlyTo center={center} zoom={zoom} flyTo={flyTo} />
+      <MapClickHandler onMapClick={onMapClick} />
 
-          {markerPosition && <Marker position={markerPosition} />}
-          
-          {markers && markers.map(issue => (
-            <Marker key={issue.id} position={[issue.lat, issue.lng]}>
-              <Popup>
-                <div className="p-1 space-y-2">
-                    <h4 className="font-bold text-base">{issue.title}</h4>
-                    <Button 
-                        size="sm"
-                        className="w-full"
-                        onClick={() => router.push(`/citizen/issues/${issue.id}`)}
-                    >
-                        View Details
-                    </Button>
-                </div>
-              </Popup>
-            </Marker>
-          ))}
-        </MapContainer>
-    </div>
+      {markerPosition && <Marker position={markerPosition} />}
+      
+      {markers && markers.map(issue => (
+        <Marker key={issue.id} position={[issue.lat, issue.lng]}>
+          <Popup>
+            <div className="p-1 space-y-2">
+                <h4 className="font-bold text-base">{issue.title}</h4>
+                <Button 
+                    size="sm"
+                    className="w-full"
+                    onClick={() => router.push(`/citizen/issues/${issue.id}`)}
+                >
+                    View Details
+                </Button>
+            </div>
+          </Popup>
+        </Marker>
+      ))}
+    </MapContainer>
   );
-});
+};
 
 LeafletMap.displayName = 'LeafletMap';
 
