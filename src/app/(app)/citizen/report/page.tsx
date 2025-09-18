@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { useCallback, useState, useMemo } from 'react';
+import { useCallback, useState, useMemo, useEffect } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -21,11 +21,21 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { IssueType } from '@/lib/types';
-import { Send, MapPin, Loader2, AlertTriangle } from 'lucide-react';
+import { Send, MapPin, Loader2, LocateFixed } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useIssues } from '@/hooks/use-issues';
 import { useAuth } from '@/contexts/AuthContext';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import dynamic from 'next/dynamic';
+import { LatLngTuple } from 'leaflet';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const LeafletMap = dynamic(() => import('@/components/shared/LeafletMap'), {
+  ssr: false,
+  loading: () => <Skeleton className="h-[400px] w-full" />,
+});
+
+// Default to a central location in Pune, India, if geolocation fails.
+const DEFAULT_CENTER: LatLngTuple = [18.5204, 73.8567];
 
 
 const issueTypes: IssueType[] = ['Pothole', 'Streetlight', 'Garbage', 'Water Leakage', 'Obstruction'];
@@ -49,6 +59,10 @@ export default function ReportIssuePage() {
   const router = useRouter();
   const { addIssue } = useIssues();
   const { user } = useAuth();
+
+  const [mapCenter, setMapCenter] = useState<LatLngTuple>(DEFAULT_CENTER);
+  const [markerPosition, setMarkerPosition] = useState<LatLngTuple | undefined>(undefined);
+  const [isLocating, setIsLocating] = useState(false);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -59,6 +73,62 @@ export default function ReportIssuePage() {
       location: '',
     },
   });
+
+  const fetchAddress = useCallback(async (lat: number, lng: number) => {
+    try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+        const data = await response.json();
+        if (data && data.display_name) {
+            form.setValue('location', data.display_name);
+        } else {
+            form.setValue('location', `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`);
+        }
+    } catch (error) {
+        console.error("Reverse geocoding failed:", error);
+        form.setValue('location', `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`);
+        toast({
+            variant: 'destructive',
+            title: 'Could not fetch address',
+            description: 'Please enter the address manually.'
+        });
+    }
+  }, [form, toast]);
+
+
+  const handleMapClick = useCallback((latlng: { lat: number, lng: number }) => {
+    setMarkerPosition([latlng.lat, latlng.lng]);
+    fetchAddress(latlng.lat, latlng.lng);
+  }, [fetchAddress]);
+
+  const handleLocateMe = () => {
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        const newPos: LatLngTuple = [latitude, longitude];
+        setMapCenter(newPos);
+        setMarkerPosition(newPos);
+        fetchAddress(latitude, longitude);
+        setIsLocating(false);
+        toast({ title: 'Location Found!', description: 'Your current location has been set.' });
+      },
+      (error) => {
+        setIsLocating(false);
+        console.error("Geolocation error:", error);
+        toast({
+          variant: 'destructive',
+          title: 'Location Error',
+          description: 'Could not get your location. Please allow location access or select on the map.',
+        });
+      }
+    );
+  };
+  
+  // Set initial location on component mount
+  useEffect(() => {
+    handleLocateMe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     if (!user) {
@@ -145,15 +215,23 @@ export default function ReportIssuePage() {
                     />
 
                      <div className="space-y-4">
-                        <FormLabel className="flex items-center gap-2"><MapPin/> Location</FormLabel>
+                         <div className="flex justify-between items-center">
+                            <FormLabel className="flex items-center gap-2"><MapPin/> Location</FormLabel>
+                             <Button type="button" variant="outline" size="sm" onClick={handleLocateMe} disabled={isLocating}>
+                                {isLocating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LocateFixed className="mr-2 h-4 w-4" />}
+                                Locate Me
+                            </Button>
+                         </div>
                         
-                        <Alert variant="destructive">
-                            <AlertTriangle className="h-4 w-4" />
-                            <AlertTitle>Map Under Maintenance</AlertTitle>
-                            <AlertDescription>
-                                The interactive map is temporarily unavailable. Please enter the full address manually below.
-                            </AlertDescription>
-                        </Alert>
+                        <div className="h-[400px] w-full rounded-md border overflow-hidden">
+                            <LeafletMap 
+                                center={mapCenter}
+                                flyTo={mapCenter}
+                                zoom={15}
+                                onMapClick={handleMapClick}
+                                markerPosition={markerPosition}
+                            />
+                        </div>
 
                         <FormField
                             control={form.control}
@@ -162,7 +240,7 @@ export default function ReportIssuePage() {
                                 <FormItem>
                                     <FormLabel>Address</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Enter the full address of the issue" {...field} />
+                                        <Input placeholder="Click on the map or enter address manually" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
