@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { format, formatDistanceToNow, isPast } from 'date-fns';
+import { ImageLightbox } from '@/components/shared/ImageLightbox';
 
 export default function IssueDetailPage() {
   const params = useParams();
@@ -21,6 +22,7 @@ export default function IssueDetailPage() {
   const id = params.id as string;
   const issue = issues.find((i) => i.id === id);
   const [localizedDate, setLocalizedDate] = useState('');
+  const [isLightboxOpen, setLightboxOpen] = useState(false);
 
   useEffect(() => {
     if (issue) {
@@ -108,7 +110,7 @@ export default function IssueDetailPage() {
                     <ImageIcon className="h-5 w-5 text-muted-foreground mt-1" />
                      <div>
                         <span className="font-semibold">Photo Evidence:</span>
-                        <div className="mt-2 rounded-lg overflow-hidden border">
+                        <div className="mt-2 rounded-lg overflow-hidden border cursor-pointer" onClick={() => setLightboxOpen(true)}>
                         <Image
                             src={issue.imageUrl}
                             alt={issue.title}
@@ -135,6 +137,15 @@ export default function IssueDetailPage() {
           <IssueTimeline statusHistory={issue.statusHistory} currentStatus={issue.status} />
         </CardContent>
       </Card>
+      
+      {issue.imageUrl && (
+        <ImageLightbox
+          imageUrl={issue.imageUrl}
+          alt={issue.title}
+          isOpen={isLightboxOpen}
+          onOpenChange={setLightboxOpen}
+        />
+      )}
     </div>
   );
 }
