@@ -1,10 +1,9 @@
-
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import L, { LatLngTuple, Map } from 'leaflet';
+import L, { LatLngTuple } from 'leaflet';
 import { Button } from '../ui/button';
 import { useRouter } from 'next/navigation';
 
