@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import dynamic from 'next/dynamic';
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useMemo } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -191,7 +191,7 @@ export default function ReportIssuePage() {
                      <div className="space-y-4">
                         <FormLabel className="flex items-center gap-2"><MapPin/> Location</FormLabel>
                         <div className="h-[400px] w-full rounded-md overflow-hidden border">
-                            <LeafletMap 
+                           <LeafletMap 
                                 center={[lat, lng]}
                                 markerPosition={[lat, lng]}
                                 onMapClick={handleMapClick}
