@@ -60,6 +60,7 @@ export default function ReportIssuePage() {
   const { user } = useAuth();
   const [isLocating, setIsLocating] = useState(false);
   const [markerPosition, setMarkerPosition] = useState<LatLngTuple | undefined>(undefined);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -128,12 +129,38 @@ export default function ReportIssuePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!user) {
       toast({ variant: 'destructive', title: 'You must be logged in to report an issue.' });
       return;
     }
     
+    setIsSubmitting(true);
+
+    let imageUrl: string | undefined;
+    if (values.photo && values.photo[0]) {
+      try {
+        imageUrl = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(values.photo[0]);
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = (error) => reject(error);
+        });
+      } catch (error) {
+        console.error("Error converting image to Data URI:", error);
+        toast({
+          variant: 'destructive',
+          title: 'Image Upload Failed',
+          description: 'Could not process the selected image. Please try another one.'
+        });
+        setIsSubmitting(false);
+        return;
+      }
+    } else {
+        // If no photo is uploaded, use a unique placeholder based on the issue type
+        imageUrl = getPlaceholderImage(`issue-${values.type.toLowerCase()}`);
+    }
+
     const timestamp = Date.now();
     const issueId = `issue-${timestamp}`;
     
@@ -143,8 +170,7 @@ export default function ReportIssuePage() {
       type: values.type,
       location: values.location,
       description: values.description,
-      // Use a unique placeholder image for each issue to simulate a real upload.
-      imageUrl: values.photo?.[0] ? getPlaceholderImage(`new-issue-${issueId}`) : undefined,
+      imageUrl: imageUrl,
       reportedBy: user.id,
       reportedAt: new Date().toISOString(),
       status: 'Submitted',
@@ -161,6 +187,7 @@ export default function ReportIssuePage() {
       description: 'Your civic issue report has been received.',
     });
     router.push('/citizen/dashboard');
+    setIsSubmitting(false);
   }
 
   return (
@@ -271,11 +298,16 @@ export default function ReportIssuePage() {
                     <FormField
                     control={form.control}
                     name="photo"
-                    render={({ field }) => (
+                    render={({ field: { onChange, value, ...rest } }) => (
                         <FormItem>
-                        <FormLabel>Upload a Photo (Optional)</FormLabel>
+                        <FormLabel>Upload a Photo</FormLabel>
                         <FormControl>
-                            <Input type="file" accept="image/*" onChange={(e) => field.onChange(e.target.files)} />
+                            <Input 
+                                type="file" 
+                                accept="image/*" 
+                                onChange={(e) => onChange(e.target.files)} 
+                                {...rest}
+                            />
                         </FormControl>
                         <FormDescription>
                             A picture can help us understand the issue better.
@@ -285,8 +317,12 @@ export default function ReportIssuePage() {
                     )}
                     />
                     
-                    <Button type="submit" className="w-full md:w-auto">
-                        <Send className="mr-2 h-4 w-4" />
+                    <Button type="submit" className="w-full md:w-auto" disabled={isSubmitting}>
+                        {isSubmitting ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                            <Send className="mr-2 h-4 w-4" />
+                        )}
                         Submit Report
                     </Button>
                 </form>
