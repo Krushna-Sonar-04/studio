@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
@@ -12,6 +13,7 @@ import type { Issue, ContractorReport, Notification } from '@/lib/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { getPlaceholderImage } from '@/lib/placeholder-images';
 import { useNotifications } from '@/hooks/use-notifications';
+import { mockUsers } from '@/lib/mock-data';
 
 
 export default function ContractorJobPage() {
@@ -56,10 +58,13 @@ export default function ContractorJobPage() {
     e.preventDefault();
     if (!user) return;
     
+    const beforeImageUrl = getPlaceholderImage('contractor-before');
+    const afterImageUrl = getPlaceholderImage('contractor-after');
+
     const contractorReport: ContractorReport = {
         notes: (e.currentTarget.querySelector('#notes') as HTMLTextAreaElement).value,
-        beforeImageUrl: getPlaceholderImage('contractor-before'),
-        afterImageUrl: getPlaceholderImage('contractor-after'),
+        beforeImageUrl: beforeImageUrl,
+        afterImageUrl: afterImageUrl,
         submittedAt: new Date().toISOString(),
     };
 
@@ -77,8 +82,8 @@ export default function ContractorJobPage() {
     updateIssue(updatedIssue);
 
     // Notify citizen that work is complete and pending review
-    const notification: Notification = {
-        id: `notif-${Date.now()}`,
+    const citizenNotification: Notification = {
+        id: `notif-citizen-${Date.now()}`,
         userId: issue.reportedBy,
         type: 'status_update',
         title: 'Work Completed on Your Issue',
@@ -87,7 +92,24 @@ export default function ContractorJobPage() {
         timestamp: new Date().toISOString(),
         read: false,
     };
-    addNotification(notification);
+    addNotification(citizenNotification);
+    
+    // Notify Head of Department to review the work
+    const hod = mockUsers.find(u => u.role === 'Head of Department');
+    if (hod) {
+        const hodNotification: Notification = {
+            id: `notif-hod-${Date.now()}`,
+            userId: hod.id,
+            type: 'new_assignment',
+            title: 'Work Ready for Review',
+            description: `Contractor has submitted a completion report for issue "${issue.title}".`,
+            issueId: issue.id,
+            timestamp: new Date().toISOString(),
+            read: false,
+        };
+        addNotification(hodNotification);
+    }
+
 
     toast({ title: 'Completion Report Submitted', description: 'The job has been marked as resolved and is pending final verification.' });
     router.push('/contractor/dashboard');

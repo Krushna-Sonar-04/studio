@@ -1,3 +1,4 @@
+
 export type UserRole =
   | "Citizen"
   | "Head of Department"
@@ -108,4 +109,5 @@ export type Notification = {
   timestamp: string;
   read: boolean;
   userId: string; // The user this notification is for
+  imageUrl?: string; // Optional: for notifications with images
 };

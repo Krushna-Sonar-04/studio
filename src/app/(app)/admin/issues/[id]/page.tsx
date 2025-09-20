@@ -61,14 +61,16 @@ export default function AdminIssueReviewPage() {
     };
     updateIssue(updatedIssue);
     
-    // Notify citizen of final completion
+    // Notify citizen of final completion with details
+    const finalReport = `The work for "${issue.title}" has been verified and the issue is now closed. \n\nContractor Notes: ${issue.contractorReport?.notes || 'N/A'}`;
     const notification: Notification = {
-        id: `notif-${Date.now()}`,
+        id: `notif-final-${Date.now()}`,
         userId: issue.reportedBy,
         type: 'status_update',
         title: 'Your issue has been closed!',
-        description: `The work for "${issue.title}" has been verified and the issue is now closed.`,
+        description: finalReport,
         issueId: issue.id,
+        imageUrl: issue.contractorReport?.afterImageUrl,
         timestamp: new Date().toISOString(),
         read: false,
     };
@@ -76,7 +78,7 @@ export default function AdminIssueReviewPage() {
 
     toast({
       title: 'Issue Closed',
-      description: 'The contractor\'s work has been approved.',
+      description: 'The contractor\'s work has been approved and the citizen has been notified.',
     });
     router.push('/admin/dashboard');
   };
