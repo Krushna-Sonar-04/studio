@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -87,7 +88,7 @@ export default function AppHeader() {
                         <span className="font-bold font-headline text-lg text-primary">{APP_NAME}</span>
                     </Link>
                    
-                     <React.Fragment key={user ? user.id : 'logged-out'}>
+                     <React.Fragment>
                       <nav className="grid gap-4">
                           {user && navLinks.map(link => (
                               <Link key={link.href} href={link.href} className="text-muted-foreground hover:text-foreground" onClick={() => setMobileMenuOpen(false)}>
