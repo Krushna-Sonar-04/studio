@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -143,7 +144,7 @@ export default function ReportIssuePage() {
       location: values.location,
       description: values.description,
       // Use a unique placeholder image for each issue to simulate a real upload.
-      imageUrl: values.photo?.[0] ? getPlaceholderImage(issueId) : undefined,
+      imageUrl: values.photo?.[0] ? getPlaceholderImage(`new-issue-${issueId}`) : undefined,
       reportedBy: user.id,
       reportedAt: new Date().toISOString(),
       status: 'Submitted',
