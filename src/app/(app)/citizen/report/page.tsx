@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -30,6 +28,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
 import { LatLngTuple } from 'leaflet';
+import { getPlaceholderImage } from '@/lib/placeholder-images';
 
 const Map = dynamic(() => import('@/components/shared/LeafletMap'), { 
     ssr: false,
@@ -96,7 +95,7 @@ export default function ReportIssuePage() {
     fetchAddress(lat, lng);
   }, [fetchAddress]);
 
-  const handleLocateMe = () => {
+  const handleLocateMe = useCallback(() => {
     setIsLocating(true);
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -113,9 +112,10 @@ export default function ReportIssuePage() {
           title: 'Location Error',
           description: 'Could not get your location. Please enter the address manually.',
         });
-      }
+      },
+      { enableHighAccuracy: true }
     );
-  };
+  }, [handleSetLocation, toast]);
   
   const handleMapClick = (latlng: { lat: number, lng: number }) => {
       handleSetLocation(latlng.lat, latlng.lng);
@@ -142,9 +142,8 @@ export default function ReportIssuePage() {
       type: values.type,
       location: values.location,
       description: values.description,
-      // In a real app, you would upload the photo and get a URL.
-      // Here, we generate a unique placeholder for each issue.
-      imageUrl: values.photo?.[0] ? `https://picsum.photos/seed/${timestamp}/600/400` : undefined,
+      // Use a unique placeholder image for each issue to simulate a real upload.
+      imageUrl: values.photo?.[0] ? getPlaceholderImage(issueId) : undefined,
       reportedBy: user.id,
       reportedAt: new Date().toISOString(),
       status: 'Submitted',

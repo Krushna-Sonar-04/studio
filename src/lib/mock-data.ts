@@ -1,10 +1,11 @@
 import { User, Issue } from './types';
 import { add } from 'date-fns';
+import { getPlaceholderImage } from './placeholder-images';
 
 export let mockUsers: User[] = [
-  { id: 'user-1', name: 'Alia Reddy', role: 'Citizen', avatarUrl: 'https://picsum.photos/seed/101/100/100', email: 'alia.r@email.com', phone: '9876543210', active: true },
-  { id: 'user-2', name: 'Bhavin Shah', role: 'Head of Department', avatarUrl: 'https://picsum.photos/seed/102/100/100', email: 'bhavin.s@gov.in', phone: '9876543211', department: 'Roads', active: true },
-  { id: 'user-3', name: 'Chirag Kumar', role: 'Engineer', avatarUrl: 'https://picsum.photos/seed/103/100/100', email: 'chirag.k@gov.in', phone: '9876543212', department: 'Roads', zone: 'North', active: true },
+  { id: 'user-1', name: 'Alia Reddy', role: 'Citizen', avatarUrl: getPlaceholderImage('user-avatar-1'), email: 'alia.r@email.com', phone: '9876543210', active: true },
+  { id: 'user-2', name: 'Bhavin Shah', role: 'Head of Department', avatarUrl: getPlaceholderImage('user-avatar-2'), email: 'bhavin.s@gov.in', phone: '9876543211', department: 'Roads', active: true },
+  { id: 'user-3', name: 'Chirag Kumar', role: 'Engineer', avatarUrl: getPlaceholderImage('user-avatar-3'), email: 'chirag.k@gov.in', phone: '9876543212', department: 'Roads', zone: 'North', active: true },
   { id: 'user-4', name: 'Deepa Iyer', role: 'Fund Manager', avatarUrl: 'https://picsum.photos/seed/104/100/100', email: 'deepa.i@gov.in', phone: '9876543213', active: true },
   { id: 'user-5', name: 'Esha Verma', role: 'Approving Manager', avatarUrl: 'https://picsum.photos/seed/105/100/100', email: 'esha.v@gov.in', phone: '9876543214', active: true },
   { id: 'user-6', name: 'Farhan Ali', role: 'Contractor', avatarUrl: 'https://picsum.photos/seed/106/100/100', email: 'farhan.ali@contractors.com', phone: '9876543215', department: 'Sanitation', zone: 'West', active: true },
@@ -20,7 +21,7 @@ export let mockIssues: Issue[] = [
     type: 'Pothole',
     location: '123 Main St, Anytown',
     description: 'A very large and dangerous pothole has formed in the middle of Main Street, near the intersection with Oak Avenue. It has already caused a flat tire for one vehicle.',
-    imageUrl: 'https://picsum.photos/seed/201/600/400',
+    imageUrl: getPlaceholderImage('issue-pothole'),
     reportedBy: 'user-1',
     reportedAt: '2024-07-20T10:00:00Z',
     status: 'Submitted',
@@ -37,7 +38,7 @@ export let mockIssues: Issue[] = [
     type: 'Streetlight',
     location: 'Corner of Pine and Maple',
     description: 'The streetlight at the corner of Pine and Maple has been out for three nights. It is a very dark corner and feels unsafe.',
-    imageUrl: 'https://picsum.photos/seed/202/600/400',
+    imageUrl: getPlaceholderImage('issue-streetlight'),
     reportedBy: 'user-1',
     reportedAt: '2024-07-18T21:30:00Z',
     status: 'PendingVerificationAndEstimation',
@@ -61,6 +62,7 @@ export let mockIssues: Issue[] = [
     reportedBy: 'user-1',
     reportedAt: '2024-07-15T14:00:00Z',
     status: 'Approved',
+    imageUrl: getPlaceholderImage('issue-garbage'),
     currentRoles: ['Head of Department'],
     assignedEngineerId: 'user-7',
     assignedFundManagerId: 'user-4',
@@ -93,7 +95,7 @@ export let mockIssues: Issue[] = [
     type: 'Water Leakage',
     location: '55 Elm Street',
     description: 'Water is gushing out from a crack in the pavement in front of 55 Elm Street. It looks like a water main break.',
-    imageUrl: 'https://picsum.photos/seed/204/600/400',
+    imageUrl: getPlaceholderImage('issue-water-leak'),
     reportedBy: 'user-1',
     reportedAt: '2024-07-10T08:00:00Z',
     status: 'Closed',
@@ -118,8 +120,8 @@ export let mockIssues: Issue[] = [
     estimationReport: { estimatedCost: 5500, notes: 'Emergency repair, including excavation and new pipe section.', submittedAt: '2024-07-10T11:00:00Z' },
     contractorReport: {
       notes: 'Work completed as per spec.',
-      beforeImageUrl: 'https://picsum.photos/seed/301/600/400',
-      afterImageUrl: 'https://picsum.photos/seed/302/600/400',
+      beforeImageUrl: getPlaceholderImage('contractor-before'),
+      afterImageUrl: getPlaceholderImage('contractor-after'),
       submittedAt: '2024-07-11T17:00:00Z'
     },
     upvotes: 52,
@@ -208,10 +210,6 @@ export let mockIssues: Issue[] = [
   },
 ];
 
-// DEPRECATED: These functions are no longer used. The `useIssues` hook now manages the state.
-export const setMockIssues = (newIssues: Issue[]) => {
-  // mockIssues = newIssues;
-};
 export const addMockUser = (newUser: User) => {
     mockUsers.push(newUser);
 };

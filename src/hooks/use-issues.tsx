@@ -1,50 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback, createContext, useContext, ReactNode } from 'react';
+import { useState, useEffect, useCallback, createContext, useContext, ReactNode, useMemo } from 'react';
 import { mockIssues as initialIssues } from '@/lib/mock-data';
 import type { Issue } from '@/lib/types';
-
-// This is a simple in-memory event emitter to notify subscribers of changes.
-// In a real-world scenario, this would be replaced by a more robust state
-// management library (like Zustand or Redux) or a real-time data fetching
-// library (like React Query with WebSockets or SWR).
-const createEventEmitter = () => {
-    const listeners = new Set<(data: Issue[]) => void>();
-    return {
-        subscribe: (listener: (data: Issue[]) => void) => {
-            listeners.add(listener);
-            return () => listeners.delete(listener);
-        },
-        emit: (data: Issue[]) => {
-            for (const listener of listeners) {
-                listener(data);
-            }
-        },
-    };
-};
-
-const issueEventEmitter = createEventEmitter();
-
-// The single source of truth for our mock data.
-let mockIssuesStore: Issue[] = [...initialIssues];
-
-const updateMockIssues = (updatedIssue: Issue) => {
-    const index = mockIssuesStore.findIndex(i => i.id === updatedIssue.id);
-    if (index !== -1) {
-        mockIssuesStore[index] = updatedIssue;
-    } else {
-         // This case should not happen if we only update
-        console.warn("Attempted to update an issue that does not exist.");
-    }
-    issueEventEmitter.emit([...mockIssuesStore]);
-};
-
-const addMockIssue = (newIssue: Issue) => {
-    mockIssuesStore.unshift(newIssue);
-    issueEventEmitter.emit([...mockIssuesStore]);
-};
-
-// --- React Hook and Provider ---
 
 interface IssuesContextType {
     issues: Issue[];
@@ -55,29 +13,45 @@ interface IssuesContextType {
 
 const IssuesContext = createContext<IssuesContextType | undefined>(undefined);
 
+// The single source of truth for our mock data.
+// In a real app, this would be your database.
+let mockIssuesStore: Issue[] = [...initialIssues];
+
 export function IssuesProvider({ children }: { children: ReactNode }) {
     const [issues, setIssues] = useState<Issue[]>(mockIssuesStore);
 
+    // This effect runs once to initialize the state from our mock store.
+    // In a real app, you might fetch initial data here.
     useEffect(() => {
-        const unsubscribe = issueEventEmitter.subscribe(setIssues);
-        return () => unsubscribe();
+        setIssues(mockIssuesStore);
     }, []);
 
     const getIssues = useCallback(() => {
         return issues;
     }, [issues]);
-
+    
+    // Function to update an issue
     const updateIssue = useCallback((issueToUpdate: Issue) => {
-        updateMockIssues(issueToUpdate);
+        mockIssuesStore = mockIssuesStore.map(i => i.id === issueToUpdate.id ? issueToUpdate : i);
+        setIssues([...mockIssuesStore]);
     }, []);
     
+    // Function to add a new issue
     const addIssue = useCallback((newIssue: Issue) => {
-        addMockIssue(newIssue);
+        mockIssuesStore.unshift(newIssue);
+        setIssues([...mockIssuesStore]);
     }, []);
-
+    
+    // We use useMemo to ensure the context value object is stable unless its contents change.
+    const contextValue = useMemo(() => ({
+        issues,
+        getIssues,
+        updateIssue,
+        addIssue
+    }), [issues, getIssues, updateIssue, addIssue]);
 
     return (
-        <IssuesContext.Provider value={{ issues, getIssues, updateIssue, addIssue }}>
+        <IssuesContext.Provider value={contextValue}>
             {children}
         </IssuesContext.Provider>
     );

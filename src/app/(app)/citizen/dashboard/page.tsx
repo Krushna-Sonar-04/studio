@@ -10,12 +10,12 @@ import { Badge } from '@/components/ui/badge';
 import { PlusCircle, BarChart, ListChecks, CheckCircle2, Map, Megaphone } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { UpvoteButton } from '@/components/shared/UpvoteButton';
 import { mockAnnouncements } from '@/lib/mock-data/announcements';
 import { AnnouncementCard } from '@/components/shared/AnnouncementCard';
 
-const StatusBadge = ({ status }: { status: Issue['status'] }) => {
+const StatusBadge = React.memo(({ status }: { status: Issue['status'] }) => {
   const variant: 'default' | 'secondary' | 'destructive' | 'outline' = useMemo(() => {
     switch (status) {
       case 'Submitted':
@@ -35,19 +35,20 @@ const StatusBadge = ({ status }: { status: Issue['status'] }) => {
     }
   }, [status]);
   return <Badge variant={variant}>{status}</Badge>;
-};
+});
+StatusBadge.displayName = 'StatusBadge';
 
 
 export default function CitizenDashboard() {
   const { user } = useAuth();
   const { issues, updateIssue } = useIssues();
   const router = useRouter();
-  const [userIssues, setUserIssues] = useState<Issue[]>([]);
 
-  useEffect(() => {
+  const userIssues = useMemo(() => {
     if (user) {
-      setUserIssues(issues.filter((issue) => issue.reportedBy === user.id));
+      return issues.filter((issue) => issue.reportedBy === user.id);
     }
+    return [];
   }, [user, issues]);
 
   const handleUpvoteChange = (issueId: string, newUpvoteCount: number, userHasUpvoted: boolean) => {

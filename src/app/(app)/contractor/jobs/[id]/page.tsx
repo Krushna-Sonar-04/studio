@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Play, Check, ArrowLeft, Upload, Ticket } from 'lucide-react';
 import type { Issue, ContractorReport } from '@/lib/types';
 import { useAuth } from '@/contexts/AuthContext';
+import { getPlaceholderImage } from '@/lib/placeholder-images';
 
 
 export default function ContractorJobPage() {
@@ -55,8 +56,8 @@ export default function ContractorJobPage() {
     
     const contractorReport: ContractorReport = {
         notes: (e.currentTarget.querySelector('#notes') as HTMLTextAreaElement).value,
-        beforeImageUrl: 'https://picsum.photos/seed/310/600/400', // Placeholder
-        afterImageUrl: 'https://picsum.photos/seed/311/600/400', // Placeholder
+        beforeImageUrl: getPlaceholderImage('contractor-before'),
+        afterImageUrl: getPlaceholderImage('contractor-after'),
         submittedAt: new Date().toISOString(),
     };
 

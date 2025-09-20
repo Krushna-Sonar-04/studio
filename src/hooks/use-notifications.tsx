@@ -1,66 +1,57 @@
 "use client";
 
-import { useState, useEffect, useCallback, createContext, useContext, ReactNode } from 'react';
-import { mockNotifications as initialNotifications, addMockNotification as addMockNotificationToStore, setMockNotifications as setMockNotificationsInStore } from '@/lib/mock-data/notifications';
+import { useState, useEffect, useCallback, createContext, useContext, ReactNode, useMemo } from 'react';
+import { mockNotifications as initialNotifications } from '@/lib/mock-data/notifications';
 import type { Notification } from '@/lib/types';
-
-const createEventEmitter = () => {
-    const listeners = new Set<(data: Notification[]) => void>();
-    return {
-        subscribe: (listener: (data: Notification[]) => void) => {
-            listeners.add(listener);
-            return () => listeners.delete(listener);
-        },
-        emit: (data: Notification[]) => {
-            for (const listener of listeners) {
-                listener(data);
-            }
-        },
-    };
-};
-
-const notificationEventEmitter = createEventEmitter();
-
-let notificationsStore: Notification[] = [...initialNotifications];
-
-const updateStoreAndEmit = () => {
-    notificationEventEmitter.emit([...notificationsStore]);
-};
-
-const addNotification = (newNotification: Notification) => {
-    notificationsStore.unshift(newNotification);
-    updateStoreAndEmit();
-};
-
-const updateNotification = (notificationToUpdate: Notification) => {
-    notificationsStore = notificationsStore.map(n => n.id === notificationToUpdate.id ? notificationToUpdate : n);
-    updateStoreAndEmit();
-};
-
-const updateAllNotificationsForUser = (userId: string, updates: Partial<Notification>) => {
-    notificationsStore = notificationsStore.map(n => n.userId === userId ? { ...n, ...updates } : n);
-    updateStoreAndEmit();
-}
 
 interface NotificationsContextType {
     notifications: Notification[];
     addNotification: (notification: Notification) => void;
     updateNotification: (notification: Notification) => void;
-    updateAllNotificationsForUser: (userId: string, updates: Partial<Notification>) => void;
+    updateAllNotificationsForUser: (userId: string, updates: Partial<Pick<Notification, 'read'>>) => void;
 }
 
 const NotificationsContext = createContext<NotificationsContextType | undefined>(undefined);
 
+let notificationsStore: Notification[] = [...initialNotifications];
+
 export function NotificationsProvider({ children }: { children: ReactNode }) {
     const [notifications, setNotifications] = useState<Notification[]>(notificationsStore);
-
+    
     useEffect(() => {
-        const unsubscribe = notificationEventEmitter.subscribe(setNotifications);
-        return () => unsubscribe();
+        setNotifications(notificationsStore);
     }, []);
 
+    const addNotification = useCallback((newNotification: Notification) => {
+        notificationsStore.unshift(newNotification);
+        setNotifications([...notificationsStore]);
+    }, []);
+
+    const updateNotification = useCallback((notificationToUpdate: Notification) => {
+        notificationsStore = notificationsStore.map(n => n.id === notificationToUpdate.id ? notificationToUpdate : n);
+        setNotifications([...notificationsStore]);
+    }, []);
+
+    const updateAllNotificationsForUser = useCallback((userId: string, updates: Partial<Pick<Notification, 'read'>>) => {
+        notificationsStore = notificationsStore.map(n => {
+            if (n.userId === userId) {
+                return { ...n, ...updates };
+            }
+            return n;
+        });
+        setNotifications([...notificationsStore]);
+    }, []);
+
+    const contextValue = useMemo(() => ({
+        notifications,
+        addNotification,
+        updateNotification,
+        updateAllNotificationsForUser
+    }), [notifications, addNotification, updateNotification, updateAllNotificationsForUser]);
+
+
     return (
-        <NotificationsContext.Provider value={{ notifications, addNotification, updateNotification, updateAllNotificationsForUser }}>
+        <NotificationsContext.Provider value={contextValue}>
             {children}
         </NotificationsContext.Provider>
     );

@@ -5,6 +5,7 @@ import { ThumbsUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
+import { ClientOnly } from './ClientOnly';
 
 interface UpvoteButtonProps {
   issueId: string;
@@ -22,22 +23,34 @@ export function UpvoteButton({
   const { user } = useAuth();
   const [upvoteCount, setUpvoteCount] = useState(initialUpvotes);
   const [hasUpvoted, setHasUpvoted] = useState(initialHasUpvoted);
-  const [isClient, setIsClient] = useState(false);
 
-  // Ensure localStorage is only accessed on the client
+  // Effect to sync with initial props from server, which might change
   useEffect(() => {
-    setIsClient(true);
-    const storedUpvotes = localStorage.getItem(`upvoted_${user?.id}`);
-    if (storedUpvotes) {
-      const upvotedIssues: string[] = JSON.parse(storedUpvotes);
-      if (upvotedIssues.includes(issueId)) {
-        setHasUpvoted(true);
+    setUpvoteCount(initialUpvotes);
+  }, [initialUpvotes]);
+  
+  // Effect to sync hasUpvoted state from localStorage only once on client mount
+  useEffect(() => {
+    if (user) {
+      const storedUpvotes = localStorage.getItem(`upvoted_${user.id}`);
+      if (storedUpvotes) {
+        const upvotedIssues: string[] = JSON.parse(storedUpvotes);
+        if (upvotedIssues.includes(issueId)) {
+          setHasUpvoted(true);
+        } else {
+          setHasUpvoted(false);
+        }
+      } else {
+          setHasUpvoted(initialHasUpvoted);
       }
     }
-  }, [issueId, user?.id]);
+  }, [issueId, user, initialHasUpvoted]);
 
   const handleUpvote = () => {
-    if (!user) return; // Or show a toast to log in
+    if (!user) { // Or show a toast to log in
+      alert("Please log in to upvote issues.");
+      return; 
+    }
 
     const newUpvoteCount = hasUpvoted ? upvoteCount - 1 : upvoteCount + 1;
     const newHasUpvoted = !hasUpvoted;
@@ -47,46 +60,33 @@ export function UpvoteButton({
 
     // Persist to localStorage
     const storedUpvotes = localStorage.getItem(`upvoted_${user.id}`);
-    const upvotedIssues: string[] = storedUpvotes ? JSON.parse(storedUpvotes) : [];
+    let upvotedIssues: string[] = storedUpvotes ? JSON.parse(storedUpvotes) : [];
 
     if (newHasUpvoted) {
       upvotedIssues.push(issueId);
     } else {
-      const index = upvotedIssues.indexOf(issueId);
-      if (index > -1) {
-        upvotedIssues.splice(index, 1);
-      }
+      upvotedIssues = upvotedIssues.filter(id => id !== issueId);
     }
     localStorage.setItem(`upvoted_${user.id}`, JSON.stringify(upvotedIssues));
     
-    // Notify parent component
+    // Notify parent component to update the global state
     onUpvoteChange(issueId, newUpvoteCount, newHasUpvoted);
   };
 
-  if (!isClient) {
-    // Render a placeholder or nothing on the server to avoid hydration mismatch
-    return (
-        <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" disabled>
-                <ThumbsUp className="h-4 w-4" />
-            </Button>
-            <span className="text-sm font-medium">{initialUpvotes}</span>
-        </div>
-    );
-  }
-
   return (
-    <div className="flex items-center gap-2">
-      <Button variant="ghost" size="sm" onClick={handleUpvote} disabled={!user}>
-        <ThumbsUp
-          className={cn(
-            'h-4 w-4',
-            hasUpvoted && 'fill-blue-500 text-blue-500'
-          )}
-        />
-        <span className="sr-only">Upvote</span>
-      </Button>
-      <span className="text-sm font-medium">{upvoteCount}</span>
-    </div>
+    <ClientOnly>
+      <div className="flex items-center gap-2">
+        <Button variant="ghost" size="sm" onClick={handleUpvote} disabled={!user}>
+          <ThumbsUp
+            className={cn(
+              'h-4 w-4',
+              hasUpvoted && 'fill-blue-500 text-blue-500'
+            )}
+          />
+          <span className="sr-only">Upvote</span>
+        </Button>
+        <span className="text-sm font-medium">{upvoteCount}</span>
+      </div>
+    </ClientOnly>
   );
 }
