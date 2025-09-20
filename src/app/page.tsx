@@ -87,7 +87,7 @@ export default function LandingPage() {
                 </div>
               </div>
               <Image
-                src="https://picsum.photos/seed/hero-image/800/600"
+                src="https://picsum.photos/seed/landing-hero/800/600"
                 width="800"
                 height="600"
                 alt="Hero"
@@ -101,7 +101,7 @@ export default function LandingPage() {
 
 
         {/* Features Section */}
-        <section id="features" className="w-full py-12 md:py-24 lg:py-32 bg-muted">
+        <section id="features" className="w-full py-12 md:py-24 lg:py-32 bg-muted/30 dark:bg-muted/40">
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
@@ -137,4 +137,3 @@ export default function LandingPage() {
     </div>
   );
 }
-
