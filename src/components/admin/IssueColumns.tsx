@@ -3,7 +3,7 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { Issue } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
-import { MoreHorizontal, ShieldAlert, Clock, ImageIcon } from 'lucide-react';
+import { MoreHorizontal, ShieldAlert, Clock, ImageIcon, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -132,6 +132,7 @@ export const issueColumns = ({ openAssignDialog, openContractorDialog }: IssueCo
       id: 'actions',
       cell: ({ row }) => {
         const issue = row.original;
+        const isResolved = issue.status === 'Resolved';
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -140,6 +141,12 @@ export const issueColumns = ({ openAssignDialog, openContractorDialog }: IssueCo
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              {isResolved && (
+                <DropdownMenuItem onClick={() => router.push(`/admin/issues/${issue.id}`)}>
+                    <Edit className="mr-2 h-4 w-4" />
+                    Review Work
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem onClick={() => openAssignDialog(issue)} disabled={issue.status !== 'Submitted'}>
                 Assign for Verification
               </DropdownMenuItem>

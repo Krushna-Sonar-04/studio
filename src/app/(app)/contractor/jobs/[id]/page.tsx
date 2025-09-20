@@ -8,9 +8,10 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Play, Check, ArrowLeft, Upload, Ticket } from 'lucide-react';
-import type { Issue, ContractorReport } from '@/lib/types';
+import type { Issue, ContractorReport, Notification } from '@/lib/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { getPlaceholderImage } from '@/lib/placeholder-images';
+import { useNotifications } from '@/hooks/use-notifications';
 
 
 export default function ContractorJobPage() {
@@ -18,6 +19,7 @@ export default function ContractorJobPage() {
   const router = useRouter();
   const { toast } = useToast();
   const { issues, updateIssue } = useIssues();
+  const { addNotification } = useNotifications();
   const { user } = useAuth();
   const id = params.id as string;
   const issue = issues.find((i) => i.id === id);
@@ -68,11 +70,25 @@ export default function ContractorJobPage() {
         contractorReport: contractorReport,
         statusHistory: [
             ...issue.statusHistory,
-            { status: 'Resolved', date: new Date().toISOString(), updatedBy: user.name, notes: 'Completion report submitted.' }
+            { status: 'Resolved', date: new Date().toISOString(), updatedBy: user.name, notes: 'Completion report submitted for verification.' }
         ]
     };
 
     updateIssue(updatedIssue);
+
+    // Notify citizen that work is complete and pending review
+    const notification: Notification = {
+        id: `notif-${Date.now()}`,
+        userId: issue.reportedBy,
+        type: 'status_update',
+        title: 'Work Completed on Your Issue',
+        description: `The work for "${issue.title}" is complete and is now pending final verification.`,
+        issueId: issue.id,
+        timestamp: new Date().toISOString(),
+        read: false,
+    };
+    addNotification(notification);
+
     toast({ title: 'Completion Report Submitted', description: 'The job has been marked as resolved and is pending final verification.' });
     router.push('/contractor/dashboard');
   };

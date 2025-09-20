@@ -27,15 +27,14 @@ const getRoleBasePath = (role: UserRole): string => {
 const getAllowedPaths = (role: UserRole): string[] => {
     const basePath = getRoleBasePath(role);
     const sharedPaths = [
-        // All roles can see their profile, issue details, and announcements
         '/profile', 
-        '/citizen/issues', 
+        '/citizen/issues', // Allows viewing any issue detail
         '/citizen/announcements'
     ];
     
-    // Admins can see everything under their path
+    // Admins can see everything under their path, plus issue review
     if (role === 'Head of Department') {
-        return [basePath, ...sharedPaths];
+        return [basePath, ...sharedPaths, '/admin/issues'];
     }
     
     // Other roles have specific paths
