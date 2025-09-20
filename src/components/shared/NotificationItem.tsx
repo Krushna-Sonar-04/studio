@@ -6,6 +6,7 @@ import { AlertTriangle, Bell, CheckCircle, Circle, FileText, Zap } from 'lucide-
 import { formatDistanceToNow } from 'date-fns';
 import { useRouter } from 'next/navigation';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import React from 'react';
 
 interface NotificationItemProps {
   notification: Notification;
@@ -20,7 +21,7 @@ const notificationTypeConfig: Record<NotificationType, { icon: React.ElementType
 };
 
 
-export function NotificationItem({ notification, onMarkAsRead }: NotificationItemProps) {
+export const NotificationItem = React.memo(function NotificationItem({ notification, onMarkAsRead }: NotificationItemProps) {
   const router = useRouter();
   const Icon = notificationTypeConfig[notification.type]?.icon || Bell;
   const iconColor = notificationTypeConfig[notification.type]?.color || 'text-muted-foreground';
@@ -71,4 +72,4 @@ export function NotificationItem({ notification, onMarkAsRead }: NotificationIte
       )}
     </div>
   );
-}
+});

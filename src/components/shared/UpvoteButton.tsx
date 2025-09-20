@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ThumbsUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,7 +14,7 @@ interface UpvoteButtonProps {
   onUpvoteChange: (issueId: string, newUpvoteCount: number, userHasUpvoted: boolean) => void;
 }
 
-export function UpvoteButton({
+export const UpvoteButton = React.memo(function UpvoteButton({
   issueId,
   initialUpvotes,
   initialHasUpvoted,
@@ -27,25 +27,9 @@ export function UpvoteButton({
   // Effect to sync with initial props from server, which might change
   useEffect(() => {
     setUpvoteCount(initialUpvotes);
-  }, [initialUpvotes]);
+    setHasUpvoted(initialHasUpvoted);
+  }, [initialUpvotes, initialHasUpvoted]);
   
-  // Effect to sync hasUpvoted state from localStorage only once on client mount
-  useEffect(() => {
-    if (user) {
-      const storedUpvotes = localStorage.getItem(`upvoted_${user.id}`);
-      if (storedUpvotes) {
-        const upvotedIssues: string[] = JSON.parse(storedUpvotes);
-        if (upvotedIssues.includes(issueId)) {
-          setHasUpvoted(true);
-        } else {
-          setHasUpvoted(false);
-        }
-      } else {
-          setHasUpvoted(initialHasUpvoted);
-      }
-    }
-  }, [issueId, user, initialHasUpvoted]);
-
   const handleUpvote = () => {
     if (!user) { // Or show a toast to log in
       alert("Please log in to upvote issues.");
@@ -57,17 +41,6 @@ export function UpvoteButton({
 
     setUpvoteCount(newUpvoteCount);
     setHasUpvoted(newHasUpvoted);
-
-    // Persist to localStorage
-    const storedUpvotes = localStorage.getItem(`upvoted_${user.id}`);
-    let upvotedIssues: string[] = storedUpvotes ? JSON.parse(storedUpvotes) : [];
-
-    if (newHasUpvoted) {
-      upvotedIssues.push(issueId);
-    } else {
-      upvotedIssues = upvotedIssues.filter(id => id !== issueId);
-    }
-    localStorage.setItem(`upvoted_${user.id}`, JSON.stringify(upvotedIssues));
     
     // Notify parent component to update the global state
     onUpvoteChange(issueId, newUpvoteCount, newHasUpvoted);
@@ -89,4 +62,4 @@ export function UpvoteButton({
       </div>
     </ClientOnly>
   );
-}
+});

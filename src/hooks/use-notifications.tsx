@@ -16,30 +16,33 @@ const NotificationsContext = createContext<NotificationsContextType | undefined>
 let notificationsStore: Notification[] = [...initialNotifications];
 
 export function NotificationsProvider({ children }: { children: ReactNode }) {
-    const [notifications, setNotifications] = useState<Notification[]>(notificationsStore);
+    const [notifications, setNotifications] = useState<Notification[]>([]);
     
     useEffect(() => {
         setNotifications(notificationsStore);
     }, []);
 
     const addNotification = useCallback((newNotification: Notification) => {
-        notificationsStore.unshift(newNotification);
-        setNotifications([...notificationsStore]);
+        const newNotifications = [newNotification, ...notificationsStore];
+        notificationsStore = newNotifications;
+        setNotifications(newNotifications);
     }, []);
 
     const updateNotification = useCallback((notificationToUpdate: Notification) => {
-        notificationsStore = notificationsStore.map(n => n.id === notificationToUpdate.id ? notificationToUpdate : n);
-        setNotifications([...notificationsStore]);
+        const newNotifications = notificationsStore.map(n => n.id === notificationToUpdate.id ? notificationToUpdate : n);
+        notificationsStore = newNotifications;
+        setNotifications(newNotifications);
     }, []);
 
     const updateAllNotificationsForUser = useCallback((userId: string, updates: Partial<Pick<Notification, 'read'>>) => {
-        notificationsStore = notificationsStore.map(n => {
-            if (n.userId === userId) {
+        const newNotifications = notificationsStore.map(n => {
+            if (n.userId === userId && !n.read) {
                 return { ...n, ...updates };
             }
             return n;
         });
-        setNotifications([...notificationsStore]);
+        notificationsStore = newNotifications;
+        setNotifications(newNotifications);
     }, []);
 
     const contextValue = useMemo(() => ({

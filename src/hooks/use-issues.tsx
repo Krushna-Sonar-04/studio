@@ -6,7 +6,6 @@ import type { Issue } from '@/lib/types';
 
 interface IssuesContextType {
     issues: Issue[];
-    getIssues: () => Issue[];
     updateIssue: (issue: Issue) => void;
     addIssue: (issue: Issue) => void;
 }
@@ -18,37 +17,33 @@ const IssuesContext = createContext<IssuesContextType | undefined>(undefined);
 let mockIssuesStore: Issue[] = [...initialIssues];
 
 export function IssuesProvider({ children }: { children: ReactNode }) {
-    const [issues, setIssues] = useState<Issue[]>(mockIssuesStore);
+    const [issues, setIssues] = useState<Issue[]>([]);
 
     // This effect runs once to initialize the state from our mock store.
-    // In a real app, you might fetch initial data here.
     useEffect(() => {
         setIssues(mockIssuesStore);
     }, []);
-
-    const getIssues = useCallback(() => {
-        return issues;
-    }, [issues]);
     
     // Function to update an issue
     const updateIssue = useCallback((issueToUpdate: Issue) => {
-        mockIssuesStore = mockIssuesStore.map(i => i.id === issueToUpdate.id ? issueToUpdate : i);
-        setIssues([...mockIssuesStore]);
+        const newIssues = mockIssuesStore.map(i => i.id === issueToUpdate.id ? issueToUpdate : i);
+        mockIssuesStore = newIssues;
+        setIssues(newIssues);
     }, []);
     
     // Function to add a new issue
     const addIssue = useCallback((newIssue: Issue) => {
-        mockIssuesStore.unshift(newIssue);
-        setIssues([...mockIssuesStore]);
+        const newIssues = [newIssue, ...mockIssuesStore];
+        mockIssuesStore = newIssues;
+        setIssues(newIssues);
     }, []);
     
     // We use useMemo to ensure the context value object is stable unless its contents change.
     const contextValue = useMemo(() => ({
         issues,
-        getIssues,
         updateIssue,
         addIssue
-    }), [issues, getIssues, updateIssue, addIssue]);
+    }), [issues, updateIssue, addIssue]);
 
     return (
         <IssuesContext.Provider value={contextValue}>

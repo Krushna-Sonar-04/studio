@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { PlusCircle, BarChart, ListChecks, CheckCircle2, Map, Megaphone } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { UpvoteButton } from '@/components/shared/UpvoteButton';
 import { mockAnnouncements } from '@/lib/mock-data/announcements';
 import { AnnouncementCard } from '@/components/shared/AnnouncementCard';
