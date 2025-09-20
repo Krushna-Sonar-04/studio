@@ -12,6 +12,7 @@ import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { NotificationBell } from './NotificationBell';
+import { ThemeSwitcher } from './ThemeSwitcher';
 
 const TricolorFlag = () => (
   <svg
@@ -64,6 +65,7 @@ export default function AppHeader() {
         
         <div className="flex flex-1 items-center justify-end space-x-2 md:space-x-4">
           <div className="hidden md:flex items-center gap-4">
+            <ThemeSwitcher />
             <LanguageSwitcher />
             {isClient && user && <NotificationBell user={user} />}
             {isClient && <UserNav />}
@@ -100,10 +102,13 @@ export default function AppHeader() {
                       </nav>
                        <div className="border-t pt-6 flex flex-col gap-4">
                             <div className="flex items-center justify-between">
+                                <ThemeSwitcher />
                                 <LanguageSwitcher />
-                                {user && <NotificationBell user={user} />}
                             </div>
-                          <UserNav />
+                             <div className="flex items-center justify-between">
+                                {user && <NotificationBell user={user} />}
+                                <UserNav />
+                            </div>
                       </div>
                      </React.Fragment>
                    
