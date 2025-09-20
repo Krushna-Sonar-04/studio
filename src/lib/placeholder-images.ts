@@ -15,17 +15,16 @@ const placeholderImages: Record<string, ImagePlaceholder> =
 
 /**
  * Gets a placeholder image URL.
- * If an id is provided, it tries to find a specific image.
- * If the id is not found or not provided, it generates a unique URL based on the id string
- * to ensure deterministic randomness.
+ * If a known id is provided, it tries to find a specific image.
+ * Otherwise, it generates a unique URL based on the id string to ensure a consistent image for that id.
  * @param id A string identifier for the image.
  * @returns A URL for a placeholder image.
  */
 export function getPlaceholderImage(id: string): string {
-    if (id && placeholderImages[id]) {
+    if (placeholderImages[id]) {
         return placeholderImages[id].imageUrl;
     }
     // Fallback to a unique, deterministically random image based on the ID.
-    // This ensures that 'issue-123' always gets the same random image.
+    // This ensures that 'issue-123' always gets the same random image across all dashboards.
     return `https://picsum.photos/seed/${id}/600/400`;
 }

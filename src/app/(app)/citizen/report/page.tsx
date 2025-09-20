@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState, useEffect, useMemo } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -174,7 +174,7 @@ export default function ReportIssuePage() {
                 <CardTitle>Issue Details</CardTitle>
                 <CardDescription>Provide as much detail as possible.</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
                 <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                     <FormField

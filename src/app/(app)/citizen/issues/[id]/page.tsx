@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
 import { ArrowLeft, Calendar, FileText, ImageIcon, MapPin, User, Wrench, Ticket, ShieldAlert, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { format, formatDistanceToNow, isPast } from 'date-fns';
 import { ImageLightbox } from '@/components/shared/ImageLightbox';
@@ -20,7 +20,7 @@ export default function IssueDetailPage() {
   const router = useRouter();
   const { issues } = useIssues();
   const id = params.id as string;
-  const issue = issues.find((i) => i.id === id);
+  const issue = useMemo(() => issues.find((i) => i.id === id), [id, issues]);
   const [localizedDate, setLocalizedDate] = useState('');
   const [isLightboxOpen, setLightboxOpen] = useState(false);
 
@@ -36,6 +36,8 @@ export default function IssueDetailPage() {
   
   const reportedBy = mockUsers.find(u => u.id === issue.reportedBy);
   const isSlaBreached = issue.slaDeadline && isPast(new Date(issue.slaDeadline));
+
+  const imageHint = issue.type.toLowerCase().split(' ')[0] || 'issue photo';
 
   return (
     <div className="space-y-8">
@@ -62,7 +64,7 @@ export default function IssueDetailPage() {
             </Badge>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <div className="grid md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div className="flex items-center gap-3">
@@ -117,7 +119,7 @@ export default function IssueDetailPage() {
                             width={400}
                             height={250}
                             className="object-cover"
-                            data-ai-hint="issue photo"
+                            data-ai-hint={imageHint}
                         />
                         </div>
                      </div>
@@ -133,7 +135,7 @@ export default function IssueDetailPage() {
           <CardTitle className="font-headline">Issue Progress</CardTitle>
           <CardDescription>Track the status of your reported issue from submission to resolution.</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <IssueTimeline statusHistory={issue.statusHistory} currentStatus={issue.status} />
         </CardContent>
       </Card>
