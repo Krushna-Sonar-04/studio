@@ -5,7 +5,7 @@ import React from 'react';
 import { APP_NAME } from '@/lib/constants';
 import { Menu } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { UserNav } from './UserNav';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { Button } from '../ui/button';
@@ -14,6 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { NotificationBell } from './NotificationBell';
 import { ThemeSwitcher } from './ThemeSwitcher';
+import { ClientOnly } from './ClientOnly';
 
 const TricolorFlag = () => (
   <svg
@@ -44,11 +45,6 @@ export default function AppHeader() {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user } = useAuth();
   const { t } = useLanguage();
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   const navLinks = [
       { href: '/citizen/dashboard', label: 'Citizen Dashboard'},
@@ -68,8 +64,10 @@ export default function AppHeader() {
           <div className="hidden md:flex items-center gap-4">
             <ThemeSwitcher />
             <LanguageSwitcher />
-            {isClient && user && <NotificationBell user={user} />}
-            {isClient && <UserNav />}
+            <ClientOnly>
+                {user && <NotificationBell user={user} />}
+                <UserNav />
+            </ClientOnly>
           </div>
 
            {/* Mobile Nav */}
@@ -81,40 +79,40 @@ export default function AppHeader() {
                 </Button>
               </SheetTrigger>
               <SheetContent side="left">
-                {isClient && (
-                <div className="flex flex-col gap-6 pt-6">
-                    <Link href="/" className="mr-8 flex items-center gap-2" onClick={() => setMobileMenuOpen(false)}>
-                        <TricolorFlag />
-                        <span className="font-bold font-headline text-lg text-primary">{APP_NAME}</span>
-                    </Link>
-                   
-                     <React.Fragment>
-                      <nav className="grid gap-4">
-                          {user && navLinks.map(link => (
-                              <Link key={link.href} href={link.href} className="text-muted-foreground hover:text-foreground" onClick={() => setMobileMenuOpen(false)}>
-                                  {link.label}
-                              </Link>
-                          ))}
-                          {!user && (
-                             <Link href="/login" className="text-muted-foreground hover:text-foreground" onClick={() => setMobileMenuOpen(false)}>
+                <ClientOnly>
+                    <div className="flex flex-col gap-6 pt-6">
+                        <Link href="/" className="mr-8 flex items-center gap-2" onClick={() => setMobileMenuOpen(false)}>
+                            <TricolorFlag />
+                            <span className="font-bold font-headline text-lg text-primary">{APP_NAME}</span>
+                        </Link>
+                    
+                        <React.Fragment>
+                        <nav className="grid gap-4">
+                            {user && navLinks.map(link => (
+                                <Link key={link.href} href={link.href} className="text-muted-foreground hover:text-foreground" onClick={() => setMobileMenuOpen(false)}>
+                                    {link.label}
+                                </Link>
+                            ))}
+                            {!user && (
+                                <Link href="/login" className="text-muted-foreground hover:text-foreground" onClick={() => setMobileMenuOpen(false)}>
                                 {t('login_button')}
-                              </Link>
-                          )}
-                      </nav>
-                       <div className="border-t pt-6 flex flex-col gap-4">
-                            <div className="flex items-center justify-between">
-                                <ThemeSwitcher />
-                                <LanguageSwitcher />
-                            </div>
-                             <div className="flex items-center justify-between">
-                                {user && <NotificationBell user={user} />}
-                                <UserNav />
-                            </div>
-                      </div>
-                     </React.Fragment>
-                   
-                </div>
-                )}
+                                </Link>
+                            )}
+                        </nav>
+                        <div className="border-t pt-6 flex flex-col gap-4">
+                                <div className="flex items-center justify-between">
+                                    <ThemeSwitcher />
+                                    <LanguageSwitcher />
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    {user && <NotificationBell user={user} />}
+                                    <UserNav />
+                                </div>
+                        </div>
+                        </React.Fragment>
+                    
+                    </div>
+                </ClientOnly>
               </SheetContent>
             </Sheet>
         </div>
