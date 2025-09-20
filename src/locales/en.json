@@ -6,6 +6,9 @@
   "login_button": "Login",
   "Citizen": "Citizen",
   "Head_of_Department": "Head of Department",
+  "Admin_Dashboard": "Admin Dashboard",
+  "Citizen_Dashboard": "Citizen Dashboard",
+  "Contractor_Dashboard": "Contractor Dashboard",
   "Engineer": "Engineer",
   "Fund_Manager": "Fund Manager",
   "Approving_Manager": "Approving Manager",
@@ -38,5 +41,17 @@
   "Resolved": "Resolved",
   "PendingFinalVerification": "Pending Final Verification",
   "Closed": "Closed",
-  "Escalated": "Escalated"
+  "Escalated": "Escalated",
+  "profile": "Profile",
+  "logout": "Log out",
+  "footer_tagline": "Empowering citizens to build smarter, cleaner communities.",
+  "quick_links": "Quick Links",
+  "home": "Home",
+  "admin_login": "Admin Login",
+  "support": "Support",
+  "help_center": "Help Center",
+  "faqs": "FAQs",
+  "contact_us": "Contact Us",
+  "privacy_policy": "Privacy Policy",
+  "gok_initiative": "An Initiative by the Government of India"
 }

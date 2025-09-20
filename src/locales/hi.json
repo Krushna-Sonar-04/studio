@@ -6,6 +6,9 @@
   "login_button": "लॉग इन करें",
   "Citizen": "नागरिक",
   "Head_of_Department": "विभागाध्यक्ष",
+  "Admin_Dashboard": "एडमिन डैशबोर्ड",
+  "Citizen_Dashboard": "नागरिक डैशबोर्ड",
+  "Contractor_Dashboard": "ठेकेदार डैशबोर्ड",
   "Engineer": "इंजीनियर",
   "Fund_Manager": "फंड प्रबंधक",
   "Approving_Manager": "अनुमोदन प्रबंधक",
@@ -38,5 +41,17 @@
   "Resolved": "हल",
   "PendingFinalVerification": "अंतिम सत्यापन लंबित",
   "Closed": "बंद",
-  "Escalated": "आगे बढ़ाया गया"
+  "Escalated": "आगे बढ़ाया गया",
+  "profile": "प्रोफ़ाइल",
+  "logout": "लॉग आउट",
+  "footer_tagline": "नागरिकों को होशियार, स्वच्छ समुदाय बनाने के लिए सशक्त बनाना।",
+  "quick_links": "त्वरित लिंक्स",
+  "home": "होम",
+  "admin_login": "एडमिन लॉग इन",
+  "support": "सहायता",
+  "help_center": "सहायता केंद्र",
+  "faqs": "सामान्य प्रश्न",
+  "contact_us": "हमसे संपर्क करें",
+  "privacy_policy": "गोपनीयता नीति",
+  "gok_initiative": "भारत सरकार की एक पहल"
 }

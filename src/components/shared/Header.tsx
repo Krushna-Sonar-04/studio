@@ -47,9 +47,9 @@ export default function AppHeader() {
   const { t } = useLanguage();
 
   const navLinks = [
-      { href: '/citizen/dashboard', label: 'Citizen Dashboard'},
-      { href: '/contractor/dashboard', label: 'Contractor Dashboard'},
-      { href: '/admin/dashboard', label: 'Admin Dashboard'},
+      { href: '/citizen/dashboard', label: t('Citizen_Dashboard')},
+      { href: '/contractor/dashboard', label: t('Contractor_Dashboard')},
+      { href: '/admin/dashboard', label: t('Admin_Dashboard')},
   ];
 
   return (

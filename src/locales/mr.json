@@ -6,6 +6,9 @@
   "login_button": "लॉग इन करा",
   "Citizen": "नागरिक",
   "Head_of_Department": "विभाग प्रमुख",
+  "Admin_Dashboard": "प्रशासक डॅशबोर्ड",
+  "Citizen_Dashboard": "नागरिक डॅशबोर्ड",
+  "Contractor_Dashboard": "कंत्राटदार डॅशबोर्ड",
   "Engineer": "अभियंता",
   "Fund_Manager": "निधी व्यवस्थापक",
   "Approving_Manager": "मंजुरी व्यवस्थापक",
@@ -38,5 +41,17 @@
   "Resolved": "निवारण झाले",
   "PendingFinalVerification": "अंतिम पडताळणी प्रलंबित",
   "Closed": "बंद",
-  "Escalated": "वर्धित"
+  "Escalated": "वर्धित",
+  "profile": "प्रोफाइल",
+  "logout": "लॉग आउट",
+  "footer_tagline": "नागरिकांना हुशार, स्वच्छ समुदाय तयार करण्यासाठी सक्षम करणे.",
+  "quick_links": "द्रुत दुवे",
+  "home": "मुख्यपृष्ठ",
+  "admin_login": "प्रशासक लॉगिन",
+  "support": "आधार",
+  "help_center": "मदत केंद्र",
+  "faqs": "सामान्य प्रश्न",
+  "contact_us": "आमच्याशी संपर्क साधा",
+  "privacy_policy": "गोपनीयता धोरण",
+  "gok_initiative": "भारत सरकारचा एक उपक्रम"
 }
