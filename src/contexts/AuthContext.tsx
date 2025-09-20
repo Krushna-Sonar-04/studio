@@ -27,7 +27,8 @@ const getRoleBasePath = (role: UserRole): string => {
 const getAllowedPaths = (role: UserRole): string[] => {
     const basePath = getRoleBasePath(role);
     const sharedPaths = [
-        // All roles can see issue details
+        // All roles can see their profile, issue details, and announcements
+        '/profile', 
         '/citizen/issues', 
         '/citizen/announcements'
     ];
@@ -80,17 +81,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const publicPaths = ['/login', '/'];
 
     const pathIsPublic = publicPaths.includes(pathname);
+    // The landing page file is at /app/(landing)/page.tsx but the path is just '/'
+    const pathIsLandingPage = pathname === '/';
 
     if (storedUserJson) {
       // User is logged in
       const storedUser = JSON.parse(storedUserJson) as User;
-      const userDashboard = ROLE_DASHBOARD_PATHS[storedUser.role];
-
-      if (pathname === '/login') {
-        // If logged in user is on login page, redirect to their dashboard
-        router.push(userDashboard);
-        return;
-      }
       
       // If on a protected path, check for authorization
       if (!pathIsPublic) {
@@ -98,6 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const isPathAllowed = allowedPaths.some(p => pathname.startsWith(p));
         
         if (!isPathAllowed) {
+            const userDashboard = ROLE_DASHBOARD_PATHS[storedUser.role];
             console.warn(`Redirecting user with role ${storedUser.role} from unauthorized path ${pathname} to ${userDashboard}`);
             router.push(userDashboard);
         }
