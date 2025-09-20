@@ -45,27 +45,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // This effect handles protecting routes
   useEffect(() => {
     const storedUserJson = localStorage.getItem('civic-lens-user');
+    // Public paths that don't require authentication
     const isPublicPath = ['/login', '/'].includes(pathname);
-    const isAppPath = pathname.startsWith('/app'); // Future-proofing for /app routes
-
+    
     if (storedUserJson) {
       const storedUser = JSON.parse(storedUserJson);
-      const userDashboard = ROLE_DASHBOARD_PATHS[storedUser.role];
-      // If user is logged in and on a public page, redirect to their dashboard
-      if (isPublicPath) {
+      const userRole = storedUser.role as UserRole;
+      const userDashboard = ROLE_DASHBOARD_PATHS[userRole];
+      const userBasePath = `/${userRole.toLowerCase().replace(/\s/g, '-')}`;
+
+      // If user is logged in and trying to access a public page like /login, redirect them to their dashboard
+      if (isPublicPath && user) {
         router.push(userDashboard);
       }
-      // If user is trying to access a page that doesn't match their role, redirect
-      else if (!pathname.startsWith(userDashboard.split('/').slice(0,2).join('/'))) {
-         // router.push(userDashboard); // This can be too aggressive, let's just log for now.
-         console.warn(`User with role ${storedUser.role} attempting to access ${pathname}`);
+      // If user is on a path that is not public and does not belong to their role, redirect to their dashboard
+      else if (!isPublicPath && !pathname.startsWith(userBasePath) && user) {
+        console.warn(`Redirecting user with role ${userRole} from unauthorized path ${pathname} to ${userDashboard}`);
+        router.push(userDashboard);
       }
     } else if (!isPublicPath) {
-      // If no user and not on a public path, redirect to login
+      // If no user is logged in and they are trying to access a non-public path, redirect to login
       router.push('/login');
     }
 
-  }, [pathname, router]);
+  }, [pathname, router, user]);
 
   return (
     <AuthContext.Provider value={{ user, login, logout }}>

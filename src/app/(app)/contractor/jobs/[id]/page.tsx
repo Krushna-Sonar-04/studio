@@ -46,6 +46,7 @@ export default function ContractorJobPage() {
       title: `Status Updated to ${newStatus}`,
       description: 'The job status has been changed.',
     });
+    // No need to redirect here, the page should reflect the new state.
   };
 
   const handleSubmit = (e: React.FormEvent) => {
