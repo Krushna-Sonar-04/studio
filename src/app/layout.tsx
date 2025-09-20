@@ -6,7 +6,6 @@ import "./globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { APP_NAME } from "@/lib/constants";
 import { Playfair_Display, PT_Sans } from 'next/font/google';
-import { ThemeProvider } from "@/components/shared/ThemeProvider";
 
 const playfairDisplay = Playfair_Display({
   subsets: ['latin'],
@@ -36,19 +35,12 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn("min-h-screen bg-background font-body antialiased", ptSans.variable, playfairDisplay.variable)}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
           <AuthProvider>
             <LanguageProvider>
                 {children}
               <Toaster />
             </LanguageProvider>
           </AuthProvider>
-        </ThemeProvider>
       </body>
     </html>
   );
