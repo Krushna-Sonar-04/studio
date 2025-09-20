@@ -87,7 +87,7 @@ export default function LandingPage() {
                 </div>
               </div>
               <Image
-                src="https://picsum.photos/seed/landing-hero/800/600"
+                src="https://www.shutterstock.com/shutterstock/photos/2221746749/display_1500/stock-photo-group-of-audience-at-stadium-shouting-screaming-for-win-by-holding-indian-flags-while-watching-2221746749.jpg"
                 width="800"
                 height="600"
                 alt="Hero"
