@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -86,13 +87,13 @@ export default function LandingPage() {
                 </div>
               </div>
               <Image
-                src="https://zolve.com/blog/content/images/2025/01/a13.png"
+                src="https://picsum.photos/seed/hero-image/800/600"
                 width="800"
                 height="600"
                 alt="Hero"
                 priority
                 className="mx-auto aspect-video overflow-hidden rounded-xl object-cover sm:w-full lg:order-last animate-fade-in"
-                data-ai-hint="indian people"
+                data-ai-hint="indian community"
               />
             </div>
           </div>
@@ -136,3 +137,4 @@ export default function LandingPage() {
     </div>
   );
 }
+
