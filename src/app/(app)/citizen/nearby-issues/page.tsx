@@ -23,12 +23,11 @@ const Map = dynamic(() => import('@/components/shared/LeafletMap'), {
 
 export default function NearbyIssuesMapPage() {
   const { toast } = useToast();
-  const { getIssues } = useIssues();
+  const { issues } = useIssues();
   const [userLocation, setUserLocation] = useState<LatLngTuple | null>(null);
   const [mapCenter, setMapCenter] = useState<LatLngTuple>(DEFAULT_CENTER);
   
   const issueMarkers = useMemo((): IssueMarker[] => {
-      const issues = getIssues();
       // This is a mock implementation. A real app would get lat/lng from the issue data.
       return issues.map((issue, index) => ({
           id: issue.id,
@@ -37,7 +36,7 @@ export default function NearbyIssuesMapPage() {
           lat: 18.5204 + (Math.random() - 0.5) * 0.1,
           lng: 73.8567 + (Math.random() - 0.5) * 0.1,
       }));
-  }, [getIssues]);
+  }, [issues]);
 
   useEffect(() => {
     if (navigator.geolocation) {
