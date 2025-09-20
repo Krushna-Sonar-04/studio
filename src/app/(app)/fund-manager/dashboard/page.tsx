@@ -37,7 +37,7 @@ export default function FundManagerDashboard() {
 
       <Card>
         <CardHeader><CardTitle>Jobs for Estimation</CardTitle></CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <Table>
             <TableHeader>
               <TableRow>

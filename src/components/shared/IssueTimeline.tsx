@@ -26,13 +26,13 @@ export function IssueTimeline({ statusHistory, currentStatus }: IssueTimelinePro
       case 'PendingVerificationAndEstimation': return 1;
       case 'Verified': return 2;
       case 'Estimated': return 3;
-      case 'PendingApproval': return 4;
+      case 'PendingApproval': return 3; // Corresponds to "Fund Approved" milestone
       case 'Approved': return 4;
-      case 'AssignedToContractor': return 4;
+      case 'AssignedToContractor': return 4; // Corresponds to "Approved" milestone
       case 'InProgress': return 5;
       case 'Resolved': return 6;
-      case 'PendingFinalVerification': return 6;
-      case 'Closed': return 6;
+      case 'PendingFinalVerification': return 6; // Corresponds to "Resolved" milestone
+      case 'Closed': return 6; // Corresponds to "Resolved" milestone
       default: return -1;
     }
   };
@@ -62,7 +62,7 @@ export function IssueTimeline({ statusHistory, currentStatus }: IssueTimelinePro
 
             let Icon = Circle;
             if (isCurrent && currentStatus !== 'Closed' && currentStatus !== 'Resolved') Icon = CircleDot;
-            if (isCompleted || currentStatus === 'Closed' || currentStatus === 'Resolved' && index <= currentStatusIndex) Icon = CheckCircle;
+            if (isCompleted || currentStatus === 'Closed' || (currentStatus === 'Resolved' && index <= currentStatusIndex)) Icon = CheckCircle;
             if (!isActive) Icon = CircleDashed;
 
             return (

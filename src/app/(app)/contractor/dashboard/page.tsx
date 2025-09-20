@@ -68,7 +68,7 @@ export default function ContractorDashboard() {
 
       <Card>
         <CardHeader><CardTitle>Your Active Jobs</CardTitle></CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <Table>
             <TableHeader>
               <TableRow>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useIssues } from '@/hooks/use-issues';
 import { mockUsers } from '@/lib/mock-data';
 import { Issue, Notification } from '@/lib/types';
@@ -20,7 +20,7 @@ import { useNotifications } from '@/hooks/use-notifications';
 
 export default function AdminDashboard() {
   const { toast } = useToast();
-  const { issues, updateIssue, getIssues } = useIssues();
+  const { issues, updateIssue } = useIssues();
   const { addNotification } = useNotifications();
   const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
   const [isAssignTaskOpen, setAssignTaskOpen] = useState(false);
@@ -113,7 +113,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const currentIssues = getIssues();
+  const currentIssues = useMemo(() => issues, [issues]);
 
   const stats = {
     new: currentIssues.filter(i => i.status === 'Submitted').length,
@@ -170,7 +170,7 @@ export default function AdminDashboard() {
 
       <Card>
         <CardHeader><CardTitle>All Issues</CardTitle></CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <IssueDataTable 
             columns={issueColumns({ openAssignDialog, openContractorDialog })} 
             data={currentIssues}

@@ -45,7 +45,7 @@ export default function ApprovingManagerDashboard() {
 
       <Card>
         <CardHeader><CardTitle>Pending Approval</CardTitle></CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <Table>
             <TableHeader>
               <TableRow>
