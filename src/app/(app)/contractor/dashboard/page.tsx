@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import { ClipboardList, Play, CheckCircle2, ImageIcon } from 'lucide-react';
 import Image from 'next/image';
 
@@ -15,20 +15,20 @@ export default function ContractorDashboard() {
   const { user } = useAuth();
   const { issues } = useIssues();
   const router = useRouter();
-  const [jobs, setJobs] = useState<Issue[]>([]);
 
-  useEffect(() => {
-    if (user) {
-      setJobs(issues.filter(issue => issue.assignedContractorId === user.id && issue.currentRoles.includes(user.role)));
+  const jobs = useMemo(() => {
+     if (user) {
+      return issues.filter(issue => issue.assignedContractorId === user.id && issue.currentRoles.includes(user.role));
     }
+    return [];
   }, [user, issues]);
 
-  const allUserJobs = issues.filter(issue => issue.assignedContractorId === user?.id);
-  const stats = {
+  const allUserJobs = useMemo(() => issues.filter(issue => issue.assignedContractorId === user?.id), [issues, user]);
+  const stats = useMemo(() => ({
     assigned: allUserJobs.filter(j => j.status === 'AssignedToContractor').length,
     inProgress: allUserJobs.filter(j => j.status === 'InProgress').length,
     completed: allUserJobs.filter(j => ['Resolved', 'Closed'].includes(j.status)).length,
-  };
+  }), [allUserJobs]);
 
   if (!user) {
     return <div>Loading...</div>;

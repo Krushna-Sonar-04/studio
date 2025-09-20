@@ -14,6 +14,33 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const getRoleBasePath = (role: UserRole): string => {
+    switch (role) {
+        case 'Head of Department': return '/admin';
+        case 'Approving Manager': return '/approving-manager';
+        case 'Fund Manager': return '/fund-manager';
+        default: return `/${role.toLowerCase()}`;
+    }
+};
+
+const getAllowedPaths = (role: UserRole): string[] => {
+    const basePath = getRoleBasePath(role);
+    const sharedPaths = [
+        // All roles can see issue details
+        '/citizen/issues', 
+        '/citizen/announcements'
+    ];
+    
+    // Admins can see everything under their path
+    if (role === 'Head of Department') {
+        return [basePath, ...sharedPaths];
+    }
+    
+    // Other roles have specific paths
+    return [basePath, ...sharedPaths];
+};
+
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
@@ -22,9 +49,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const storedUser = localStorage.getItem('civic-lens-user');
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      const parsedUser = JSON.parse(storedUser);
+       if (!user || user.id !== parsedUser.id) {
+          setUser(parsedUser);
+       }
     }
-  }, []);
+  }, [user]);
 
   const login = (role: UserRole) => {
     const userToLogin = mockUsers.find((u) => u.role === role);
@@ -45,30 +75,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // This effect handles protecting routes
   useEffect(() => {
     const storedUserJson = localStorage.getItem('civic-lens-user');
-    // Public paths that don't require authentication
     const isPublicPath = ['/login', '/'].includes(pathname);
-    
-    if (storedUserJson) {
-      const storedUser = JSON.parse(storedUserJson);
-      const userRole = storedUser.role as UserRole;
-      const userDashboard = ROLE_DASHBOARD_PATHS[userRole];
-      const userBasePath = `/${userRole.toLowerCase().replace(/\s/g, '-')}`;
 
-      // If user is logged in and trying to access a public page like /login, redirect them to their dashboard
-      if (isPublicPath && user) {
-        router.push(userDashboard);
-      }
-      // If user is on a path that is not public and does not belong to their role, redirect to their dashboard
-      else if (!isPublicPath && !pathname.startsWith(userBasePath) && user) {
-        console.warn(`Redirecting user with role ${userRole} from unauthorized path ${pathname} to ${userDashboard}`);
-        router.push(userDashboard);
-      }
-    } else if (!isPublicPath) {
-      // If no user is logged in and they are trying to access a non-public path, redirect to login
-      router.push('/login');
+    if (!storedUserJson && !isPublicPath) {
+        // Not logged in and not on a public page -> redirect to login
+        router.push('/login');
+    } else if (storedUserJson) {
+        const storedUser = JSON.parse(storedUserJson) as User;
+        const userDashboard = ROLE_DASHBOARD_PATHS[storedUser.role];
+
+        // Logged in and on a public page -> redirect to dashboard
+        if (isPublicPath) {
+            router.push(userDashboard);
+            return;
+        }
+
+        // Check if the current path is allowed for the user's role
+        const allowedPaths = getAllowedPaths(storedUser.role);
+        const isPathAllowed = allowedPaths.some(p => pathname.startsWith(p));
+        
+        if (!isPathAllowed) {
+            console.warn(`Redirecting user with role ${storedUser.role} from unauthorized path ${pathname} to ${userDashboard}`);
+            router.push(userDashboard);
+        }
     }
 
-  }, [pathname, router, user]);
+  }, [pathname, router]);
 
   return (
     <AuthContext.Provider value={{ user, login, logout }}>

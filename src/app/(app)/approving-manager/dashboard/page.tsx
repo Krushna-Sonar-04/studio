@@ -6,7 +6,7 @@ import { Issue } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Users, ImageIcon } from 'lucide-react';
@@ -16,13 +16,12 @@ export default function ApprovingManagerDashboard() {
   const { user } = useAuth();
   const { issues } = useIssues();
   const router = useRouter();
-  const [pendingJobs, setPendingJobs] = useState<Issue[]>([]);
 
-  useEffect(() => {
-    // Approving managers see all issues where their role is the current one to act.
+  const pendingJobs = useMemo(() => {
     if (user) {
-      setPendingJobs(issues.filter(issue => issue.currentRoles.includes(user.role)));
+      return issues.filter(issue => issue.currentRoles.includes(user.role));
     }
+    return [];
   }, [user, issues]);
 
   if (!user) {

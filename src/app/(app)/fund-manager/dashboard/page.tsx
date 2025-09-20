@@ -6,7 +6,7 @@ import { Issue } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import Image from 'next/image';
 import { ImageIcon } from 'lucide-react';
 
@@ -14,15 +14,14 @@ export default function FundManagerDashboard() {
   const { user } = useAuth();
   const { issues } = useIssues();
   const router = useRouter();
-  const [assignedJobs, setAssignedJobs] = useState<Issue[]>([]);
-
-  useEffect(() => {
+  
+  const assignedJobs = useMemo(() => {
     if (user) {
-      // A Fund Manager sees issues assigned to them that are now their responsibility.
-      setAssignedJobs(issues.filter(issue => 
+      return issues.filter(issue => 
         issue.currentRoles.includes(user.role) && issue.assignedFundManagerId === user.id
-      ));
+      );
     }
+    return [];
   }, [user, issues]);
 
   if (!user) {
