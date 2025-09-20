@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,8 +15,9 @@ import React, { useMemo } from 'react';
 import { UpvoteButton } from '@/components/shared/UpvoteButton';
 import { mockAnnouncements } from '@/lib/mock-data/announcements';
 import { AnnouncementCard } from '@/components/shared/AnnouncementCard';
+import { useLanguage } from '@/contexts/LanguageContext';
 
-const StatusBadge = React.memo(({ status }: { status: Issue['status'] }) => {
+const StatusBadge = React.memo(({ status, t }: { status: Issue['status'], t: (key: string) => string }) => {
   const variant: 'default' | 'secondary' | 'destructive' | 'outline' = useMemo(() => {
     switch (status) {
       case 'Submitted':
@@ -34,7 +36,7 @@ const StatusBadge = React.memo(({ status }: { status: Issue['status'] }) => {
         return 'default';
     }
   }, [status]);
-  return <Badge variant={variant}>{status}</Badge>;
+  return <Badge variant={variant}>{t(status)}</Badge>;
 });
 StatusBadge.displayName = 'StatusBadge';
 
@@ -43,6 +45,7 @@ export default function CitizenDashboard() {
   const { user } = useAuth();
   const { issues, updateIssue } = useIssues();
   const router = useRouter();
+  const { t } = useLanguage();
 
   const userIssues = useMemo(() => {
     if (user) {
@@ -89,20 +92,20 @@ export default function CitizenDashboard() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-headline font-bold">Welcome, {user.name}!</h1>
-          <p className="text-muted-foreground">Here's a summary of your reported issues.</p>
+          <h1 className="text-3xl font-headline font-bold">{t('welcome_message')}, {user.name}!</h1>
+          <p className="text-muted-foreground">{t('dashboard_subtitle')}</p>
         </div>
         <div className="flex gap-2">
            <Link href="/citizen/nearby-issues">
             <Button variant="outline">
               <Map className="mr-2 h-4 w-4" />
-              View Nearby Issues
+              {t('view_nearby_issues')}
             </Button>
           </Link>
           <Link href="/citizen/report">
             <Button>
               <PlusCircle className="mr-2 h-4 w-4" />
-              Report New Issue
+              {t('report_new_issue')}
             </Button>
           </Link>
         </div>
@@ -112,10 +115,10 @@ export default function CitizenDashboard() {
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-headline font-bold flex items-center gap-2">
-              <Megaphone className="text-primary" /> Latest Announcement
+              <Megaphone className="text-primary" /> {t('latest_announcement')}
             </h2>
             <Link href="/citizen/announcements">
-              <Button variant="link">View All</Button>
+              <Button variant="link">{t('view_all')}</Button>
             </Link>
           </div>
           <AnnouncementCard announcement={latestAnnouncement} />
@@ -126,7 +129,7 @@ export default function CitizenDashboard() {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Reports</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('total_reports')}</CardTitle>
             <BarChart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -135,7 +138,7 @@ export default function CitizenDashboard() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">In Progress</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('in_progress')}</CardTitle>
             <ListChecks className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -144,7 +147,7 @@ export default function CitizenDashboard() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Resolved</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('resolved')}</CardTitle>
             <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -155,17 +158,17 @@ export default function CitizenDashboard() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Your Reported Issues</CardTitle>
+          <CardTitle>{t('your_reported_issues')}</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Token ID</TableHead>
-                <TableHead>Title</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Upvotes</TableHead>
-                <TableHead>Reported On</TableHead>
+                <TableHead>{t('token_id')}</TableHead>
+                <TableHead>{t('title')}</TableHead>
+                <TableHead>{t('status')}</TableHead>
+                <TableHead>{t('upvotes')}</TableHead>
+                <TableHead>{t('reported_on')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -188,7 +191,7 @@ export default function CitizenDashboard() {
                       className="cursor-pointer"
                       onClick={() => router.push(`/citizen/issues/${issue.id}`)}
                     >
-                      <StatusBadge status={issue.status} />
+                      <StatusBadge status={issue.status} t={t} />
                     </TableCell>
                      <TableCell>
                       <UpvoteButton
@@ -209,7 +212,7 @@ export default function CitizenDashboard() {
               ) : (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center">
-                    You haven't reported any issues yet.
+                    {t('no_issues_reported')}
                   </TableCell>
                 </TableRow>
               )}
