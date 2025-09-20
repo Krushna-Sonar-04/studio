@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { createContext, useState, useContext, ReactNode, useEffect } from "react";
@@ -75,22 +76,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // This effect handles protecting routes
   useEffect(() => {
     const storedUserJson = localStorage.getItem('civic-lens-user');
-    const isPublicPath = ['/login', '/'].includes(pathname);
+    // Public paths that anyone can see, logged in or not.
+    const publicPaths = ['/login', '/'];
 
-    if (!storedUserJson && !isPublicPath) {
-        // Not logged in and not on a public page -> redirect to login
-        router.push('/login');
-    } else if (storedUserJson) {
-        const storedUser = JSON.parse(storedUserJson) as User;
-        const userDashboard = ROLE_DASHBOARD_PATHS[storedUser.role];
+    const pathIsPublic = publicPaths.includes(pathname);
 
-        // Logged in and on a public page -> redirect to dashboard
-        if (isPublicPath) {
-            router.push(userDashboard);
-            return;
-        }
+    if (storedUserJson) {
+      // User is logged in
+      const storedUser = JSON.parse(storedUserJson) as User;
+      const userDashboard = ROLE_DASHBOARD_PATHS[storedUser.role];
 
-        // Check if the current path is allowed for the user's role
+      if (pathname === '/login') {
+        // If logged in user is on login page, redirect to their dashboard
+        router.push(userDashboard);
+        return;
+      }
+      
+      // If on a protected path, check for authorization
+      if (!pathIsPublic) {
         const allowedPaths = getAllowedPaths(storedUser.role);
         const isPathAllowed = allowedPaths.some(p => pathname.startsWith(p));
         
@@ -98,8 +101,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             console.warn(`Redirecting user with role ${storedUser.role} from unauthorized path ${pathname} to ${userDashboard}`);
             router.push(userDashboard);
         }
+      }
+    } else {
+      // User is not logged in
+      if (!pathIsPublic) {
+        // and is trying to access a protected page, redirect to login
+        router.push('/login');
+      }
     }
-
   }, [pathname, router]);
 
   return (
