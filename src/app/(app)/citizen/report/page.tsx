@@ -133,14 +133,18 @@ export default function ReportIssuePage() {
       return;
     }
     
+    const timestamp = Date.now();
+    const issueId = `issue-${timestamp}`;
+    
     addIssue({
-      id: `issue-${Date.now()}`,
+      id: issueId,
       title: values.title,
       type: values.type,
       location: values.location,
       description: values.description,
-      // In a real app, upload the photo and get a URL
-      imageUrl: values.photo?.[0] ? 'https://picsum.photos/seed/210/600/400' : undefined,
+      // In a real app, you would upload the photo and get a URL.
+      // Here, we generate a unique placeholder for each issue.
+      imageUrl: values.photo?.[0] ? `https://picsum.photos/seed/${timestamp}/600/400` : undefined,
       reportedBy: user.id,
       reportedAt: new Date().toISOString(),
       status: 'Submitted',
