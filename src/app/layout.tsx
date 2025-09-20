@@ -7,6 +7,11 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { APP_NAME } from "@/lib/constants";
 import { Playfair_Display, PT_Sans } from 'next/font/google';
 import { ThemeProvider } from "@/components/shared/ThemeProvider";
+import AppHeader from "@/components/shared/Header";
+import Footer from "@/components/shared/Footer";
+import { IssuesProvider } from "@/hooks/use-issues";
+import { NotificationsProvider } from "@/hooks/use-notifications";
+
 
 const playfairDisplay = Playfair_Display({
   subsets: ['latin'],
@@ -43,10 +48,20 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <AuthProvider>
-              <LanguageProvider>
-                  {children}
-                <Toaster />
-              </LanguageProvider>
+                <IssuesProvider>
+                    <NotificationsProvider>
+                        <LanguageProvider>
+                            <div className="flex flex-col min-h-screen">
+                                <AppHeader />
+                                <main className="flex-1">
+                                    {children}
+                                </main>
+                                <Footer />
+                            </div>
+                            <Toaster />
+                        </LanguageProvider>
+                    </NotificationsProvider>
+                </IssuesProvider>
             </AuthProvider>
           </ThemeProvider>
       </body>
