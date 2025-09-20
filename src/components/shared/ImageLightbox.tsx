@@ -4,8 +4,10 @@
 import {
   Dialog,
   DialogContent,
+  DialogTitle,
 } from '@/components/ui/dialog';
 import Image from 'next/image';
+import { VisuallyHidden } from '@/components/ui/visually-hidden';
 
 interface ImageLightboxProps {
   imageUrl: string;
@@ -20,6 +22,9 @@ export function ImageLightbox({ imageUrl, alt, isOpen, onOpenChange }: ImageLigh
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl p-0 border-0 bg-transparent">
+        <VisuallyHidden>
+            <DialogTitle>Image Lightbox: {alt}</DialogTitle>
+        </VisuallyHidden>
         <Image
           src={imageUrl}
           alt={alt}
