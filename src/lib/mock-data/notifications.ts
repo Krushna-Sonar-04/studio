@@ -57,3 +57,7 @@ export let mockNotifications: Notification[] = [
 export const setMockNotifications = (newNotifications: Notification[]) => {
     mockNotifications = newNotifications;
 };
+
+export const addMockNotification = (notification: Notification) => {
+    mockNotifications.unshift(notification);
+}

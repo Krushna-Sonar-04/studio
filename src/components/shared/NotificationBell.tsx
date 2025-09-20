@@ -6,48 +6,39 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { mockNotifications, setMockNotifications } from '@/lib/mock-data/notifications';
 import { Notification as NotificationType, User } from '@/lib/types';
 import { NotificationItem } from './NotificationItem';
+import { useNotifications } from '@/hooks/use-notifications';
 
 interface NotificationBellProps {
     user: User;
 }
 
 export function NotificationBell({ user }: NotificationBellProps) {
-    const [notifications, setNotifications] = useState<NotificationType[]>([]);
+    const { notifications, updateNotification, updateAllNotificationsForUser } = useNotifications();
+    const [userNotifications, setUserNotifications] = useState<NotificationType[]>([]);
     
     useEffect(() => {
         // Filter notifications for the logged-in user
-        const userNotifications = mockNotifications
+        const filtered = notifications
             .filter(n => n.userId === user.id)
             .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-        setNotifications(userNotifications);
-    }, [user.id]);
+        setUserNotifications(filtered);
+    }, [user.id, notifications]);
 
     const unreadCount = useMemo(() => {
-        return notifications.filter(n => !n.read).length;
-    }, [notifications]);
+        return userNotifications.filter(n => !n.read).length;
+    }, [userNotifications]);
 
     const handleMarkAsRead = (id: string) => {
-        const updatedNotifications = notifications.map(n =>
-            n.id === id ? { ...n, read: true } : n
-        );
-        setNotifications(updatedNotifications);
-        // This would also be where you update the master list/database
-        const globalUpdated = mockNotifications.map(n =>
-            n.id === id ? { ...n, read: true } : n
-        );
-        setMockNotifications(globalUpdated);
+        const notification = userNotifications.find(n => n.id === id);
+        if (notification) {
+            updateNotification({ ...notification, read: true });
+        }
     };
 
     const handleMarkAllRead = () => {
-         const updatedNotifications = notifications.map(n => ({...n, read: true}));
-         setNotifications(updatedNotifications);
-         const globalUpdated = mockNotifications.map(n => 
-            n.userId === user.id ? { ...n, read: true } : n
-        );
-        setMockNotifications(globalUpdated);
+         updateAllNotificationsForUser(user.id, { read: true });
     };
 
     return (
@@ -76,9 +67,9 @@ export function NotificationBell({ user }: NotificationBellProps) {
                 </div>
                 <Separator />
                 <ScrollArea className="h-96">
-                   {notifications.length > 0 ? (
+                   {userNotifications.length > 0 ? (
                         <div className="p-2">
-                            {notifications.map(notification => (
+                            {userNotifications.map(notification => (
                                 <NotificationItem 
                                     key={notification.id}
                                     notification={notification}

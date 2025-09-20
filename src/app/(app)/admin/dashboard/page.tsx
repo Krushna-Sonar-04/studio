@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useIssues } from '@/hooks/use-issues';
 import { mockUsers } from '@/lib/mock-data';
-import { Issue } from '@/lib/types';
+import { Issue, Notification } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
@@ -11,14 +11,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Bell, AlertTriangle, Play, CheckCircle, Megaphone } from 'lucide-react';
+import { Bell, AlertTriangle, Play, CheckCircle, Megaphone, ImageIcon } from 'lucide-react';
 import Link from 'next/link';
 import { IssueDataTable } from '@/components/admin/IssueDataTable';
 import { issueColumns } from '@/components/admin/IssueColumns';
+import Image from 'next/image';
+import { useNotifications } from '@/hooks/use-notifications';
 
 export default function AdminDashboard() {
   const { toast } = useToast();
   const { issues, updateIssue, getIssues } = useIssues();
+  const { addNotification } = useNotifications();
   const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
   const [isAssignTaskOpen, setAssignTaskOpen] = useState(false);
   const [isAssignContractorOpen, setAssignContractorOpen] = useState(false);
@@ -63,6 +66,20 @@ export default function AdminDashboard() {
        };
 
       updateIssue(updatedIssue);
+
+      // Create a notification for the engineer
+      const notification: Notification = {
+        id: `notif-${Date.now()}`,
+        userId: selectedEngineer,
+        type: 'new_assignment',
+        title: 'New Issue Assigned',
+        description: `Issue "${selectedIssue.title}" has been assigned to you for verification.`,
+        issueId: selectedIssue.id,
+        timestamp: new Date().toISOString(),
+        read: false,
+      };
+      addNotification(notification);
+
       toast({ title: 'Task Assigned', description: `Issue sent to Engineer with a ${slaDays}-day SLA.` });
       setAssignTaskOpen(false);
       setSelectedIssue(null);
