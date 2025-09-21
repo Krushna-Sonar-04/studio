@@ -18,6 +18,14 @@ export const issueTypes = [
   { value: "Streetlight", label: "Streetlight" },
   { value: "Garbage", label: "Garbage" },
   { value: "Water Leakage", label: "Water Leakage" },
+  { value: "Obstruction", label: "Obstruction" },
+  { value: "Broken Sidewalk", label: "Broken Sidewalk" },
+  { value: "Fallen Tree", label: "Fallen Tree" },
+  { value: "Illegal Dumping", label: "Illegal Dumping" },
+  { value: "Stray Animal", label: "Stray Animal" },
+  { value: "Damaged Public Property", label: "Damaged Public Property" },
+  { value: "Traffic Signal Malfunction", label: "Traffic Signal Malfunction" },
+  { value: "Parking Violation", label: "Parking Violation" },
 ]
 
 export const issueStatuses = [

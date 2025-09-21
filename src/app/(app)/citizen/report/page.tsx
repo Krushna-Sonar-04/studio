@@ -37,7 +37,7 @@ const Map = dynamic(() => import('@/components/shared/LeafletMap'), {
 });
 
 
-const issueTypes: IssueType[] = ['Pothole', 'Streetlight', 'Garbage', 'Water Leakage', 'Obstruction'];
+const issueTypes: IssueType[] = ['Pothole', 'Streetlight', 'Garbage', 'Water Leakage', 'Obstruction', 'Broken Sidewalk', 'Fallen Tree', 'Illegal Dumping', 'Stray Animal', 'Damaged Public Property', 'Traffic Signal Malfunction', 'Parking Violation'];
 
 const formSchema = z.object({
   title: z.string().min(10, {

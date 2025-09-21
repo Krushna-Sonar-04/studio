@@ -35,7 +35,7 @@ export type IssueStatus =
   | "Closed"
   | "Escalated";
 
-export type IssueType = "Pothole" | "Streetlight" | "Garbage" | "Water Leakage" | "Obstruction";
+export type IssueType = "Pothole" | "Streetlight" | "Garbage" | "Water Leakage" | "Obstruction" | "Broken Sidewalk" | "Fallen Tree" | "Illegal Dumping" | "Stray Animal" | "Damaged Public Property" | "Traffic Signal Malfunction" | "Parking Violation";
 
 export type StatusUpdate = {
   status: IssueStatus;
