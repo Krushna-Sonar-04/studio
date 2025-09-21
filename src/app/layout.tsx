@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import "./globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { APP_NAME } from "@/lib/constants";
-import { Playfair_Display, PT_Sans } from 'next/font/google';
+import { Noto_Sans, Noto_Serif } from 'next/font/google';
 import { ThemeProvider } from "@/components/shared/ThemeProvider";
 import AppHeader from "@/components/shared/Header";
 import Footer from "@/components/shared/Footer";
@@ -14,17 +14,17 @@ import { NotificationsProvider } from "@/hooks/use-notifications";
 import "next/font/local";
 
 
-const playfairDisplay = Playfair_Display({
-  subsets: ['latin'],
+const notoSerif = Noto_Serif({
+  subsets: ['latin', 'devanagari'],
   weight: '700',
-  variable: '--font-playfair-display',
+  variable: '--font-noto-serif',
   display: 'swap',
 });
 
-const ptSans = PT_Sans({
-  subsets: ['latin'],
+const notoSans = Noto_Sans({
+  subsets: ['latin', 'devanagari'],
   weight: ['400', '700'],
-  variable: '--font-pt-sans',
+  variable: '--font-noto-sans',
   display: 'swap',
 });
 
@@ -41,7 +41,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={cn("min-h-screen bg-background font-body antialiased", ptSans.variable, playfairDisplay.variable)}>
+      <body className={cn("min-h-screen bg-background font-body antialiased", notoSans.variable, notoSerif.variable)}>
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
