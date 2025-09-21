@@ -124,7 +124,7 @@ const LeafletMap: React.FC<MapProps> = ({
   }, [markerPosition, markers, router]);
 
 
-  return <div ref={mapContainerRef} style={{ height: '100%', width: '100%' }} />;
+  return <div ref={mapContainerRef} style={{ height: '100%', width: '100%', zIndex: 0 }} />;
 };
 
 LeafletMap.displayName = 'LeafletMap';
