@@ -11,12 +11,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Bell, AlertTriangle, Play, CheckCircle, Megaphone, ImageIcon } from 'lucide-react';
+import { Bell, AlertTriangle, Play, CheckCircle, Megaphone } from 'lucide-react';
 import Link from 'next/link';
 import { IssueDataTable } from '@/components/admin/IssueDataTable';
 import { issueColumns } from '@/components/admin/IssueColumns';
-import Image from 'next/image';
 import { useNotifications } from '@/hooks/use-notifications';
+import dynamic from 'next/dynamic';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const DynamicIssueDataTable = dynamic(
+  () => import('@/components/admin/IssueDataTable').then(mod => mod.IssueDataTable),
+  {
+    loading: () => <Skeleton className="h-[400px] w-full" />,
+    ssr: false,
+  }
+);
+
 
 export default function AdminDashboard() {
   const { toast } = useToast();
@@ -171,7 +181,7 @@ export default function AdminDashboard() {
       <Card>
         <CardHeader><CardTitle>All Issues</CardTitle></CardHeader>
         <CardContent className="pt-6">
-          <IssueDataTable 
+          <DynamicIssueDataTable 
             columns={issueColumns({ openAssignDialog, openContractorDialog })} 
             data={currentIssues}
           />
