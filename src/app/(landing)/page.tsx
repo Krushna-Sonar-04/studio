@@ -16,6 +16,7 @@ import {
 import Image from 'next/image';
 import Link from 'next/link';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function LandingPage() {
   const { t } = useLanguage();
@@ -118,15 +119,19 @@ export default function LandingPage() {
                 </p>
               </div>
             </div>
-            <div className="mx-auto grid max-w-5xl gap-8 py-12 sm:grid-cols-2 md:gap-12 lg:grid-cols-4 lg:max-w-none">
+            <div className="mx-auto grid max-w-5xl gap-8 py-12 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 lg:max-w-none">
                 {features.map((feature) => (
-                    <div key={feature.title} className="grid gap-2 text-center">
-                        <div className="flex justify-center">{feature.icon}</div>
-                        <h3 className="text-xl font-bold">{feature.title}</h3>
-                        <p className="text-muted-foreground">
-                        {feature.description}
-                        </p>
-                    </div>
+                    <Card key={feature.title} className="text-center flex flex-col items-center p-6">
+                        <CardHeader className="p-0 mb-4">
+                           {feature.icon}
+                        </CardHeader>
+                        <CardContent className="p-0 flex-grow flex flex-col justify-center">
+                            <CardTitle className="text-xl mb-2">{feature.title}</CardTitle>
+                            <p className="text-muted-foreground">
+                            {feature.description}
+                            </p>
+                        </CardContent>
+                    </Card>
                 ))}
             </div>
           </div>
