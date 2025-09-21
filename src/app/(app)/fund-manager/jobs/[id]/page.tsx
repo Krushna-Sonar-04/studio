@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Send, Camera } from 'lucide-react';
 import type { Issue, EstimationReport } from '@/lib/types';
-import { useAuth } from '@/hooks/use-auth';
+import { useAuth } from '@/contexts/AuthContext';
 import Image from 'next/image';
 import { useState } from 'react';
 import { ImageLightbox } from '@/components/shared/ImageLightbox';

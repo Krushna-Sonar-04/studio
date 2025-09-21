@@ -11,7 +11,7 @@ import { Check, X, ArrowLeft, Camera } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import type { Issue, Notification } from '@/lib/types';
 import { useNotifications } from '@/hooks/use-notifications';
-import { useAuth } from '@/hooks/use-auth';
+import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
 import Image from 'next/image';
 import { ImageLightbox } from '@/components/shared/ImageLightbox';

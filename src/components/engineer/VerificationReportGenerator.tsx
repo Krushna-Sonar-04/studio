@@ -13,7 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Sparkles, Lightbulb, FileText, Upload, Send, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useIssues } from '@/hooks/use-issues';
-import { useAuth } from '@/hooks/use-auth';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function VerificationReportGenerator({ issue }: { issue: Issue }) {
   const [isLoading, setIsLoading] = useState(false);
