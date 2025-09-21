@@ -16,49 +16,48 @@ import {
 import Image from 'next/image';
 import Link from 'next/link';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 export default function LandingPage() {
   const { t } = useLanguage();
 
   const features = [
     {
-      icon: <QrCode className="w-6 h-6 text-primary" />,
+      icon: <QrCode className="w-10 h-10 text-primary" />,
       title: t('feature_qr_title'),
       description: t('feature_qr_desc'),
     },
     {
-      icon: <MapPin className="w-6 h-6 text-primary" />,
+      icon: <MapPin className="w-10 h-10 text-primary" />,
       title: t('feature_map_title'),
       description: t('feature_map_desc'),
     },
     {
-      icon: <Languages className="w-6 h-6 text-primary" />,
+      icon: <Languages className="w-10 h-10 text-primary" />,
       title: t('feature_multilingual_title'),
       description: t('feature_multilingual_desc'),
     },
     {
-      icon: <Vote className="w-6 h-6 text-primary" />,
+      icon: <Vote className="w-10 h-10 text-primary" />,
       title: t('feature_upvote_title'),
       description: t('feature_upvote_desc'),
     },
     {
-      icon: <Trophy className="w-6 h-6 text-primary" />,
+      icon: <Trophy className="w-10 h-10 text-primary" />,
       title: t('feature_leaderboard_title'),
       description: t('feature_leaderboard_desc'),
     },
     {
-      icon: <BellRing className="w-6 h-6 text-primary" />,
+      icon: <BellRing className="w-10 h-10 text-primary" />,
       title: t('feature_broadcasts_title'),
       description: t('feature_broadcasts_desc'),
     },
     {
-      icon: <TimerReset className="w-6 h-6 text-primary" />,
+      icon: <TimerReset className="w-10 h-10 text-primary" />,
       title: t('feature_sla_title'),
       description: t('feature_sla_desc'),
     },
     {
-      icon: <Database className="w-6 h-6 text-primary" />,
+      icon: <Database className="w-10 h-10 text-primary" />,
       title: t('feature_bulk_upload_title'),
       description: t('feature_bulk_upload_desc'),
     },
@@ -119,22 +118,16 @@ export default function LandingPage() {
                 </p>
               </div>
             </div>
-            <div className="mx-auto max-w-3xl w-full py-12">
-               <Accordion type="single" collapsible className="w-full">
-                  {features.map((feature, i) => (
-                    <AccordionItem value={`item-${i}`} key={feature.title}>
-                      <AccordionTrigger className="text-lg font-semibold hover:no-underline">
-                        <div className="flex items-center gap-4">
-                          {feature.icon}
-                          {feature.title}
-                        </div>
-                      </AccordionTrigger>
-                      <AccordionContent className="text-muted-foreground text-base pl-14">
+            <div className="mx-auto grid max-w-5xl gap-8 py-12 sm:grid-cols-2 md:gap-12 lg:grid-cols-4 lg:max-w-none">
+                {features.map((feature) => (
+                    <div key={feature.title} className="grid gap-2 text-center">
+                        <div className="flex justify-center">{feature.icon}</div>
+                        <h3 className="text-xl font-bold">{feature.title}</h3>
+                        <p className="text-muted-foreground">
                         {feature.description}
-                      </AccordionContent>
-                    </AccordionItem>
-                  ))}
-               </Accordion>
+                        </p>
+                    </div>
+                ))}
             </div>
           </div>
         </section>
