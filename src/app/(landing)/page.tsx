@@ -88,7 +88,7 @@ export default function LandingPage() {
               </div>
               <div className="relative mx-auto aspect-video overflow-hidden rounded-xl sm:w-full lg:order-last">
                 <Image
-                    src="https://images.unsplash.com/photo-1590241935833-e381f129a737?q=80&w=2592&auto=format&fit=crop"
+                    src="https://media.istockphoto.com/id/1461650610/photo/group-of-audience-at-stadium-shouting-screaming-for-win-by-holding-indian-flags-while.jpg?s=2048x2048&w=is&k=20&c=-ZHH4VJw5ngoHOwl3D24UOQTI7ZD52Pyju5RM5z-H7U="
                     fill
                     alt="A diverse group of people from an Indian community working together."
                     priority
