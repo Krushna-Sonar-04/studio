@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
@@ -75,7 +76,7 @@ export default function ApprovingManagerDashboard() {
                       )}
                     </TableCell>
                     <TableCell>{job.title}</TableCell>
-                    <TableCell>${job.estimationReport?.estimatedCost.toLocaleString()}</TableCell>
+                    <TableCell>₹{job.estimationReport?.estimatedCost.toLocaleString()}</TableCell>
                     <TableCell>{new Date(job.estimationReport?.submittedAt || '').toLocaleDateString()}</TableCell>
                   </TableRow>
                 ))

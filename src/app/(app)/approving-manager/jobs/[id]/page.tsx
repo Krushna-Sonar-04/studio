@@ -191,7 +191,7 @@ export default function ApprovalPage() {
                 {fundManager && <CardDescription>By: {fundManager.name} on {new Date(issue.estimationReport.submittedAt).toLocaleString()}</CardDescription>}
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold">${issue.estimationReport.estimatedCost.toLocaleString()}</p>
+              <p className="text-3xl font-bold">₹{issue.estimationReport.estimatedCost.toLocaleString()}</p>
               <Separator className="my-4" />
               <p className="font-semibold">Notes:</p>
               <p className="text-sm text-muted-foreground">{issue.estimationReport.notes}</p>

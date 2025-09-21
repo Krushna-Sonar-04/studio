@@ -64,7 +64,7 @@ export default function FundManagerJobPage() {
           status: 'Estimated',
           date: new Date().toISOString(),
           updatedBy: user.name,
-          notes: `Cost estimation submitted: $${cost}.`,
+          notes: `Cost estimation submitted: ₹${cost}.`,
         },
         {
           status: 'PendingApproval',
@@ -137,7 +137,7 @@ export default function FundManagerJobPage() {
             <form onSubmit={handleSubmit}>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <label htmlFor="cost" className="text-sm font-medium">Estimated Cost ($)</label>
+                  <label htmlFor="cost" className="text-sm font-medium">Estimated Cost (₹)</label>
                   <Input id="cost" name="cost" type="number" placeholder="e.g., 5500" required />
                 </div>
                 <div className="space-y-2">
