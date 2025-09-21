@@ -88,9 +88,9 @@ export default function LandingPage() {
               </div>
               <div className="relative mx-auto aspect-video overflow-hidden rounded-xl sm:w-full lg:order-last">
                 <Image
-                    src="https://www.shutterstock.com/shutterstock/photos/2221746749/display_1500/stock-photo-group-of-audience-at-stadium-shouting-screaming-for-win-by-holding-indian-flags-while-watching-2221746749.jpg"
+                    src="https://picsum.photos/seed/hero-community/1280/720"
                     fill
-                    alt="Hero"
+                    alt="A diverse group of people from an Indian community working together."
                     priority
                     className="object-cover"
                     data-ai-hint="indian community"

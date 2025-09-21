@@ -9,6 +9,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { DataTableColumnHeader } from './DataTableColumnHeader';
@@ -20,10 +22,9 @@ import Image from 'next/image';
 
 type IssueColumnsProps = {
   openAssignDialog: (issue: Issue) => void;
-  openContractorDialog: (issue: Issue) => void;
 };
 
-export const issueColumns = ({ openAssignDialog, openContractorDialog }: IssueColumnsProps): ColumnDef<Issue>[] => {
+export const issueColumns = ({ openAssignDialog }: IssueColumnsProps): ColumnDef<Issue>[] => {
   const router = useRouter();
   
   return [
@@ -144,10 +145,6 @@ export const issueColumns = ({ openAssignDialog, openContractorDialog }: IssueCo
       cell: ({ row }) => {
         const issue = row.original;
         
-        const isSubmitted = issue.status === 'Submitted';
-        const isApproved = issue.status === 'Approved';
-        const isResolved = issue.status === 'Resolved';
-
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -156,23 +153,29 @@ export const issueColumns = ({ openAssignDialog, openContractorDialog }: IssueCo
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              {isResolved && (
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+              {issue.status === 'Resolved' && (
                 <DropdownMenuItem onClick={() => router.push(`/admin/issues/${issue.id}`)}>
                     <Edit className="mr-2 h-4 w-4" />
                     Review Work
                 </DropdownMenuItem>
               )}
-              {isSubmitted && (
+              {issue.status === 'Submitted' && (
                  <DropdownMenuItem onClick={() => openAssignDialog(issue)}>
+                    <Send className="mr-2 h-4 w-4" />
                     Assign for Verification
                 </DropdownMenuItem>
               )}
-              {isApproved && (
+              {issue.status === 'Approved' && (
                  <DropdownMenuItem onClick={() => router.push(`/admin/jobs/${issue.id}`)}>
                     <Send className="mr-2 h-4 w-4" />
                     Assign to Contractor
                 </DropdownMenuItem>
               )}
+               {issue.status !== 'Submitted' && issue.status !== 'Approved' && issue.status !== 'Resolved' && (
+                 <DropdownMenuItem disabled>No actions available</DropdownMenuItem>
+               )}
             </DropdownMenuContent>
           </DropdownMenu>
         );
