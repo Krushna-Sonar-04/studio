@@ -16,49 +16,51 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function LandingPage() {
+  const { t } = useLanguage();
 
   const features = [
     {
       icon: <QrCode className="w-8 h-8 text-primary" />,
-      title: 'QR Code Reporting',
-      description: 'Scan location-based QR codes to instantly report issues.',
+      title: t('feature_qr_title'),
+      description: t('feature_qr_desc'),
     },
     {
       icon: <MapPin className="w-8 h-8 text-primary" />,
-      title: 'Nearby Issues Map',
-      description: 'Discover civic issues around you in real time.',
+      title: t('feature_map_title'),
+      description: t('feature_map_desc'),
     },
     {
       icon: <Languages className="w-8 h-8 text-primary" />,
-      title: 'Multilingual Support',
-      description: 'Available in English, Hindi, and Marathi for wider access.',
+      title: t('feature_multilingual_title'),
+      description: t('feature_multilingual_desc'),
     },
     {
       icon: <Vote className="w-8 h-8 text-primary" />,
-      title: 'Upvote System',
-      description: 'Prioritize issues with public votes to drive faster action.',
+      title: t('feature_upvote_title'),
+      description: t('feature_upvote_desc'),
     },
     {
       icon: <Trophy className="w-8 h-8 text-primary" />,
-      title: 'Leaderboard & Impact',
-      description: 'Recognize active reporters and see your impact count.',
+      title: t('feature_leaderboard_title'),
+      description: t('feature_leaderboard_desc'),
     },
     {
       icon: <BellRing className="w-8 h-8 text-primary" />,
-      title: 'Broadcasts & Alerts',
-      description: 'Stay informed about local events and issue resolutions.',
+      title: t('feature_broadcasts_title'),
+      description: t('feature_broadcasts_desc'),
     },
     {
       icon: <TimerReset className="w-8 h-8 text-primary" />,
-      title: 'SLA & Reminder System',
-      description: 'Auto-notifications for issue escalation & deadline tracking.',
+      title: t('feature_sla_title'),
+      description: t('feature_sla_desc'),
     },
     {
       icon: <Database className="w-8 h-8 text-primary" />,
-      title: 'Admin Bulk Upload',
-      description: 'Easily manage contractors and locations from the backend.',
+      title: t('feature_bulk_upload_title'),
+      description: t('feature_bulk_upload_desc'),
     },
   ];
 
@@ -72,23 +74,23 @@ export default function LandingPage() {
               <div className="flex flex-col justify-center space-y-4">
                 <div className="space-y-4">
                   <h1 className="text-4xl font-bold font-headline tracking-tighter sm:text-5xl md:text-6xl text-foreground">
-                    A New Lens on Your Community
+                    {t('landing_hero_title')}
                   </h1>
                   <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                    {APP_NAME} empowers you to report, track, and resolve local civic issues. Be an active part of improving your neighborhood.
+                    {t('landing_hero_subtitle')}
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
                   <Link href="/login">
                     <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                      Get Started
+                      {t('get_started')}
                     </Button>
                   </Link>
                 </div>
               </div>
               <div className="relative mx-auto aspect-video overflow-hidden rounded-xl sm:w-full lg:order-last">
                 <Image
-                    src="https://media.istockphoto.com/id/1461650610/photo/group-of-audience-at-stadium-shouting-screaming-for-win-by-holding-indian-flags-while.jpg?s=2048x2048&w=is&k=20&c=-ZHH4VJw5ngoHOwl3D24UOQTI7ZD52Pyju5RM5z-H7U="
+                    src="https://media.istockphoto.com/id/1461650610/photo/group-of-audience-at-stadium-shouting-screaming-for-win-by-holding-indian-flags-while.jpg?s=2048x2048&w=is&k=20&c=-ZHH4VJw5ngoHOQTI7ZD52Pyju5RM5z-H7U="
                     fill
                     alt="A diverse group of people from an Indian community working together."
                     priority
@@ -107,13 +109,13 @@ export default function LandingPage() {
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
                 <div className="inline-block rounded-lg bg-background px-3 py-1 text-sm">
-                  Latest Features
+                  {t('latest_features')}
                 </div>
                 <h2 className="text-3xl font-bold font-headline tracking-tighter sm:text-5xl">
-                  Redefining Civic Involvement
+                  {t('features_title')}
                 </h2>
                 <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                  From QR-based issue tagging to multilingual support, {APP_NAME} is built for every citizen.
+                  {t('features_subtitle', { appName: APP_NAME })}
                 </p>
               </div>
             </div>
