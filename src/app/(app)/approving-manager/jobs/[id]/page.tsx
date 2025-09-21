@@ -7,7 +7,7 @@ import { mockUsers } from '@/lib/mock-data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Check, X, ArrowLeft, Camera } from 'lucide-react';
+import { Check, X, ArrowLeft, Camera, User, FileText } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import type { Issue, Notification } from '@/lib/types';
 import { useNotifications } from '@/hooks/use-notifications';
@@ -128,17 +128,47 @@ export default function ApprovalPage() {
       <div className="grid lg:grid-cols-3 gap-8 items-start">
         <div className="lg:col-span-2 space-y-6">
           <Card>
-            <CardHeader><CardTitle>Citizen Report</CardTitle>{reporter && <CardDescription>By: {reporter.name}</CardDescription>}</CardHeader>
-            <CardContent><p>{issue.description}</p></CardContent>
+            <CardHeader>
+                <CardTitle>Citizen's Report</CardTitle>
+                {reporter && <CardDescription>By: {reporter.name} on {new Date(issue.reportedAt).toLocaleString()}</CardDescription>}
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div className="flex items-start gap-3">
+                    <FileText className="h-5 w-5 text-muted-foreground mt-1" />
+                    <div>
+                        <span className="font-semibold">Description:</span>
+                        <p className="text-muted-foreground">{issue.description}</p>
+                    </div>
+                </div>
+                 {issue.imageUrl && (
+                  <div>
+                    <h4 className="font-semibold mb-2 flex items-center gap-2"><Camera className="h-4 w-4" /> Original Photo:</h4>
+                    <div className="rounded-lg overflow-hidden border w-full max-w-sm cursor-pointer" onClick={() => openLightbox(issue.imageUrl!)}>
+                        <Image 
+                            src={issue.imageUrl} 
+                            alt="Citizen's photo"
+                            width={400}
+                            height={300}
+                            className="object-cover"
+                        />
+                    </div>
+                  </div>
+                )}
+            </CardContent>
           </Card>
           {issue.verificationReport && <Card>
-            <CardHeader><CardTitle>Engineer Verification</CardTitle>{engineer && <CardDescription>By: {engineer.name}</CardDescription>}</CardHeader>
+            <CardHeader><CardTitle>Engineer's Verification</CardTitle>{engineer && <CardDescription>By: {engineer.name} on {new Date(issue.verificationReport.submittedAt).toLocaleString()}</CardDescription>}</CardHeader>
             <CardContent className="space-y-4">
-                <p className="font-semibold">Comments:</p>
-                <p className="text-muted-foreground">{issue.verificationReport.comments}</p>
+                <div className="flex items-start gap-3">
+                    <FileText className="h-5 w-5 text-muted-foreground mt-1" />
+                     <div>
+                        <span className="font-semibold">Comments:</span>
+                        <p className="text-muted-foreground">{issue.verificationReport.comments}</p>
+                    </div>
+                </div>
                  {issue.verificationReport.verificationPhotoUrl && (
                   <div>
-                    <h4 className="font-semibold mb-2">Verification Photo:</h4>
+                    <h4 className="font-semibold mb-2 flex items-center gap-2"><Camera className="h-4 w-4" /> Verification Photo:</h4>
                     <div className="rounded-lg overflow-hidden border w-full max-w-sm cursor-pointer" onClick={() => openLightbox(issue.verificationReport!.verificationPhotoUrl!)}>
                         <Image 
                             src={issue.verificationReport.verificationPhotoUrl} 
@@ -156,10 +186,14 @@ export default function ApprovalPage() {
 
         <div className="lg:col-span-1 space-y-6 sticky top-20">
           {issue.estimationReport && <Card>
-            <CardHeader><CardTitle>Cost Estimation</CardTitle>{fundManager && <CardDescription>By: {fundManager.name}</CardDescription>}</CardHeader>
+            <CardHeader>
+                <CardTitle>Cost Estimation</CardTitle>
+                {fundManager && <CardDescription>By: {fundManager.name} on {new Date(issue.estimationReport.submittedAt).toLocaleString()}</CardDescription>}
+            </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold">${issue.estimationReport.estimatedCost.toLocaleString()}</p>
               <Separator className="my-4" />
+              <p className="font-semibold">Notes:</p>
               <p className="text-sm text-muted-foreground">{issue.estimationReport.notes}</p>
             </CardContent>
           </Card>}
@@ -189,7 +223,7 @@ export default function ApprovalPage() {
         isOpen={isLightboxOpen}
         onOpenChange={setLightboxOpen}
         imageUrl={lightboxImageUrl}
-        alt="Verification photo"
+        alt="Approval process photo"
       />
     </div>
   );
