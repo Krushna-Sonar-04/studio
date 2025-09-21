@@ -8,12 +8,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Play, Check, ArrowLeft, Upload, Ticket } from 'lucide-react';
+import { Play, Check, ArrowLeft, Upload, Ticket, Loader2 } from 'lucide-react';
 import type { Issue, ContractorReport, Notification } from '@/lib/types';
 import { useAuth } from '@/contexts/AuthContext';
-import { getPlaceholderImage } from '@/lib/placeholder-images';
 import { useNotifications } from '@/hooks/use-notifications';
 import { mockUsers } from '@/lib/mock-data';
+import { useState } from 'react';
 
 
 export default function ContractorJobPage() {
@@ -25,6 +25,8 @@ export default function ContractorJobPage() {
   const { user } = useAuth();
   const id = params.id as string;
   const issue = issues.find((i) => i.id === id);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!issue) {
     return <div className="text-center">Job not found.</div>;
@@ -54,17 +56,46 @@ export default function ContractorJobPage() {
     // No need to redirect here, the page should reflect the new state.
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!user) return;
+
+    setIsSubmitting(true);
     
-    const beforeImageUrl = getPlaceholderImage('contractor-before');
-    const afterImageUrl = getPlaceholderImage('contractor-after');
+    const notes = (e.currentTarget.querySelector('#notes') as HTMLTextAreaElement).value;
+    const beforeFile = (e.currentTarget.querySelector('#before') as HTMLInputElement).files?.[0];
+    const afterFile = (e.currentTarget.querySelector('#after') as HTMLInputElement).files?.[0];
+    
+    let beforeImageUrl, afterImageUrl;
+
+    const fileToDataUri = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = (error) => reject(error);
+        });
+    };
+
+    try {
+        if (beforeFile) beforeImageUrl = await fileToDataUri(beforeFile);
+        if (afterFile) afterImageUrl = await fileToDataUri(afterFile);
+    } catch (error) {
+        console.error("Error converting images:", error);
+        toast({
+            variant: 'destructive',
+            title: 'Image Upload Failed',
+            description: 'There was a problem processing your images.'
+        });
+        setIsSubmitting(false);
+        return;
+    }
+
 
     const contractorReport: ContractorReport = {
-        notes: (e.currentTarget.querySelector('#notes') as HTMLTextAreaElement).value,
-        beforeImageUrl: beforeImageUrl,
-        afterImageUrl: afterImageUrl,
+        notes,
+        beforeImageUrl,
+        afterImageUrl,
         submittedAt: new Date().toISOString(),
     };
 
@@ -89,6 +120,7 @@ export default function ContractorJobPage() {
         title: 'Work Completed on Your Issue',
         description: `The work for "${issue.title}" is complete and is now pending final verification.`,
         issueId: issue.id,
+        imageUrl: afterImageUrl, // Include the 'after' image in the notification
         timestamp: new Date().toISOString(),
         read: false,
     };
@@ -113,6 +145,7 @@ export default function ContractorJobPage() {
 
     toast({ title: 'Completion Report Submitted', description: 'The job has been marked as resolved and is pending final verification.' });
     router.push('/contractor/dashboard');
+    setIsSubmitting(false);
   };
 
   return (
@@ -152,11 +185,11 @@ export default function ContractorJobPage() {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <label htmlFor="before" className="flex items-center gap-2 text-sm font-medium"><Upload className="h-4 w-4" />'Before' Photo</label>
-                  <Input id="before" type="file" required />
+                  <Input id="before" type="file" required accept="image/*" />
                 </div>
                  <div className="space-y-2">
                   <label htmlFor="after" className="flex items-center gap-2 text-sm font-medium"><Upload className="h-4 w-4" />'After' Photo</label>
-                  <Input id="after" type="file" required />
+                  <Input id="after" type="file" required accept="image/*" />
                 </div>
                 <div className="space-y-2">
                   <label htmlFor="notes" className="text-sm font-medium">Completion Notes</label>
@@ -164,8 +197,13 @@ export default function ContractorJobPage() {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button type="submit" className="w-full" disabled={issue.status !== 'InProgress'}>
-                    <Check className="mr-2 h-4 w-4" /> Mark as Resolved
+                <Button type="submit" className="w-full" disabled={issue.status !== 'InProgress' || isSubmitting}>
+                   {isSubmitting ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                        <Check className="mr-2 h-4 w-4" />
+                    )}
+                    Mark as Resolved
                 </Button>
               </CardFooter>
             </form>
