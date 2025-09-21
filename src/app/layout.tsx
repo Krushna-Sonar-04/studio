@@ -11,6 +11,7 @@ import AppHeader from "@/components/shared/Header";
 import Footer from "@/components/shared/Footer";
 import { IssuesProvider } from "@/hooks/use-issues";
 import { NotificationsProvider } from "@/hooks/use-notifications";
+import "next/font/local";
 
 
 const playfairDisplay = Playfair_Display({
