@@ -88,7 +88,7 @@ export default function LandingPage() {
               </div>
               <div className="relative mx-auto aspect-video overflow-hidden rounded-xl sm:w-full lg:order-last">
                 <Image
-                    src="https://picsum.photos/seed/hero-community/1280/720"
+                    src="https://images.unsplash.com/photo-1590241935833-e381f129a737?q=80&w=2592&auto=format&fit=crop"
                     fill
                     alt="A diverse group of people from an Indian community working together."
                     priority
