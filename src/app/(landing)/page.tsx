@@ -121,7 +121,7 @@ export default function LandingPage() {
             </div>
             <div className="mx-auto grid max-w-5xl gap-8 py-12 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 lg:max-w-none">
                 {features.map((feature) => (
-                    <Card key={feature.title} className="text-center flex flex-col items-center p-6">
+                    <Card key={feature.title} className="text-center flex flex-col items-center p-6 transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg cursor-pointer">
                         <CardHeader className="p-0 mb-4">
                            {feature.icon}
                         </CardHeader>
