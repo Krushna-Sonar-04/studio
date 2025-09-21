@@ -1,3 +1,4 @@
+
 import type { Metadata } from "next";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Toaster } from "@/components/ui/toaster";
@@ -5,7 +6,7 @@ import { cn } from "@/lib/utils";
 import "./globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { APP_NAME } from "@/lib/constants";
-import { Noto_Sans, Noto_Serif } from 'next/font/google';
+import { Noto_Sans_Devanagari, Noto_Serif_Devanagari } from 'next/font/google';
 import { ThemeProvider } from "@/components/shared/ThemeProvider";
 import AppHeader from "@/components/shared/Header";
 import Footer from "@/components/shared/Footer";
@@ -14,15 +15,15 @@ import { NotificationsProvider } from "@/hooks/use-notifications";
 import "next/font/local";
 
 
-const notoSerif = Noto_Serif({
-  subsets: ['latin', 'devanagari'],
+const notoSerif = Noto_Serif_Devanagari({
+  subsets: ['devanagari'],
   weight: '700',
   variable: '--font-noto-serif',
   display: 'swap',
 });
 
-const notoSans = Noto_Sans({
-  subsets: ['latin', 'devanagari'],
+const notoSans = Noto_Sans_Devanagari({
+  subsets: ['devanagari'],
   weight: ['400', '700'],
   variable: '--font-noto-sans',
   display: 'swap',
