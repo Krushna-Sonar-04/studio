@@ -9,11 +9,13 @@ import { useRouter } from 'next/navigation';
 import { useMemo } from 'react';
 import Image from 'next/image';
 import { ImageIcon } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function EngineerDashboard() {
   const { user } = useAuth();
   const { issues } = useIssues();
   const router = useRouter();
+  const { t } = useLanguage();
 
   const assignedJobs = useMemo(() => {
     if (user) {
@@ -29,21 +31,21 @@ export default function EngineerDashboard() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-headline font-bold">Engineer Dashboard</h1>
-        <p className="text-muted-foreground">Jobs assigned to you for verification.</p>
+        <h1 className="text-3xl font-headline font-bold">{t('engineer_dashboard_title')}</h1>
+        <p className="text-muted-foreground">{t('engineer_dashboard_subtitle')}</p>
       </div>
 
       <Card>
-        <CardHeader><CardTitle>Assigned Jobs</CardTitle></CardHeader>
+        <CardHeader><CardTitle>{t('assigned_jobs_title')}</CardTitle></CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Image</TableHead>
-                <TableHead>Title</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Reported On</TableHead>
+                <TableHead>{t('id_column')}</TableHead>
+                <TableHead>{t('image_column')}</TableHead>
+                <TableHead>{t('title_column')}</TableHead>
+                <TableHead>{t('type_column')}</TableHead>
+                <TableHead>{t('reported_on_column')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -69,7 +71,7 @@ export default function EngineerDashboard() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center">No jobs assigned for verification.</TableCell>
+                  <TableCell colSpan={5} className="text-center">{t('no_jobs_assigned_verification')}</TableCell>
                 </TableRow>
               )}
             </TableBody>

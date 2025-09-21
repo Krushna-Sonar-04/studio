@@ -18,6 +18,7 @@ import { issueColumns } from '@/components/admin/IssueColumns';
 import { useNotifications } from '@/hooks/use-notifications';
 import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const DynamicIssueDataTable = dynamic(
   () => import('@/components/admin/IssueDataTable').then(mod => mod.IssueDataTable),
@@ -30,6 +31,7 @@ const DynamicIssueDataTable = dynamic(
 
 export default function AdminDashboard() {
   const { toast } = useToast();
+  const { t } = useLanguage();
   const { issues, updateIssue } = useIssues();
   const { addNotification } = useNotifications();
   const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
@@ -90,7 +92,7 @@ export default function AdminDashboard() {
       };
       addNotification(notification);
 
-      toast({ title: 'Task Assigned', description: `Issue sent to Engineer with a ${slaDays}-day SLA.` });
+      toast({ title: t('task_assigned_toast_title'), description: t('task_assigned_toast_desc', { slaDays }) });
       setAssignTaskOpen(false);
       setSelectedIssue(null);
       setSelectedEngineer('');
@@ -117,7 +119,7 @@ export default function AdminDashboard() {
         ],
       };
       updateIssue(updatedIssue);
-      toast({ title: 'Contractor Assigned', description: `Issue assigned to contractor for execution.` });
+      toast({ title: t('contractor_assigned_toast_title'), description: t('contractor_assigned_toast_desc') });
       setAssignContractorOpen(false);
       setSelectedIssue(null);
     }
@@ -136,13 +138,13 @@ export default function AdminDashboard() {
     <div className="space-y-8">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-headline font-bold">Admin Dashboard</h1>
-          <p className="text-muted-foreground">Overview of all civic issues.</p>
+          <h1 className="text-3xl font-headline font-bold">{t('admin_dashboard_title')}</h1>
+          <p className="text-muted-foreground">{t('admin_dashboard_subtitle')}</p>
         </div>
         <Link href="/admin/broadcast">
             <Button>
                 <Megaphone className="mr-2 h-4 w-4" />
-                Send Broadcast
+                {t('send_broadcast_button')}
             </Button>
         </Link>
       </div>
@@ -150,28 +152,28 @@ export default function AdminDashboard() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">New Reports</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('new_reports_stat')}</CardTitle>
             <Bell className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent><div className="text-2xl font-bold">{stats.new}</div></CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Verification</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('pending_verification_stat')}</CardTitle>
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent><div className="text-2xl font-bold">{stats.pendingVerification}</div></CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">In Progress</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('in_progress_stat')}</CardTitle>
             <Play className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent><div className="text-2xl font-bold">{stats.inProgress}</div></CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Resolved</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('resolved_stat')}</CardTitle>
             <CheckCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent><div className="text-2xl font-bold">{stats.resolved}</div></CardContent>
@@ -179,7 +181,7 @@ export default function AdminDashboard() {
       </div>
 
       <Card>
-        <CardHeader><CardTitle>All Issues</CardTitle></CardHeader>
+        <CardHeader><CardTitle>{t('all_issues_title')}</CardTitle></CardHeader>
         <CardContent className="pt-6">
           <DynamicIssueDataTable 
             columns={issueColumns({ openAssignDialog, openContractorDialog })} 
@@ -192,19 +194,19 @@ export default function AdminDashboard() {
       <Dialog open={isAssignTaskOpen} onOpenChange={setAssignTaskOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Assign for Verification</DialogTitle>
-            <DialogDescription>Assign an Engineer and set an SLA for issue: {selectedIssue?.id}</DialogDescription>
+            <DialogTitle>{t('assign_verification_dialog_title')}</DialogTitle>
+            <DialogDescription>{t('assign_verification_dialog_desc', { issueId: selectedIssue?.id })}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-                <Label htmlFor="engineer-select">Engineer</Label>
+                <Label htmlFor="engineer-select">{t('engineer_label')}</Label>
                 <Select onValueChange={setSelectedEngineer} required>
-                    <SelectTrigger id="engineer-select"><SelectValue placeholder="Select Engineer" /></SelectTrigger>
+                    <SelectTrigger id="engineer-select"><SelectValue placeholder={t('select_engineer_placeholder')} /></SelectTrigger>
                     <SelectContent>{engineers.map(e => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent>
                 </Select>
             </div>
             <div className="space-y-2">
-                <Label htmlFor="sla-days">SLA (in days)</Label>
+                <Label htmlFor="sla-days">{t('sla_days_label')}</Label>
                 <Input 
                     id="sla-days" 
                     type="number" 
@@ -215,8 +217,8 @@ export default function AdminDashboard() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setAssignTaskOpen(false)}>Cancel</Button>
-            <Button onClick={handleAssignTask} disabled={!selectedEngineer}>Assign</Button>
+            <Button variant="outline" onClick={() => setAssignTaskOpen(false)}>{t('cancel_button')}</Button>
+            <Button onClick={handleAssignTask} disabled={!selectedEngineer}>{t('assign_button')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -225,18 +227,18 @@ export default function AdminDashboard() {
       <Dialog open={isAssignContractorOpen} onOpenChange={setAssignContractorOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Assign to Contractor</DialogTitle>
-            <DialogDescription>Assign a Contractor for issue: {selectedIssue?.id}</DialogDescription>
+            <DialogTitle>{t('assign_contractor_dialog_title')}</DialogTitle>
+            <DialogDescription>{t('assign_contractor_dialog_desc', { issueId: selectedIssue?.id })}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <Select onValueChange={setSelectedContractor}>
-              <SelectTrigger><SelectValue placeholder="Select Contractor" /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder={t('select_contractor_placeholder')} /></SelectTrigger>
               <SelectContent>{contractors.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
             </Select>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setAssignContractorOpen(false)}>Cancel</Button>
-            <Button onClick={handleAssignContractor} disabled={!selectedContractor}>Assign</Button>
+            <Button variant="outline" onClick={() => setAssignContractorOpen(false)}>{t('cancel_button')}</Button>
+            <Button onClick={handleAssignContractor} disabled={!selectedContractor}>{t('assign_button')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

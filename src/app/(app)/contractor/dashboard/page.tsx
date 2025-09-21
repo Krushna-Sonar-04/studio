@@ -10,11 +10,13 @@ import { useRouter } from 'next/navigation';
 import { useMemo } from 'react';
 import { ClipboardList, Play, CheckCircle2, ImageIcon } from 'lucide-react';
 import Image from 'next/image';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function ContractorDashboard() {
   const { user } = useAuth();
   const { issues } = useIssues();
   const router = useRouter();
+  const { t } = useLanguage();
 
   const jobs = useMemo(() => {
      if (user) {
@@ -37,28 +39,28 @@ export default function ContractorDashboard() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-headline font-bold">Contractor Dashboard</h1>
-        <p className="text-muted-foreground">Your assigned jobs for execution.</p>
+        <h1 className="text-3xl font-headline font-bold">{t('contractor_dashboard_title')}</h1>
+        <p className="text-muted-foreground">{t('contractor_dashboard_subtitle')}</p>
       </div>
 
        <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">New/Assigned</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('new_assigned_stat')}</CardTitle>
             <ClipboardList className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent><div className="text-2xl font-bold">{stats.assigned}</div></CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">In Progress</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('in_progress_stat')}</CardTitle>
             <Play className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent><div className="text-2xl font-bold">{stats.inProgress}</div></CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completed</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('completed_stat')}</CardTitle>
             <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent><div className="text-2xl font-bold">{stats.completed}</div></CardContent>
@@ -67,16 +69,16 @@ export default function ContractorDashboard() {
 
 
       <Card>
-        <CardHeader><CardTitle>Your Active Jobs</CardTitle></CardHeader>
+        <CardHeader><CardTitle>{t('active_jobs_title')}</CardTitle></CardHeader>
         <CardContent className="pt-6">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Image</TableHead>
-                <TableHead>Title</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>{t('id_column')}</TableHead>
+                <TableHead>{t('image_column')}</TableHead>
+                <TableHead>{t('title_column')}</TableHead>
+                <TableHead>{t('location_column')}</TableHead>
+                <TableHead>{t('status_column')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -97,12 +99,12 @@ export default function ContractorDashboard() {
                     </TableCell>
                     <TableCell>{job.title}</TableCell>
                     <TableCell>{job.location}</TableCell>
-                    <TableCell><Badge variant="outline">{job.status}</Badge></TableCell>
+                    <TableCell><Badge variant="outline">{t(job.status)}</Badge></TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center">You have no active jobs requiring your attention.</TableCell>
+                  <TableCell colSpan={5} className="text-center">{t('no_active_jobs')}</TableCell>
                 </TableRow>
               )}
             </TableBody>

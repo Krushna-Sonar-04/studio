@@ -11,11 +11,13 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Users, ImageIcon } from 'lucide-react';
 import Image from 'next/image';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function ApprovingManagerDashboard() {
   const { user } = useAuth();
   const { issues } = useIssues();
   const router = useRouter();
+  const { t } = useLanguage();
 
   const pendingJobs = useMemo(() => {
     if (user) {
@@ -32,28 +34,28 @@ export default function ApprovingManagerDashboard() {
     <div className="space-y-8">
       <div className="flex justify-between items-center">
         <div>
-            <h1 className="text-3xl font-headline font-bold">Approval Dashboard</h1>
-            <p className="text-muted-foreground">Projects awaiting your approval and contractor management.</p>
+            <h1 className="text-3xl font-headline font-bold">{t('approving_manager_dashboard_title')}</h1>
+            <p className="text-muted-foreground">{t('approving_manager_dashboard_subtitle')}</p>
         </div>
         <Link href="/approving-manager/contractors">
             <Button>
                 <Users className="mr-2 h-4 w-4" />
-                Manage Contractors
+                {t('manage_contractors_button')}
             </Button>
         </Link>
       </div>
 
       <Card>
-        <CardHeader><CardTitle>Pending Approval</CardTitle></CardHeader>
+        <CardHeader><CardTitle>{t('pending_approval_title')}</CardTitle></CardHeader>
         <CardContent className="pt-6">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Image</TableHead>
-                <TableHead>Title</TableHead>
-                <TableHead>Estimated Cost</TableHead>
-                <TableHead>Submitted On</TableHead>
+                <TableHead>{t('id_column')}</TableHead>
+                <TableHead>{t('image_column')}</TableHead>
+                <TableHead>{t('title_column')}</TableHead>
+                <TableHead>{t('estimated_cost_column')}</TableHead>
+                <TableHead>{t('submitted_on_column')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -79,7 +81,7 @@ export default function ApprovingManagerDashboard() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center">No jobs are pending approval.</TableCell>
+                  <TableCell colSpan={5} className="text-center">{t('no_jobs_pending_approval')}</TableCell>
                 </TableRow>
               )}
             </TableBody>

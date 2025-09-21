@@ -9,11 +9,13 @@ import { useRouter } from 'next/navigation';
 import { useMemo } from 'react';
 import Image from 'next/image';
 import { ImageIcon } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function FundManagerDashboard() {
   const { user } = useAuth();
   const { issues } = useIssues();
   const router = useRouter();
+  const { t } = useLanguage();
   
   const assignedJobs = useMemo(() => {
     if (user) {
@@ -31,21 +33,21 @@ export default function FundManagerDashboard() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-headline font-bold">Fund Manager Dashboard</h1>
-        <p className="text-muted-foreground">Jobs ready for cost estimation.</p>
+        <h1 className="text-3xl font-headline font-bold">{t('fund_manager_dashboard_title')}</h1>
+        <p className="text-muted-foreground">{t('fund_manager_dashboard_subtitle')}</p>
       </div>
 
       <Card>
-        <CardHeader><CardTitle>Jobs for Estimation</CardTitle></CardHeader>
+        <CardHeader><CardTitle>{t('jobs_for_estimation_title')}</CardTitle></CardHeader>
         <CardContent className="pt-6">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Image</TableHead>
-                <TableHead>Title</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>{t('id_column')}</TableHead>
+                <TableHead>{t('image_column')}</TableHead>
+                <TableHead>{t('title_column')}</TableHead>
+                <TableHead>{t('type_column')}</TableHead>
+                <TableHead>{t('status_column')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -67,13 +69,13 @@ export default function FundManagerDashboard() {
                     <TableCell>{job.title}</TableCell>
                     <TableCell>{job.type}</TableCell>
                      <TableCell>
-                        {job.verificationReport ? 'Verified' : 'Pending Verification'}
+                        {job.verificationReport ? t('Verified') : t('PendingVerification')}
                     </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center">No jobs currently require estimation.</TableCell>
+                  <TableCell colSpan={5} className="text-center">{t('no_jobs_require_estimation')}</TableCell>
                 </TableRow>
               )}
             </TableBody>
