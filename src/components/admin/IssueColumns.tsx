@@ -3,7 +3,7 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { Issue } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
-import { MoreHorizontal, ShieldAlert, Clock, ImageIcon, Edit } from 'lucide-react';
+import { MoreHorizontal, ShieldAlert, Clock, ImageIcon, Edit, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -30,14 +30,25 @@ export const issueColumns = ({ openAssignDialog, openContractorDialog }: IssueCo
     {
       accessorKey: 'id',
       header: ({ column }) => <DataTableColumnHeader column={column} title="Token ID" />,
-      cell: ({ row }) => (
-        <div 
-          className="font-medium cursor-pointer hover:underline"
-          onClick={() => router.push(`/citizen/issues/${row.original.id}`)}
-        >
-          {row.getValue('id')}
-        </div>
-      ),
+      cell: ({ row }) => {
+        const issue = row.original;
+        let path = `/citizen/issues/${issue.id}`;
+        // Admins have special views for certain statuses
+        if(issue.status === 'Approved') {
+          path = `/admin/jobs/${issue.id}`;
+        } else if (issue.status === 'Resolved') {
+          path = `/admin/issues/${issue.id}`;
+        }
+
+        return (
+          <div 
+            className="font-medium cursor-pointer hover:underline"
+            onClick={() => router.push(path)}
+          >
+            {row.getValue('id')}
+          </div>
+        );
+      },
       enableSorting: false,
     },
     {
@@ -132,7 +143,11 @@ export const issueColumns = ({ openAssignDialog, openContractorDialog }: IssueCo
       id: 'actions',
       cell: ({ row }) => {
         const issue = row.original;
+        
+        const isSubmitted = issue.status === 'Submitted';
+        const isApproved = issue.status === 'Approved';
         const isResolved = issue.status === 'Resolved';
+
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -147,12 +162,17 @@ export const issueColumns = ({ openAssignDialog, openContractorDialog }: IssueCo
                     Review Work
                 </DropdownMenuItem>
               )}
-              <DropdownMenuItem onClick={() => openAssignDialog(issue)} disabled={issue.status !== 'Submitted'}>
-                Assign for Verification
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => openContractorDialog(issue)} disabled={issue.status !== 'Approved'}>
-                Assign to Contractor
-              </DropdownMenuItem>
+              {isSubmitted && (
+                 <DropdownMenuItem onClick={() => openAssignDialog(issue)}>
+                    Assign for Verification
+                </DropdownMenuItem>
+              )}
+              {isApproved && (
+                 <DropdownMenuItem onClick={() => router.push(`/admin/jobs/${issue.id}`)}>
+                    <Send className="mr-2 h-4 w-4" />
+                    Assign to Contractor
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         );

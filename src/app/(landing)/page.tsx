@@ -86,15 +86,16 @@ export default function LandingPage() {
                   </Link>
                 </div>
               </div>
-              <Image
-                src="https://www.shutterstock.com/shutterstock/photos/2221746749/display_1500/stock-photo-group-of-audience-at-stadium-shouting-screaming-for-win-by-holding-indian-flags-while-watching-2221746749.jpg"
-                width="800"
-                height="600"
-                alt="Hero"
-                priority
-                className="mx-auto aspect-video overflow-hidden rounded-xl object-cover sm:w-full lg:order-last"
-                data-ai-hint="indian community"
-              />
+              <div className="relative mx-auto aspect-video overflow-hidden rounded-xl sm:w-full lg:order-last">
+                <Image
+                    src="https://www.shutterstock.com/shutterstock/photos/2221746749/display_1500/stock-photo-group-of-audience-at-stadium-shouting-screaming-for-win-by-holding-indian-flags-while-watching-2221746749.jpg"
+                    fill
+                    alt="Hero"
+                    priority
+                    className="object-cover"
+                    data-ai-hint="indian community"
+                />
+              </div>
             </div>
           </div>
         </section>

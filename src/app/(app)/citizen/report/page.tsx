@@ -136,6 +136,9 @@ export default function ReportIssuePage() {
     }
     
     setIsSubmitting(true);
+    
+    const timestamp = Date.now();
+    const issueId = `issue-${timestamp}`;
 
     let imageUrl: string | undefined;
     if (values.photo && values.photo[0]) {
@@ -157,12 +160,9 @@ export default function ReportIssuePage() {
         return;
       }
     } else {
-        // If no photo is uploaded, use a unique placeholder based on the issue type
-        imageUrl = getPlaceholderImage(`issue-${values.type.toLowerCase()}`);
+        // If no photo is uploaded, use a unique placeholder based on the issue ID
+        imageUrl = getPlaceholderImage(issueId);
     }
-
-    const timestamp = Date.now();
-    const issueId = `issue-${timestamp}`;
     
     addIssue({
       id: issueId,
