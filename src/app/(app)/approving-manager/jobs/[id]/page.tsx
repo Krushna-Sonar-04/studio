@@ -7,11 +7,14 @@ import { mockUsers } from '@/lib/mock-data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Check, X, ArrowLeft } from 'lucide-react';
+import { Check, X, ArrowLeft, Camera } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import type { Issue, Notification } from '@/lib/types';
 import { useNotifications } from '@/hooks/use-notifications';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/use-auth';
+import { useState } from 'react';
+import Image from 'next/image';
+import { ImageLightbox } from '@/components/shared/ImageLightbox';
 
 
 export default function ApprovalPage() {
@@ -23,6 +26,14 @@ export default function ApprovalPage() {
   const { addNotification } = useNotifications();
   const id = params.id as string;
   const issue = issues.find((i) => i.id === id);
+
+  const [isLightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxImageUrl, setLightboxImageUrl] = useState('');
+
+  const openLightbox = (url: string) => {
+    setLightboxImageUrl(url);
+    setLightboxOpen(true);
+  };
 
   if (!issue) {
     return <div className="text-center">Job not found.</div>;
@@ -122,7 +133,24 @@ export default function ApprovalPage() {
           </Card>
           {issue.verificationReport && <Card>
             <CardHeader><CardTitle>Engineer Verification</CardTitle>{engineer && <CardDescription>By: {engineer.name}</CardDescription>}</CardHeader>
-            <CardContent><p>{issue.verificationReport.comments}</p></CardContent>
+            <CardContent className="space-y-4">
+                <p className="font-semibold">Comments:</p>
+                <p className="text-muted-foreground">{issue.verificationReport.comments}</p>
+                 {issue.verificationReport.verificationPhotoUrl && (
+                  <div>
+                    <h4 className="font-semibold mb-2">Verification Photo:</h4>
+                    <div className="rounded-lg overflow-hidden border w-full max-w-sm cursor-pointer" onClick={() => openLightbox(issue.verificationReport!.verificationPhotoUrl!)}>
+                        <Image 
+                            src={issue.verificationReport.verificationPhotoUrl} 
+                            alt="Engineer verification"
+                            width={400}
+                            height={300}
+                            className="object-cover"
+                        />
+                    </div>
+                  </div>
+                )}
+            </CardContent>
           </Card>}
         </div>
 
@@ -157,6 +185,12 @@ export default function ApprovalPage() {
           )}
         </div>
       </div>
+       <ImageLightbox
+        isOpen={isLightboxOpen}
+        onOpenChange={setLightboxOpen}
+        imageUrl={lightboxImageUrl}
+        alt="Verification photo"
+      />
     </div>
   );
 }

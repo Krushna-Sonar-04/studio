@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
@@ -8,10 +9,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Send } from 'lucide-react';
+import { ArrowLeft, Send, Camera } from 'lucide-react';
 import type { Issue, EstimationReport } from '@/lib/types';
-import { useAuth } from '@/contexts/AuthContext';
-
+import { useAuth } from '@/hooks/use-auth';
+import Image from 'next/image';
+import { useState } from 'react';
+import { ImageLightbox } from '@/components/shared/ImageLightbox';
 
 export default function FundManagerJobPage() {
   const params = useParams();
@@ -21,6 +24,14 @@ export default function FundManagerJobPage() {
   const { user } = useAuth();
   const id = params.id as string;
   const issue = issues.find((i) => i.id === id);
+
+  const [isLightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxImageUrl, setLightboxImageUrl] = useState('');
+
+  const openLightbox = (url: string) => {
+    setLightboxImageUrl(url);
+    setLightboxOpen(true);
+  };
 
   if (!issue) {
     return <div className="text-center">Job not found.</div>;
@@ -96,8 +107,23 @@ export default function FundManagerJobPage() {
                 <CardTitle>Engineer's Verification Report</CardTitle>
                 {engineer && <CardDescription>By: {engineer.name} on {new Date(issue.verificationReport.submittedAt).toLocaleDateString()}</CardDescription>}
               </CardHeader>
-              <CardContent>
-                <p>{issue.verificationReport.comments}</p>
+              <CardContent className="space-y-4">
+                <p className="font-semibold">Comments:</p>
+                <p className="text-muted-foreground">{issue.verificationReport.comments}</p>
+                 {issue.verificationReport.verificationPhotoUrl && (
+                  <div>
+                    <h4 className="font-semibold mb-2">Verification Photo:</h4>
+                    <div className="rounded-lg overflow-hidden border w-full max-w-sm cursor-pointer" onClick={() => openLightbox(issue.verificationReport!.verificationPhotoUrl!)}>
+                        <Image 
+                            src={issue.verificationReport.verificationPhotoUrl} 
+                            alt="Engineer verification"
+                            width={400}
+                            height={300}
+                            className="object-cover"
+                        />
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}
@@ -129,6 +155,12 @@ export default function FundManagerJobPage() {
           </Card>
         </div>
       </div>
+      <ImageLightbox
+        isOpen={isLightboxOpen}
+        onOpenChange={setLightboxOpen}
+        imageUrl={lightboxImageUrl}
+        alt="Engineer verification photo"
+      />
     </div>
   );
 }

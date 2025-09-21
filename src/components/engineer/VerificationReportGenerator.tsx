@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -12,12 +13,14 @@ import { useToast } from '@/hooks/use-toast';
 import { Sparkles, Lightbulb, FileText, Upload, Send, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useIssues } from '@/hooks/use-issues';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/use-auth';
 
 export function VerificationReportGenerator({ issue }: { issue: Issue }) {
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [aiReport, setAiReport] = useState<IssueVerificationReportOutput | null>(null);
   const [comments, setComments] = useState('');
+  const [verificationPhoto, setVerificationPhoto] = useState<File | null>(null);
   const { toast } = useToast();
   const router = useRouter();
   const { updateIssue } = useIssues();
@@ -46,13 +49,35 @@ export function VerificationReportGenerator({ issue }: { issue: Issue }) {
     }
   };
   
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!user) return;
+    setIsSubmitting(true);
+
+    let verificationPhotoUrl: string | undefined;
+    if (verificationPhoto) {
+       try {
+        verificationPhotoUrl = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(verificationPhoto);
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = (error) => reject(error);
+        });
+      } catch (error) {
+        console.error("Error converting image to Data URI:", error);
+        toast({
+          variant: 'destructive',
+          title: 'Image Upload Failed',
+          description: 'Could not process the selected image.'
+        });
+        setIsSubmitting(false);
+        return;
+      }
+    }
 
     const verificationReport: VerificationReport = {
         comments: comments,
         submittedAt: new Date().toISOString(),
-        // In a real app, upload the photo and add the URL here
+        verificationPhotoUrl: verificationPhotoUrl,
     };
 
     const updatedIssue: Issue = {
@@ -75,6 +100,7 @@ export function VerificationReportGenerator({ issue }: { issue: Issue }) {
       description: 'The report has been sent for cost estimation.',
     });
     router.push('/engineer/dashboard');
+    setIsSubmitting(false);
   };
 
   return (
@@ -144,12 +170,17 @@ export function VerificationReportGenerator({ issue }: { issue: Issue }) {
                 <Upload className="h-4 w-4" />
                 Upload Verification Photo
             </label>
-            <Input id="photo" type="file" />
+            <Input 
+              id="photo" 
+              type="file" 
+              accept="image/*"
+              onChange={(e) => setVerificationPhoto(e.target.files ? e.target.files[0] : null)}
+            />
         </div>
       </CardContent>
       <CardFooter>
-        <Button onClick={handleSubmit} disabled={!comments} className="w-full">
-            <Send className="mr-2 h-4 w-4" />
+        <Button onClick={handleSubmit} disabled={!comments || isSubmitting} className="w-full">
+            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
             Submit Verification
         </Button>
       </CardFooter>
