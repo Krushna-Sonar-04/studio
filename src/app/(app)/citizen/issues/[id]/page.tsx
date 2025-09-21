@@ -8,12 +8,13 @@ import { IssueTimeline } from '@/components/shared/IssueTimeline';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
-import { ArrowLeft, Calendar, FileText, ImageIcon, MapPin, User, Wrench, Ticket, ShieldAlert, Clock } from 'lucide-react';
+import { ArrowLeft, Calendar, FileText, ImageIcon, MapPin, User, Wrench, Ticket, ShieldAlert, Clock, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { format, formatDistanceToNow, isPast } from 'date-fns';
 import { ImageLightbox } from '@/components/shared/ImageLightbox';
+import { Separator } from '@/components/ui/separator';
 
 export default function IssueDetailPage() {
   const params = useParams();
@@ -23,6 +24,13 @@ export default function IssueDetailPage() {
   const issue = useMemo(() => issues.find((i) => i.id === id), [id, issues]);
   const [localizedDate, setLocalizedDate] = useState('');
   const [isLightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxImageUrl, setLightboxImageUrl] = useState('');
+  
+  const openLightbox = (url: string) => {
+    setLightboxImageUrl(url);
+    setLightboxOpen(true);
+  };
+
 
   useEffect(() => {
     if (issue) {
@@ -35,6 +43,7 @@ export default function IssueDetailPage() {
   }
   
   const reportedBy = mockUsers.find(u => u.id === issue.reportedBy);
+  const contractor = mockUsers.find(u => u.id === issue.assignedContractorId);
   const isSlaBreached = issue.slaDeadline && isPast(new Date(issue.slaDeadline));
 
   const imageHint = issue.type.toLowerCase().split(' ')[0] || 'issue photo';
@@ -112,7 +121,7 @@ export default function IssueDetailPage() {
                     <ImageIcon className="h-5 w-5 text-muted-foreground mt-1" />
                      <div>
                         <span className="font-semibold">Photo Evidence:</span>
-                        <div className="mt-2 rounded-lg overflow-hidden border cursor-pointer" onClick={() => setLightboxOpen(true)}>
+                        <div className="mt-2 rounded-lg overflow-hidden border cursor-pointer" onClick={() => openLightbox(issue.imageUrl!)}>
                         <Image
                             src={issue.imageUrl}
                             alt={issue.title}
@@ -130,6 +139,39 @@ export default function IssueDetailPage() {
         </CardContent>
       </Card>
       
+      {issue.contractorReport && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-headline flex items-center gap-2">
+                <CheckCircle className="text-green-600" />
+                Resolution Report
+            </CardTitle>
+            {contractor && <CardDescription>Work completed by {contractor.name} on {new Date(issue.contractorReport.submittedAt).toLocaleDateString()}</CardDescription>}
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div>
+              <h4 className="font-semibold">Contractor's Notes:</h4>
+              <p className="text-muted-foreground">{issue.contractorReport.notes}</p>
+            </div>
+            <Separator />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <h4 className="font-semibold mb-2">'Before' Photo</h4>
+                {issue.contractorReport.beforeImageUrl ? (
+                    <Image src={issue.contractorReport.beforeImageUrl} alt="Before work" width={400} height={300} className="rounded-lg border object-cover cursor-pointer" onClick={() => openLightbox(issue.contractorReport!.beforeImageUrl!)} />
+                ) : <p className="text-sm text-muted-foreground">No 'before' image provided.</p>}
+              </div>
+              <div>
+                <h4 className="font-semibold mb-2">'After' Photo</h4>
+                {issue.contractorReport.afterImageUrl ? (
+                  <Image src={issue.contractorReport.afterImageUrl} alt="After work" width={400} height={300} className="rounded-lg border object-cover cursor-pointer" onClick={() => openLightbox(issue.contractorReport!.afterImageUrl!)} />
+                ) : <p className="text-sm text-muted-foreground">No 'after' image provided.</p>}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle className="font-headline">Issue Progress</CardTitle>
@@ -140,9 +182,9 @@ export default function IssueDetailPage() {
         </CardContent>
       </Card>
       
-      {issue.imageUrl && (
+      {lightboxImageUrl && (
         <ImageLightbox
-          imageUrl={issue.imageUrl}
+          imageUrl={lightboxImageUrl}
           alt={issue.title}
           isOpen={isLightboxOpen}
           onOpenChange={setLightboxOpen}
